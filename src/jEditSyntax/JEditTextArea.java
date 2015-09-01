@@ -42,7 +42,6 @@ import java.util.Enumeration;
 import java.util.Vector;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollBar;
@@ -111,35 +110,28 @@ public class JEditTextArea extends JTextArea //JTextComponent
     private JFileChooser dialog = new JFileChooser(System.getProperty("user.dir"));
     private String currentFile = "Untitled";
     private boolean changed = false;
-    private JFrame frame;
 
     /**
      * Creates a new JEditTextArea with the default settings.
-     * @param rows
-     * @param columns
      */
-    public JEditTextArea(int rows, int columns, JFrame frame)
+    public JEditTextArea()
     {            
-        this(rows, columns, frame, TextAreaDefaults.getDefaults());
+        this(TextAreaDefaults.getDefaults());
     }
 
     /**
      * Creates a new JEditTextArea with the specified settings.
-     * @param rows
-     * @param columns
      * @param defaults The default settings
      */
-    public JEditTextArea(int rows, int columns, JFrame frame, TextAreaDefaults defaults)
+    public JEditTextArea(TextAreaDefaults defaults)
     {      
         super();
         
         // Enable the necessary events
         //enableEvents(AWTEvent.KEY_EVENT_MASK);
-
-        this.frame = frame;
         
         // Initialize some misc. stuff
-        painter = new TextAreaPainter(this,defaults);
+        painter = new TextAreaPainter(this, defaults);        
         documentHandler = new DocumentHandler();
         listenerList = new EventListenerList();
         caretEvent = new MutableCaretEvent();
@@ -1218,7 +1210,6 @@ public class JEditTextArea extends JTextArea //JTextComponent
         
             setText(sb.toString());
             currentFile = fileName;
-            frame.setTitle(currentFile);
             changed = false;
         }catch(IOException e) {         
             Toolkit.getDefaultToolkit().beep();

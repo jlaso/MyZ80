@@ -4,14 +4,15 @@
  */
 package myz80;
 
+import jEditSyntax.JEditTextArea;
+import jEditSyntax.TextAreaDefaults;
+import jEditSyntax.marker.ASMZ80TokenMarker;
 import java.awt.BorderLayout;
 import java.awt.Font;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import javax.swing.AbstractAction;
@@ -24,8 +25,6 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 import javax.swing.text.DefaultEditorKit;
 
@@ -35,111 +34,141 @@ import javax.swing.text.DefaultEditorKit;
  */
 public class TextEditor extends JFrame {
     
-    private JTextArea area = new JTextArea(20, 120);
+    private JEditTextArea area;
     private JFileChooser dialog = new JFileChooser(System.getProperty("user.dir"));
     private String currentFile = "Untitled";
     private boolean changed = false;
     
-    Action New = new AbstractAction("New", new ImageIcon("icons/new.gif")) {
-        public void actionPerformed(ActionEvent e) {
-            saveOld();
-            area.setText("");
-            currentFile = "Untitled";
-            setTitle(currentFile);
-            changed = false;
-            Save.setEnabled(false);
-            SaveAs.setEnabled(false);
-        }
-    };
-
-    Action Open = new AbstractAction("Open", new ImageIcon("icons/open.gif")) {
-        public void actionPerformed(ActionEvent e) {
-            saveOld();
-            if(dialog.showOpenDialog(null)==JFileChooser.APPROVE_OPTION) {
-                    readInFile(dialog.getSelectedFile().getAbsolutePath());
+    Action New, Open, Save, SaveAs, Quit;
+    
+    ActionMap m;
+    Action Cut, Copy, Paste;
+    
+    public TextEditor() 
+    {
+        super();
+        
+        setLayout(new BorderLayout());
+        setExtendedState(java.awt.Frame.MAXIMIZED_BOTH);
+        
+        // Left SideBar Panel
+        SideBarLeftPanel sideBarLeftPanel = new SideBarLeftPanel();
+        add(sideBarLeftPanel, BorderLayout.WEST);
+        
+        // Right SideBar Panel
+        SideBarRightPanel sideBarRightPanel = new SideBarRightPanel();
+        add(sideBarRightPanel, BorderLayout.EAST);
+        
+        // Status Bar Panel
+        StatusBarPanel statusBarPanel = new StatusBarPanel();
+        add(statusBarPanel, BorderLayout.SOUTH);
+        
+        TextAreaDefaults defaults = TextAreaDefaults.getDefaults();
+        defaults.rows = 20;
+        defaults.cols = 200;
+        area = new JEditTextArea(defaults);
+        
+        New = new AbstractAction("New", new ImageIcon("icons/new.gif")) {
+            public void actionPerformed(ActionEvent e) {
+                saveOld();
+                area.setText("");
+                currentFile = "Untitled";
+                setTitle(currentFile);
+                changed = false;
+                Save.setEnabled(false);
+                SaveAs.setEnabled(false);
             }
-            SaveAs.setEnabled(true);
-        }
-    };
-    
-    Action Save = new AbstractAction("Save", new ImageIcon("icons/save.gif")) {
-        public void actionPerformed(ActionEvent e) {
-            if(!currentFile.equals("Untitled"))
-                saveFile(currentFile);
-            else
+        };
+
+        Open = new AbstractAction("Open", new ImageIcon("icons/open.gif")) {
+            public void actionPerformed(ActionEvent e) {
+                saveOld();
+                if(dialog.showOpenDialog(null)==JFileChooser.APPROVE_OPTION) {
+                    area.readInFile(dialog.getSelectedFile().getAbsolutePath());
+                }
+                SaveAs.setEnabled(true);
+            }
+        };
+
+        Save = new AbstractAction("Save", new ImageIcon("icons/save.gif")) {
+            public void actionPerformed(ActionEvent e) {
+                if(!currentFile.equals("Untitled"))
+                    saveFile(currentFile);
+                else
+                    saveFileAs();
+            }
+        };
+
+        SaveAs = new AbstractAction("Save as...") {
+            public void actionPerformed(ActionEvent e) {
                 saveFileAs();
-        }
-    };
-    
-    Action SaveAs = new AbstractAction("Save as...") {
-        public void actionPerformed(ActionEvent e) {
-            saveFileAs();
-        }
-    };
-    
-    Action Quit = new AbstractAction("Quit") {
-        public void actionPerformed(ActionEvent e) {
-            saveOld();
-            System.exit(0);
-        }
-    };
-    
-    ActionMap m = area.getActionMap();
-    Action Cut = m.get(DefaultEditorKit.cutAction);
-    Action Copy = m.get(DefaultEditorKit.copyAction);
-    Action Paste = m.get(DefaultEditorKit.pasteAction);
-    
-    public TextEditor() {
-            area.setFont(new Font("Monospaced",Font.PLAIN,12));
-            JScrollPane scroll = new JScrollPane(area,JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-            add(scroll,BorderLayout.CENTER);
+            }
+        };
 
-            JMenuBar JMB = new JMenuBar();
-            setJMenuBar(JMB);
-            JMenu file = new JMenu("File");
-            JMenu edit = new JMenu("Edit");
-            JMB.add(file); 
-            JMB.add(edit);
+        Quit = new AbstractAction("Quit") {
+            public void actionPerformed(ActionEvent e) {
+                saveOld();
+                System.exit(0);
+            }
+        };
 
-            file.add(New);
-            file.add(Open);
-            file.add(Save);
-            file.add(Quit);
-            file.add(SaveAs);
-            file.addSeparator();
+        m = area.getActionMap();
+        Cut = m.get(DefaultEditorKit.cutAction);
+        Copy = m.get(DefaultEditorKit.copyAction);
+        Paste = m.get(DefaultEditorKit.pasteAction);
 
-            for(int i=0; i<4; i++)
-                file.getItem(i).setIcon(null);
+        area.setTokenMarker(new ASMZ80TokenMarker());
+        area.setFont(new Font("Monospaced",Font.PLAIN,12));
+        //JScrollPane scroll = new JScrollPane(area,JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        //add(scroll,BorderLayout.CENTER);
+        add(area, BorderLayout.CENTER);
+        
+        JMenuBar JMB = new JMenuBar();
+        setJMenuBar(JMB);
+        JMenu file = new JMenu("File");
+        JMenu edit = new JMenu("Edit");
+        JMB.add(file); 
+        JMB.add(edit);
 
-            edit.add(Cut);
-            edit.add(Copy);
-            edit.add(Paste);
+        file.add(New);
+        file.add(Open);
+        file.add(Save);
+        file.add(Quit);
+        file.add(SaveAs);
+        file.addSeparator();
 
-            edit.getItem(0).setText("Cut out");
-            edit.getItem(1).setText("Copy");
-            edit.getItem(2).setText("Paste");
+        for(int i=0; i<4; i++)
+            file.getItem(i).setIcon(null);
 
-            JToolBar tool = new JToolBar();
-            add(tool,BorderLayout.NORTH);
-            tool.add(New);
-            tool.add(Open);
-            tool.add(Save);
-            tool.addSeparator();
+        edit.add(Cut);
+        edit.add(Copy);
+        edit.add(Paste);
 
-            JButton cut = tool.add(Cut), cop = tool.add(Copy),pas = tool.add(Paste);
+        edit.getItem(0).setText("Cut out");
+        edit.getItem(1).setText("Copy");
+        edit.getItem(2).setText("Paste");
 
-            cut.setText(null); cut.setIcon(new ImageIcon("icons/cut.gif"));
-            cop.setText(null); cop.setIcon(new ImageIcon("icons/copy.gif"));
-            pas.setText(null); pas.setIcon(new ImageIcon("icons/paste.gif"));
+        JToolBar tool = new JToolBar();
+        add(tool,BorderLayout.NORTH);
+        tool.add(New);
+        tool.add(Open);
+        tool.add(Save);
+        tool.addSeparator();
 
-            Save.setEnabled(false);
-            SaveAs.setEnabled(false);
+        JButton cut = tool.add(Cut), cop = tool.add(Copy),pas = tool.add(Paste);
 
-            setDefaultCloseOperation(EXIT_ON_CLOSE);
-            pack();
-            area.addKeyListener(k1);
-            setTitle(currentFile);
-            setVisible(true);
+        cut.setText(null); cut.setIcon(new ImageIcon("icons/cut.gif"));
+        cop.setText(null); cop.setIcon(new ImageIcon("icons/copy.gif"));
+        pas.setText(null); pas.setIcon(new ImageIcon("icons/paste.gif"));
+
+        Save.setEnabled(false);
+        SaveAs.setEnabled(false);
+
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        pack();
+        area.addKeyListener(k1);
+        setTitle(currentFile);
+        setVisible(true);
     };
     
     private KeyListener k1 = new KeyAdapter() {
@@ -161,21 +190,7 @@ public class TextEditor extends JFrame {
                 saveFile(currentFile);
         }
     }
-    
-    private void readInFile(String fileName) {
-        try {
-            FileReader r = new FileReader(fileName);
-            area.read(r,null);
-            r.close();
-            currentFile = fileName;
-            setTitle(currentFile);
-            changed = false;
-        }
-        catch(IOException e) {
-            Toolkit.getDefaultToolkit().beep();
-            JOptionPane.showMessageDialog(this,"Editor can't find the file called "+fileName);
-        }
-    }
+   
     
     private void saveFile(String fileName) {
         try {

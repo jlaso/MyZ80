@@ -10,8 +10,8 @@ package jEditSyntax;
 
 import jEditSyntax.inputHandler.DefaultInputHandler;
 import jEditSyntax.inputHandler.InputHandler;
-import javax.swing.JPopupMenu;
 import java.awt.Color;
+import javax.swing.JPopupMenu;
 
 /**
  * Encapsulates default settings for a text area. This can be passed
