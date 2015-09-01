@@ -10,7 +10,6 @@ import jEditSyntax.SyntaxStyle;
 import jEditSyntax.SyntaxUtilities;
 import jEditSyntax.Token;
 import jEditSyntax.marker.ASMZ80TokenMarker;
-import jEditSyntax.marker.JavaTokenMarker;
 import java.awt.Color;
 import javax.swing.JFrame;
 import static javax.swing.JFrame.EXIT_ON_CLOSE;
@@ -28,10 +27,14 @@ public class MyZ80 {
     public static void main(String[] args) {
         //new TextEditor();   
         
+        UIManager.put("EditTextAreaUI", "jEditSyntax.EditTextAreaUI");
+
         JFrame fm = new JFrame();
         
-        JEditTextArea jta = new JEditTextArea(20,100); 
+        JEditTextArea jta = new JEditTextArea(20,100, fm); 
         jta.setTokenMarker(new ASMZ80TokenMarker());
+        jta.readInFile("samples/normals.asm");
+        /*
         jta.setText(";; A byte-by-byte software scroll.\n" +
 ";;\n" +
 ";; Rate dependant on mode:\n" +
@@ -513,7 +516,7 @@ public class MyZ80 {
 "defb &00,&00,&00,&00,&00,&00,&00,&00,&00,&00,&00,&00,&00,&00,&00,&00 \n" +
 "defb &00,&00,&00,&00,&00,&00,&00,&00,&00,&00,&00,&00,&00,&00,&00,&00\n" +
 ";; font" 
-                    );
+                    );*/
         jta.recalculateVisibleLines();
         jta.setFirstLine(0);
         jta.setElectricScroll(0);
