@@ -1,10 +1,10 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * This simple editor is based on the idea of Turk4n
+ * see original post here: http://forum.codecall.net/topic/49721-simple-text-editor/
  */
 package myz80;
 
+import jEditSyntax.JEditTextArea;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -17,7 +17,7 @@ import javax.swing.text.*;
  */
 public class TextEditor extends JFrame {
     
-    private JTextArea area = new JTextArea(20,120);
+    private JEditTextArea area = new JEditTextArea(20, 120);
     private JFileChooser dialog = new JFileChooser(System.getProperty("user.dir"));
     private String currentFile = "Untitled";
     private boolean changed = false;
@@ -80,7 +80,8 @@ public class TextEditor extends JFrame {
             setJMenuBar(JMB);
             JMenu file = new JMenu("File");
             JMenu edit = new JMenu("Edit");
-            JMB.add(file); JMB.add(edit);
+            JMB.add(file); 
+            JMB.add(edit);
 
             file.add(New);
             file.add(Open);
@@ -92,7 +93,9 @@ public class TextEditor extends JFrame {
             for(int i=0; i<4; i++)
                 file.getItem(i).setIcon(null);
 
-            edit.add(Cut);edit.add(Copy);edit.add(Paste);
+            edit.add(Cut);
+            edit.add(Copy);
+            edit.add(Paste);
 
             edit.getItem(0).setText("Cut out");
             edit.getItem(1).setText("Copy");
