@@ -1,6 +1,8 @@
 
 package myz80;
 
+import sun.jvm.hotspot.debugger.cdbg.Sym;
+
 import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Dimension;
@@ -10,6 +12,8 @@ import java.io.File;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
@@ -17,91 +21,78 @@ import javax.swing.tree.TreePath;
  *
  * @author joseluislaso
  */
-public class SideBarLeftPanel extends JPanel implements MouseListener {
+public class SideBarLeftPanel extends JPanel {
     
     JTree tree;
     DefaultMutableTreeNode root;
-
-//    MouseListener ml = new MouseAdapter() {
-//        public void mousePressed(MouseEvent e) {
-//            int selRow = tree.getRowForLocation(e.getX(), e.getY());
-//            TreePath selPath = tree.getPathForLocation(e.getX(), e.getY());
-//            if(selRow != -1) {
-//                if(e.getClickCount() == 1) {
-//                    mySingleClick(selRow, selPath);
-//                }
-//                else if(e.getClickCount() == 2) {
-//                    myDoubleClick(selRow, selPath);
-//                }
-//            }
-//        }
-//    };
-//        
+    AreaEditorHandler areaEditorHandler;
+    Project project = null;
+    JScrollPane scrollPane;
   
-    public SideBarLeftPanel(){
+    public SideBarLeftPanel(AreaEditorHandler areaEditorHdl){
      
         super();
         setSize(200, 400);
         setLayout(new BorderLayout());
-        
-        add(new Button("North"), BorderLayout.NORTH);
-        add(new Button("South"), BorderLayout.SOUTH);
-        add(new Button("East"), BorderLayout.EAST);
-        add(new Button("West"), BorderLayout.WEST);
-        add(new Button("Center"), BorderLayout.CENTER);
+        areaEditorHandler = areaEditorHdl;
 
         root = new DefaultMutableTreeNode("root", true);
-        getList(root, new File(System.getProperty("user.dir")));
+        //getList(root, new File(System.getProperty("user.dir")));
         setLayout(new BorderLayout());
         tree = new JTree(root);
         tree.setRootVisible(false);
-        add(new JScrollPane((JTree)tree),"Center");
-                
-        //tree.addMouseListener(ml);
+        scrollPane = new JScrollPane((JTree)tree);
+        add(scrollPane,"Center");
+
+        tree.addTreeSelectionListener(new TreeSelectionListener() {
+            public void valueChanged(TreeSelectionEvent e) {
+                if (project==null) return;
+
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+
+                /* if nothing is selected */
+                if (node == null) return;
+
+                /* retrieve the node that was selected */
+                TreeNodeObj nodeInfo = (TreeNodeObj)node.getUserObject();
+
+                System.out.println(nodeInfo.getName());
+                /* React to the node selection. */
+
+                if (!nodeInfo.getIsDir()) {
+                    areaEditorHandler.loadFile(project.getPath() + "/" + nodeInfo.getName());
+                }
+            }
+        });
+    }
+
+    public void loadProject(Project prj) {
+
+        scrollPane.remove(tree);
+        tree.remove(root);
+        project = prj;
+        getList(root, new File(project.getPath()));
+        //tree.repaint();
+        scrollPane.add(tree);
+        repaint();
+        doLayout();
+
     }
 
     public Dimension getPreferredSize(){
+
         return new Dimension(200, 120);
-    }
-    
-    @Override
-    public void mouseClicked(MouseEvent e) {
-        if (e.getClickCount() == 2) {
-            TreePath path = tree.getPathForLocation(e.getX(), e.getY());
-            if (path != null) {
-                System.out.println(path.getLastPathComponent().toString());
-            }
-        }
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
 
     }
     
     public void getList(DefaultMutableTreeNode node, File f) {
         if(!f.isDirectory()) {
             if (f.getName().endsWith("asm")) {
-               DefaultMutableTreeNode child = new DefaultMutableTreeNode(f.getName());
+               DefaultMutableTreeNode child = new DefaultMutableTreeNode(new TreeNodeObj(false, f.getName()));
                node.add(child);
             }
         } else {
-            DefaultMutableTreeNode child = new DefaultMutableTreeNode(f.getName());
+            DefaultMutableTreeNode child = new DefaultMutableTreeNode(new TreeNodeObj(true, f.getName()));
             node.add(child);
             File fList[] = f.listFiles();
             for(int i = 0; i  < fList.length; i++)
@@ -110,5 +101,23 @@ public class SideBarLeftPanel extends JPanel implements MouseListener {
     }
   
 
+    private class TreeNodeObj {
+
+        protected Boolean isDir;
+        protected String name;
+
+        public TreeNodeObj(Boolean isDir, String name) {
+            this.isDir = isDir;
+            this.name = name;
+        }
+
+        public Boolean getIsDir() {
+            return isDir;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
     
 }

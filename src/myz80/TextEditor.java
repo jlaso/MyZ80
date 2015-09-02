@@ -10,6 +10,7 @@ import jEditSyntax.marker.ASMZ80TokenMarker;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import javax.swing.AbstractAction;
@@ -23,6 +24,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.text.DefaultEditorKit;
 
 /**
@@ -40,6 +42,8 @@ public class TextEditor extends JFrame {
     private String currentProject;
     private StatusBarPanel statusBarPanel;
     private AppConfiguration appConfig;
+    private AreaEditorHandler areaEditorHandler;
+    SideBarLeftPanel sideBarLeftPanel;
 
     ActionMap m;
     Action New, Open, Save, SaveAs, Quit;
@@ -54,7 +58,23 @@ public class TextEditor extends JFrame {
         appConfig = new AppConfiguration();
 
         currentFile = UNTITLED;
-        
+        dialog.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        dialog.setDialogType(JFileChooser.SAVE_DIALOG);
+        dialog.setApproveButtonText("Select");
+        dialog.setFileFilter(new FileFilter() {
+
+            @Override
+            public boolean accept(File f) {
+                return f.isDirectory();
+            }
+
+            @Override
+            public String getDescription() {
+                return "Any folder";
+            }
+
+        });
+
         setLayout(new BorderLayout());
         if ((appConfig.getxWindowSize() == -1) || (appConfig.getyWindowSize() == -1)) {
             setExtendedState(Frame.MAXIMIZED_BOTH);
@@ -63,9 +83,20 @@ public class TextEditor extends JFrame {
             setBounds(appConfig.getxWindowPos(), appConfig.getyWindowPos(), appConfig.getxWindowSize(), appConfig.getyWindowSize());
             setLocationByPlatform(false);
         }
+
+        // Main text area (editor)
+        TextAreaDefaults defaults = TextAreaDefaults.getDefaults();
+        defaults.rows = 20;
+        defaults.cols = 200;
+        area = new JEditTextArea(defaults);
+        area.setTokenMarker(new ASMZ80TokenMarker());
+        area.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        add(area, BorderLayout.CENTER);
+
+        areaEditorHandler = new AreaEditorHandler(area);
         
         // Left SideBar Panel
-        SideBarLeftPanel sideBarLeftPanel = new SideBarLeftPanel();
+        sideBarLeftPanel = new SideBarLeftPanel(areaEditorHandler);
         add(sideBarLeftPanel, BorderLayout.WEST);
         
         // Right SideBar Panel
@@ -75,15 +106,6 @@ public class TextEditor extends JFrame {
         // Status Bar Panel
         statusBarPanel = new StatusBarPanel();
         add(statusBarPanel, BorderLayout.SOUTH);
-
-        // Main text area (editor)
-        TextAreaDefaults defaults = TextAreaDefaults.getDefaults();
-        defaults.rows = 20;
-        defaults.cols = 200;
-        area = new JEditTextArea(defaults);
-        area.setTokenMarker(new ASMZ80TokenMarker());
-        area.setFont(new Font("Monospaced",Font.PLAIN,12));
-        add(area, BorderLayout.CENTER);
 
         initializeMenuActions();
 
@@ -125,9 +147,21 @@ public class TextEditor extends JFrame {
         Open = new AbstractAction("Open", new ImageIcon("icons/open.gif")) {
             public void actionPerformed(ActionEvent e) {
                 saveOld();
-                if(dialog.showOpenDialog(null)==JFileChooser.APPROVE_OPTION) {
-                    currentFile = dialog.getSelectedFile().getAbsolutePath();
-                    area.readInFile(currentFile);
+                String home = System.getProperty("user.dir");
+                if (currentProject != "")
+                    home = currentProject;
+
+                dialog.setCurrentDirectory(new File(home+"/."));
+                if(dialog.showSaveDialog(null)==JFileChooser.APPROVE_OPTION) {
+                    File selectedFile = dialog.getSelectedFile();
+                    if (!dialog.getSelectedFile().isDirectory()) {
+                        currentProject = selectedFile.getParent();
+                    }else{
+                        currentProject = selectedFile.getAbsolutePath();
+                    }
+                    Project project = new Project(currentProject);
+                    sideBarLeftPanel.loadProject(project);
+                    setTitle(project.getConfig().getName());
                 }
                 SaveAs.setEnabled(true);
                 updateStatusBar();
@@ -206,9 +240,9 @@ public class TextEditor extends JFrame {
     
     private KeyListener k1 = new KeyAdapter() {
         public void keyPressed(KeyEvent e) {
-            changed = true;
-            Save.setEnabled(true);
-            SaveAs.setEnabled(true);
+        changed = true;
+        Save.setEnabled(true);
+        SaveAs.setEnabled(true);
         }
     };
     
