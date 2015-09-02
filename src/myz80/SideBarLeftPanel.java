@@ -57,7 +57,7 @@ public class SideBarLeftPanel extends JPanel implements MouseListener {
         tree.setRootVisible(false);
         add(new JScrollPane((JTree)tree),"Center");
                 
-        tree.addMouseListener(ml);
+        //tree.addMouseListener(ml);
     }
 
     public Dimension getPreferredSize(){

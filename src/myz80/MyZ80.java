@@ -20,7 +20,11 @@ public class MyZ80 {
         
         UIManager.put("EditTextAreaUI", "jEditSyntax.EditTextAreaUI");
         
-        new TextEditor();   
+        AppConfiguration appConfig = new AppConfiguration();
+        
+        new TextEditor(appConfig);   
+        
+        appConfig.save();
         
         /*
         JFrame fm = new JFrame();

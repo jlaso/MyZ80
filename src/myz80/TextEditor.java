@@ -44,7 +44,7 @@ public class TextEditor extends JFrame {
     ActionMap m;
     Action Cut, Copy, Paste;
     
-    public TextEditor() 
+    public TextEditor(AppConfiguration appConfiguration) 
     {
         super();
         
