@@ -6,7 +6,7 @@
 package myz80;
 
 import java.awt.BorderLayout;
-import java.awt.Button;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 /**
@@ -15,12 +15,19 @@ import javax.swing.JPanel;
  */
 public class StatusBarPanel extends JPanel{
     
+    JLabel label = new JLabel("This is the status bar panel");
+    
     public StatusBarPanel(){
         super();
 
         //setSize(200, 400);
         setLayout(new BorderLayout());
 
-        add(new Button("North"), BorderLayout.NORTH);        
+        add(label, BorderLayout.CENTER);        
     }
+    
+    public void setText(String text) {        
+        label.setText(text);        
+    }
+            
 }

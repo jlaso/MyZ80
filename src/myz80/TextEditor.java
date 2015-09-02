@@ -7,12 +7,9 @@ package myz80;
 import jEditSyntax.JEditTextArea;
 import jEditSyntax.TextAreaDefaults;
 import jEditSyntax.marker.ASMZ80TokenMarker;
-import java.awt.BorderLayout;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+
+import java.awt.*;
+import java.awt.event.*;
 import java.io.FileWriter;
 import java.io.IOException;
 import javax.swing.AbstractAction;
@@ -33,23 +30,39 @@ import javax.swing.text.DefaultEditorKit;
  * @author joseluislaso
  */
 public class TextEditor extends JFrame {
-    
+
+    private static String UNTITLED = "Untitled";
+
+    private boolean changed = false;
     private JEditTextArea area;
     private JFileChooser dialog = new JFileChooser(System.getProperty("user.dir"));
-    private String currentFile = "Untitled";
-    private boolean changed = false;
-    
-    Action New, Open, Save, SaveAs, Quit;
-    
+    private String currentFile;
+    private String currentProject;
+    private StatusBarPanel statusBarPanel;
+    private AppConfiguration appConfig;
+
     ActionMap m;
+    Action New, Open, Save, SaveAs, Quit;
     Action Cut, Copy, Paste;
-    
-    public TextEditor(AppConfiguration appConfiguration) 
+
+    public TextEditor()
     {
         super();
+
+        System.out.println("Starting MyZ80...");
+
+        appConfig = new AppConfiguration();
+
+        currentFile = UNTITLED;
         
         setLayout(new BorderLayout());
-        setExtendedState(java.awt.Frame.MAXIMIZED_BOTH);
+        if ((appConfig.getxWindowSize() == -1) || (appConfig.getyWindowSize() == -1)) {
+            setExtendedState(Frame.MAXIMIZED_BOTH);
+        }else{
+            setExtendedState(Frame.NORMAL);
+            setBounds(appConfig.getxWindowPos(), appConfig.getyWindowPos(), appConfig.getxWindowSize(), appConfig.getyWindowSize());
+            setLocationByPlatform(false);
+        }
         
         // Left SideBar Panel
         SideBarLeftPanel sideBarLeftPanel = new SideBarLeftPanel();
@@ -60,23 +73,52 @@ public class TextEditor extends JFrame {
         add(sideBarRightPanel, BorderLayout.EAST);
         
         // Status Bar Panel
-        StatusBarPanel statusBarPanel = new StatusBarPanel();
+        statusBarPanel = new StatusBarPanel();
         add(statusBarPanel, BorderLayout.SOUTH);
-        
+
+        // Main text area (editor)
         TextAreaDefaults defaults = TextAreaDefaults.getDefaults();
         defaults.rows = 20;
         defaults.cols = 200;
         area = new JEditTextArea(defaults);
-        
+        area.setTokenMarker(new ASMZ80TokenMarker());
+        area.setFont(new Font("Monospaced",Font.PLAIN,12));
+        add(area, BorderLayout.CENTER);
+
+        initializeMenuActions();
+
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        //pack();
+        area.addKeyListener(k1);
+        setTitle(currentFile);
+        setVisible(true);
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                Rectangle r = getBounds();
+                appConfig.setxWindowPos(r.x);
+                appConfig.setyWindowPos(r.y);
+                appConfig.setxWindowSize(r.width);
+                appConfig.setyWindowSize(r.height);
+                // save the app configuration
+                appConfig.save();
+                System.out.println("Finishing MyZ80...");
+            }
+        });
+    };
+
+    private void initializeMenuActions() {
+
         New = new AbstractAction("New", new ImageIcon("icons/new.gif")) {
             public void actionPerformed(ActionEvent e) {
                 saveOld();
                 area.setText("");
-                currentFile = "Untitled";
-                setTitle(currentFile);
+                currentFile = UNTITLED;
                 changed = false;
                 Save.setEnabled(false);
                 SaveAs.setEnabled(false);
+                updateStatusBar();
             }
         };
 
@@ -84,15 +126,17 @@ public class TextEditor extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 saveOld();
                 if(dialog.showOpenDialog(null)==JFileChooser.APPROVE_OPTION) {
-                    area.readInFile(dialog.getSelectedFile().getAbsolutePath());
+                    currentFile = dialog.getSelectedFile().getAbsolutePath();
+                    area.readInFile(currentFile);
                 }
                 SaveAs.setEnabled(true);
+                updateStatusBar();
             }
         };
 
         Save = new AbstractAction("Save", new ImageIcon("icons/save.gif")) {
             public void actionPerformed(ActionEvent e) {
-                if(!currentFile.equals("Untitled"))
+                if(!currentFile.equals(UNTITLED))
                     saveFile(currentFile);
                 else
                     saveFileAs();
@@ -117,28 +161,23 @@ public class TextEditor extends JFrame {
         Copy = m.get(DefaultEditorKit.copyAction);
         Paste = m.get(DefaultEditorKit.pasteAction);
 
-        area.setTokenMarker(new ASMZ80TokenMarker());
-        area.setFont(new Font("Monospaced",Font.PLAIN,12));
-        //JScrollPane scroll = new JScrollPane(area,JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        //add(scroll,BorderLayout.CENTER);
-        add(area, BorderLayout.CENTER);
-        
+        // Menu bar
         JMenuBar JMB = new JMenuBar();
         setJMenuBar(JMB);
-        JMenu file = new JMenu("File");
+        JMenu project = new JMenu("Project");
         JMenu edit = new JMenu("Edit");
-        JMB.add(file); 
+        JMB.add(project);
         JMB.add(edit);
 
-        file.add(New);
-        file.add(Open);
-        file.add(Save);
-        file.add(Quit);
-        file.add(SaveAs);
-        file.addSeparator();
+        project.add(New);
+        project.add(Open);
+        project.add(Save);
+        project.add(Quit);
+        project.add(SaveAs);
+        project.addSeparator();
 
         for(int i=0; i<4; i++)
-            file.getItem(i).setIcon(null);
+            project.getItem(i).setIcon(null);
 
         edit.add(Cut);
         edit.add(Copy);
@@ -163,13 +202,7 @@ public class TextEditor extends JFrame {
 
         Save.setEnabled(false);
         SaveAs.setEnabled(false);
-
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        pack();
-        area.addKeyListener(k1);
-        setTitle(currentFile);
-        setVisible(true);
-    };
+    }
     
     private KeyListener k1 = new KeyAdapter() {
         public void keyPressed(KeyEvent e) {
@@ -183,15 +216,14 @@ public class TextEditor extends JFrame {
         if(dialog.showSaveDialog(null)==JFileChooser.APPROVE_OPTION)
             saveFile(dialog.getSelectedFile().getAbsolutePath());
     }
-    
+
     private void saveOld() {
         if(changed) {
             if(JOptionPane.showConfirmDialog(this, "Would you like to save "+ currentFile +" ?","Save",JOptionPane.YES_NO_OPTION)== JOptionPane.YES_OPTION)
                 saveFile(currentFile);
         }
     }
-   
-    
+
     private void saveFile(String fileName) {
         try {
             FileWriter w = new FileWriter(fileName);
@@ -204,5 +236,9 @@ public class TextEditor extends JFrame {
         }
         catch(IOException e) {
         }
+    }
+    
+    private void updateStatusBar() {
+        statusBarPanel.setText(currentFile);
     }
 }

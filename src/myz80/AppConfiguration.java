@@ -5,10 +5,7 @@
  */
 package myz80;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,19 +21,23 @@ public class AppConfiguration {
     protected int xWindowSize = -1;
     protected int yWindowSize = -1;
     
-    protected String configFile = "./appconfig.properties";
+    protected String configFile = "resources/appconfig.properties";
     private Properties prop;
     
     public AppConfiguration() {
         
         prop = new Properties();
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();           
-        InputStream stream = loader.getResourceAsStream(configFile);
+        //ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        //InputStream stream = getClass().getClassLoader().getResourceAsStream(configFile);
         try {
+            FileInputStream stream = new FileInputStream(configFile);
             prop.load(stream);
             
-            xWindowPos = Integer.parseInt(prop.getProperty("XWindowPos", "0"));
-            
+            xWindowPos = Integer.parseInt(prop.getProperty("xWindowPos", "0"));
+            yWindowPos = Integer.parseInt(prop.getProperty("yWindowPos", "0"));
+            xWindowSize = Integer.parseInt(prop.getProperty("xWindowSize", "-1"));
+            yWindowSize = Integer.parseInt(prop.getProperty("yWindowSize", "-1"));
+
         } catch (NullPointerException ex) {
 
             save();
@@ -53,17 +54,52 @@ public class AppConfiguration {
         
         FileOutputStream stream;
         try {
-            stream = new FileOutputStream(configFile);            
-            prop.setProperty("xWindowPos", Integer.toString(xWindowPos));          
-            prop.store(stream, null);           
+            stream = new FileOutputStream(configFile);
+
+            prop.setProperty("xWindowPos", Integer.toString(xWindowPos));
+            prop.setProperty("yWindowPos", Integer.toString(yWindowPos));
+            prop.setProperty("xWindowSize", Integer.toString(xWindowSize));
+            prop.setProperty("yWindowSize", Integer.toString(yWindowSize));
+
+            prop.store(stream, null);
             stream.close();
         } catch (FileNotFoundException ex) {
             Logger.getLogger(AppConfiguration.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(AppConfiguration.class.getName()).log(Level.SEVERE, null, ex);
-	}
+	    }
         
     }
-    
-    
+
+    public int getxWindowPos() {
+        return xWindowPos;
+    }
+
+    public void setxWindowPos(int xWindowPos) {
+        this.xWindowPos = xWindowPos;
+    }
+
+    public int getyWindowPos() {
+        return yWindowPos;
+    }
+
+    public void setyWindowPos(int yWindowPos) {
+        this.yWindowPos = yWindowPos;
+    }
+
+    public int getxWindowSize() {
+        return xWindowSize;
+    }
+
+    public void setxWindowSize(int xWindowSize) {
+        this.xWindowSize = xWindowSize;
+    }
+
+    public int getyWindowSize() {
+        return yWindowSize;
+    }
+
+    public void setyWindowSize(int yWindowSize) {
+        this.yWindowSize = yWindowSize;
+    }
 }
