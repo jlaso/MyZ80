@@ -15,6 +15,7 @@ import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
 /**
@@ -28,7 +29,7 @@ public class SideBarLeftPanel extends JPanel {
     AreaEditorHandler areaEditorHandler;
     Project project = null;
     JScrollPane scrollPane;
-  
+
     public SideBarLeftPanel(AreaEditorHandler areaEditorHdl){
      
         super();
@@ -37,7 +38,7 @@ public class SideBarLeftPanel extends JPanel {
         areaEditorHandler = areaEditorHdl;
 
         root = new DefaultMutableTreeNode("root", true);
-        //getList(root, new File(System.getProperty("user.dir")));
+
         setLayout(new BorderLayout());
         tree = new JTree(root);
         tree.setRootVisible(false);
@@ -60,7 +61,7 @@ public class SideBarLeftPanel extends JPanel {
                 /* React to the node selection. */
 
                 if (!nodeInfo.getIsDir()) {
-                    areaEditorHandler.loadFile(project.getPath() + "/" + nodeInfo.getName());
+                    areaEditorHandler.loadFile(nodeInfo.getFullName());
                 }
             }
         });
@@ -68,14 +69,12 @@ public class SideBarLeftPanel extends JPanel {
 
     public void loadProject(Project prj) {
 
-        scrollPane.remove(tree);
-        tree.remove(root);
+        root.removeAllChildren();
+
         project = prj;
         getList(root, new File(project.getPath()));
-        //tree.repaint();
-        scrollPane.add(tree);
-        repaint();
-        doLayout();
+
+        ((DefaultTreeModel) tree.getModel()).reload(root);
 
     }
 
@@ -88,11 +87,11 @@ public class SideBarLeftPanel extends JPanel {
     public void getList(DefaultMutableTreeNode node, File f) {
         if(!f.isDirectory()) {
             if (f.getName().endsWith("asm")) {
-               DefaultMutableTreeNode child = new DefaultMutableTreeNode(new TreeNodeObj(false, f.getName()));
+               DefaultMutableTreeNode child = new DefaultMutableTreeNode(new TreeNodeObj(false, f.getName(), f.getAbsolutePath()));
                node.add(child);
             }
         } else {
-            DefaultMutableTreeNode child = new DefaultMutableTreeNode(new TreeNodeObj(true, f.getName()));
+            DefaultMutableTreeNode child = new DefaultMutableTreeNode(new TreeNodeObj(true, f.getName(), null));
             node.add(child);
             File fList[] = f.listFiles();
             for(int i = 0; i  < fList.length; i++)
@@ -105,10 +104,12 @@ public class SideBarLeftPanel extends JPanel {
 
         protected Boolean isDir;
         protected String name;
+        protected String fullName;
 
-        public TreeNodeObj(Boolean isDir, String name) {
+        public TreeNodeObj(Boolean isDir, String name, String fullName) {
             this.isDir = isDir;
             this.name = name;
+            this.fullName = fullName;
         }
 
         public Boolean getIsDir() {
@@ -116,6 +117,15 @@ public class SideBarLeftPanel extends JPanel {
         }
 
         public String getName() {
+            return name;
+        }
+
+        public String getFullName() {
+            return fullName;
+        }
+
+        @Override
+        public String toString() {
             return name;
         }
     }
