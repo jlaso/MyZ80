@@ -20,6 +20,7 @@ public class AppConfiguration {
     protected int yWindowPos = 0;
     protected int xWindowSize = -1;
     protected int yWindowSize = -1;
+    protected String lastProject = "";
     
     protected String configFile = "resources/appconfig.properties";
     private Properties prop;
@@ -37,6 +38,7 @@ public class AppConfiguration {
             yWindowPos = Integer.parseInt(prop.getProperty("yWindowPos", "0"));
             xWindowSize = Integer.parseInt(prop.getProperty("xWindowSize", "-1"));
             yWindowSize = Integer.parseInt(prop.getProperty("yWindowSize", "-1"));
+            lastProject = prop.getProperty("lastProject", "");
 
         } catch (NullPointerException ex) {
 
@@ -60,6 +62,7 @@ public class AppConfiguration {
             prop.setProperty("yWindowPos", Integer.toString(yWindowPos));
             prop.setProperty("xWindowSize", Integer.toString(xWindowSize));
             prop.setProperty("yWindowSize", Integer.toString(yWindowSize));
+            prop.setProperty("lastProject", lastProject);
 
             prop.store(stream, null);
             stream.close();
@@ -101,5 +104,13 @@ public class AppConfiguration {
 
     public void setyWindowSize(int yWindowSize) {
         this.yWindowSize = yWindowSize;
+    }
+
+    public String getLastProject() {
+        return lastProject;
+    }
+
+    public void setLastProject(String lastProject) {
+        this.lastProject = lastProject;
     }
 }

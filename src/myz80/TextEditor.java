@@ -43,11 +43,13 @@ public class TextEditor extends JFrame {
     private StatusBarPanel statusBarPanel;
     private AppConfiguration appConfig;
     private AreaEditorHandler areaEditorHandler;
-    SideBarLeftPanel sideBarLeftPanel;
+    private SideBarLeftPanel sideBarLeftPanel;
+    private Project project;
+    private ProjectConfigurationForm configForm = new ProjectConfigurationForm();
 
     ActionMap m;
-    Action New, Open, Save, SaveAs, Quit;
-    Action Cut, Copy, Paste;
+    Action NewAction, OpenAction, ConfigAction, QuitAction;
+    Action CutAction, CopyAction, PasteAction;
 
     public TextEditor()
     {
@@ -128,23 +130,35 @@ public class TextEditor extends JFrame {
                 System.out.println("Finishing MyZ80...");
             }
         });
+
+        if (appConfig.getLastProject() != "") {
+            openProject(appConfig.getLastProject());
+        }
     };
+
+    private void openProject(String projectName) {
+        project = new Project(projectName);
+        sideBarLeftPanel.loadProject(project);
+        ConfigAction.setEnabled(true);
+        appConfig.setLastProject(projectName);
+        setTitle(project.getConfig().getName());
+    }
 
     private void initializeMenuActions() {
 
-        New = new AbstractAction("New", new ImageIcon("icons/new.gif")) {
+        NewAction = new AbstractAction("New", new ImageIcon("icons/new.gif")) {
             public void actionPerformed(ActionEvent e) {
                 saveOld();
+                // empty editor area
                 area.setText("");
                 currentFile = UNTITLED;
                 changed = false;
-                Save.setEnabled(false);
-                SaveAs.setEnabled(false);
+                ConfigAction.setEnabled(true);
                 updateStatusBar();
             }
         };
 
-        Open = new AbstractAction("Open", new ImageIcon("icons/open.gif")) {
+        OpenAction = new AbstractAction("Open", new ImageIcon("icons/open.gif")) {
             public void actionPerformed(ActionEvent e) {
                 saveOld();
                 String home = System.getProperty("user.dir");
@@ -159,31 +173,20 @@ public class TextEditor extends JFrame {
                     }else{
                         currentProject = selectedFile.getAbsolutePath();
                     }
-                    Project project = new Project(currentProject);
-                    sideBarLeftPanel.loadProject(project);
-                    setTitle(project.getConfig().getName());
+                    openProject(currentProject);
                 }
-                SaveAs.setEnabled(true);
+                ConfigAction.setEnabled(true);
                 updateStatusBar();
             }
         };
 
-        Save = new AbstractAction("Save", new ImageIcon("icons/save.gif")) {
+        ConfigAction = new AbstractAction("Config", new ImageIcon("icons/config.gif")) {
             public void actionPerformed(ActionEvent e) {
-                if(!currentFile.equals(UNTITLED))
-                    saveFile(currentFile);
-                else
-                    saveFileAs();
+                configForm.showDialog(project.getConfig(), new UpdateProjectConfig());
             }
         };
 
-        SaveAs = new AbstractAction("Save as...") {
-            public void actionPerformed(ActionEvent e) {
-                saveFileAs();
-            }
-        };
-
-        Quit = new AbstractAction("Quit") {
+        QuitAction = new AbstractAction("Quit") {
             public void actionPerformed(ActionEvent e) {
                 saveOld();
                 System.exit(0);
@@ -191,9 +194,9 @@ public class TextEditor extends JFrame {
         };
 
         m = area.getActionMap();
-        Cut = m.get(DefaultEditorKit.cutAction);
-        Copy = m.get(DefaultEditorKit.copyAction);
-        Paste = m.get(DefaultEditorKit.pasteAction);
+        CutAction = m.get(DefaultEditorKit.cutAction);
+        CopyAction = m.get(DefaultEditorKit.copyAction);
+        PasteAction = m.get(DefaultEditorKit.pasteAction);
 
         // Menu bar
         JMenuBar JMB = new JMenuBar();
@@ -203,46 +206,42 @@ public class TextEditor extends JFrame {
         JMB.add(project);
         JMB.add(edit);
 
-        project.add(New);
-        project.add(Open);
-        project.add(Save);
-        project.add(Quit);
-        project.add(SaveAs);
+        project.add(NewAction);
+        project.add(OpenAction);
+        project.add(QuitAction);
+        project.add(ConfigAction);
         project.addSeparator();
 
         for(int i=0; i<4; i++)
             project.getItem(i).setIcon(null);
 
-        edit.add(Cut);
-        edit.add(Copy);
-        edit.add(Paste);
+        edit.add(CutAction);
+        edit.add(CopyAction);
+        edit.add(PasteAction);
 
         edit.getItem(0).setText("Cut out");
         edit.getItem(1).setText("Copy");
         edit.getItem(2).setText("Paste");
 
         JToolBar tool = new JToolBar();
-        add(tool,BorderLayout.NORTH);
-        tool.add(New);
-        tool.add(Open);
-        tool.add(Save);
+        add(tool, BorderLayout.NORTH);
+        tool.add(NewAction);
+        tool.add(OpenAction);
         tool.addSeparator();
 
-        JButton cut = tool.add(Cut), cop = tool.add(Copy),pas = tool.add(Paste);
+        JButton cut = tool.add(CutAction), cop = tool.add(CopyAction),pas = tool.add(PasteAction);
 
         cut.setText(null); cut.setIcon(new ImageIcon("icons/cut.gif"));
         cop.setText(null); cop.setIcon(new ImageIcon("icons/copy.gif"));
         pas.setText(null); pas.setIcon(new ImageIcon("icons/paste.gif"));
 
-        Save.setEnabled(false);
-        SaveAs.setEnabled(false);
+        ConfigAction.setEnabled(false);
     }
     
     private KeyListener k1 = new KeyAdapter() {
         public void keyPressed(KeyEvent e) {
         changed = true;
-        Save.setEnabled(true);
-        SaveAs.setEnabled(true);
+        ConfigAction.setEnabled(true);
         }
     };
     
@@ -266,7 +265,6 @@ public class TextEditor extends JFrame {
             currentFile = fileName;
             setTitle(currentFile);
             changed = false;
-            Save.setEnabled(false);
         }
         catch(IOException e) {
         }
@@ -274,5 +272,17 @@ public class TextEditor extends JFrame {
     
     private void updateStatusBar() {
         statusBarPanel.setText(currentFile);
+    }
+
+    private class UpdateProjectConfig implements CallbackRunnable {
+
+        public void run() {
+
+            ProjectConfiguration config = project.getConfig();
+
+            setTitle(config.getName());
+
+        }
+
     }
 }
