@@ -13,17 +13,7 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.ActionMap;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JOptionPane;
-import javax.swing.JToolBar;
+import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.text.DefaultEditorKit;
 
@@ -201,19 +191,26 @@ public class TextEditor extends JFrame {
         // Menu bar
         JMenuBar JMB = new JMenuBar();
         setJMenuBar(JMB);
-        JMenu project = new JMenu("Project");
+        JMenu projectMenu = new JMenu("Project");
         JMenu edit = new JMenu("Edit");
-        JMB.add(project);
+        JMB.add(projectMenu);
         JMB.add(edit);
 
-        project.add(NewAction);
-        project.add(OpenAction);
-        project.add(QuitAction);
-        project.add(ConfigAction);
-        project.addSeparator();
+        projectMenu.add(NewAction);
+
+        projectMenu.add(OpenAction);
+
+        projectMenu.add(QuitAction);
+
+        JMenuItem ConfigMenuItem = new JMenuItem();
+        ConfigMenuItem.setAction(ConfigAction);
+        ConfigMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.CTRL_DOWN_MASK));
+        projectMenu.add(ConfigMenuItem);
+
+        projectMenu.addSeparator();
 
         for(int i=0; i<4; i++)
-            project.getItem(i).setIcon(null);
+            projectMenu.getItem(i).setIcon(null);
 
         edit.add(CutAction);
         edit.add(CopyAction);
@@ -241,7 +238,7 @@ public class TextEditor extends JFrame {
     private KeyListener k1 = new KeyAdapter() {
         public void keyPressed(KeyEvent e) {
         changed = true;
-        ConfigAction.setEnabled(true);
+        //ConfigAction.setEnabled(true);
         }
     };
     

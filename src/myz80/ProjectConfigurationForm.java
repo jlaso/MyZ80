@@ -1,9 +1,6 @@
 package myz80;
 
-import com.sun.tools.javac.comp.Flow;
-
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,9 +13,8 @@ public class ProjectConfigurationForm implements ActionListener {
     JFrame frame = new JFrame("Project configuration");
     JLabel nameLbl;
     JTextField nameFld;
+    JButton acceptBtn, cancelBtn;
     ProjectConfiguration projectConfig = null;
-    JButton acceptBtn;
-    JButton cancelBtn;
     CallbackRunnable callback = null;
 
     public ProjectConfigurationForm() {
@@ -27,36 +23,54 @@ public class ProjectConfigurationForm implements ActionListener {
         c.fill = GridBagConstraints.HORIZONTAL;
 
         frame.setLayout(new GridBagLayout());
-        frame.setExtendedState(Frame.MAXIMIZED_BOTH);
+        //frame.setExtendedState(Frame.MAXIMIZED_BOTH);
 
+        frame.setPreferredSize(new Dimension(400,300));
+
+        c.weightx = 0;
         c.gridx = 0;
         c.gridy = 0;
         c.gridwidth = 10;
+        c.ipady = 40;
         frame.add(new JLabel("Configuration of the project"), c);
+        c.ipady = 0;
 
         c.gridy = 1;
 
         nameLbl = new JLabel("Name");
+        c.fill = GridBagConstraints.NONE;
         c.gridx = 0;
+        c.gridwidth = 1;
+        c.weightx = 0.5;
         frame.add(nameLbl, c);
 
         nameFld = new JTextField("");
+        c.fill = GridBagConstraints.HORIZONTAL;
         c.gridx = 1;
         c.gridwidth = 9;
+        c.weightx = 0;
         frame.add(nameFld, c);
 
         c.weighty = 1.0;
         c.anchor = GridBagConstraints.PAGE_END;
-        
+
         acceptBtn = new JButton("Save");
         c.gridy = 6;
-        c.gridx = 4;
+        c.gridx = 0;
+        c.gridwidth = 1;
+        c.weightx = 0.5;
+        c.fill = GridBagConstraints.HORIZONTAL;
         frame.add(acceptBtn, c);
 
         cancelBtn = new JButton("Cancel");
         c.gridy = 6;
-        c.gridx = 5;
+        c.gridx = 1;
+        c.gridwidth = 1;
+        c.weightx = 0.5;
+        c.fill = GridBagConstraints.HORIZONTAL;
         frame.add(cancelBtn, c);
+
+        frame.pack();
     }
 
     @Override
