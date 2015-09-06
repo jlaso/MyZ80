@@ -10,14 +10,17 @@ import java.awt.event.ActionListener;
  */
 public class ProjectConfigurationForm implements ActionListener {
 
-    JFrame frame = new JFrame("Project configuration");
+    JDialog frame;
     JLabel nameLbl;
     JTextField nameFld;
     JButton acceptBtn, cancelBtn;
     ProjectConfiguration projectConfig = null;
     CallbackRunnable callback = null;
 
-    public ProjectConfigurationForm() {
+    public ProjectConfigurationForm(JFrame parent) {
+
+        frame = new JDialog(parent, "Project configuration", Dialog.ModalityType.APPLICATION_MODAL);
+        frame.setLocationRelativeTo(parent);
 
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
@@ -84,11 +87,12 @@ public class ProjectConfigurationForm implements ActionListener {
             if (callback != null)
                 callback.run();
 
+            return;
         }
         if(e.getSource()==cancelBtn){
 
             hideDialog();
-
+            return;
         }
     }
 
@@ -101,7 +105,8 @@ public class ProjectConfigurationForm implements ActionListener {
     }
 
     public void hideDialog() {
-        acceptBtn.removeActionListener(this);
         frame.setVisible(false);
+        acceptBtn.removeActionListener(this);
+        frame.dispose();
     }
 }

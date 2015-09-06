@@ -35,7 +35,7 @@ public class TextEditor extends JFrame {
     private AreaEditorHandler areaEditorHandler;
     private SideBarLeftPanel sideBarLeftPanel;
     private Project project;
-    private ProjectConfigurationForm configForm = new ProjectConfigurationForm();
+    private ProjectConfigurationForm configForm;
 
     ActionMap m;
     Action NewAction, OpenAction, ConfigAction, QuitAction;
@@ -124,6 +124,8 @@ public class TextEditor extends JFrame {
         if (appConfig.getLastProject() != "") {
             openProject(appConfig.getLastProject());
         }
+
+        configForm = new ProjectConfigurationForm(this);
     };
 
     private void openProject(String projectName) {
