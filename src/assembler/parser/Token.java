@@ -5,6 +5,9 @@ import java.util.regex.Pattern;
 
 /**
  * Created by joseluislaso on 06/09/15.
+ *
+ *
+ * TAKE IN ACCOUNT: http://sgate.emt.bme.hu/patai/publications/z80guide/part1.html#variables
  */
 public class Token extends Item {
 
@@ -52,6 +55,9 @@ public class Token extends Item {
 
             case "scf": return new int[] {0x37};
 
+            case "neg": return new int[] {0xED, 0x44};
+            case "retn": return new int[] {0xED, 0x45};
+
             case "rst":
                 switch (operand1){
                     case "00h": return new int[] {0xC7};
@@ -62,6 +68,14 @@ public class Token extends Item {
                     case "28h": return new int[] {0xEF};
                     case "30h": return new int[] {0xF7};
                     case "38h": return new int[] {0xFF};
+                }
+                break;
+
+            case "im":
+                switch (operand1){
+                    case "0": return new int[] {0xED, 0x46};
+                    case "1": return new int[] {0xED, 0x56};
+                    case "2": return new int[] {0xD7, 0x5E};
                 }
                 break;
 
@@ -79,6 +93,48 @@ public class Token extends Item {
                         return new int[]{0xDD, 0xE5};
                     case "iy":
                         return new int[]{0xFD, 0xE5};
+                }
+                break;
+
+            case "exx" :
+                return new int[] {0xD9};
+
+            case "ex":
+                switch (operand2) {
+                    case "hl":
+                        switch (operand1) {
+                            case "(sp)":
+                                return new int[]{0xE3};
+                            case "de":
+                                return new int[]{0xEB};
+                        }
+                        break;
+
+                    case "af'":
+                        return new int[]{0x08};
+                }
+                break;
+
+            case "out":
+                if ("a"==operand2){
+
+                }
+                break;
+
+            case "pop":
+                switch (operand1) {
+                    case "bc":
+                        return new int[]{0xC1};
+                    case "de":
+                        return new int[]{0xD1};
+                    case "hl":
+                        return new int[]{0xE1};
+                    case "af":
+                        return new int[]{0xF1};
+                    case "ix":
+                        return new int[]{0xDD, 0xE1};
+                    case "iy":
+                        return new int[]{0xFD, 0xE1};
                 }
                 break;
 
@@ -229,11 +285,20 @@ public class Token extends Item {
                 switch (operand1) {
 
                     case "a":
-                        try {
-                            return new int[] {0x78 | code8bitsRegister(operand2)};
-                        }catch (Unrecognized8bitsRegister e){
-                            return new int[]{0x3E, Integer.parseInt(operand1)};
+                        switch (operand2) {
+
+                            case "(bc)": return new int[]{0x0A};
+                            case "(de)": return new int[]{0x1A};
+                            default:
+                                try {
+                                    return new int[]{0x78 | code8bitsRegister(operand2)};
+                                } catch (Unrecognized8bitsRegister e) {
+
+                                    // detect between ld a,x and ld a,(xx)
+                                    return new int[]{0x3E, Integer.parseInt(operand1)};
+                                }
                         }
+
                     case "b":
                         try {
                             return new int[] {0x40 | code8bitsRegister(operand2)};
@@ -273,7 +338,14 @@ public class Token extends Item {
                     case "bc": return new int[] {0x01, getLiteral(op2)};
                     case "de": return new int[] {0x11, getLiteral(op2)};
                     case "hl": return new int[] {0x21, getLiteral(op2)};
-                    case "sp": return new int[] {0x31, getLiteral(op2)};
+                    case "sp":
+                        switch (operand2) {
+                            case "hl":
+                                return new int[]{0xF9};
+                            default:
+                                return new int[]{0x31, getLiteral(op2)};
+                        }
+
                     case "(hl)":
                         if ("(hl)"!=operand2){  // because the theoretical code for "ld (hl),(hl)" it's the same for "halt"
                             try {
@@ -355,11 +427,37 @@ public class Token extends Item {
                 }
                 break;
 
+            case "call":
+                switch (operand1){
+                    case "nz":  return getJumpCode(0xC4, operand2);
+                    case "z":   return getJumpCode(0xCC, operand2);
+                    case "nc":  return getJumpCode(0xD4, operand2);
+                    case "c":   return getJumpCode(0xDC, operand2);
+                    case "po":  return getJumpCode(0xE4, operand2);
+                    case "pe":  return getJumpCode(0xEC, operand2);
+                    case "p":   return getJumpCode(0xF4, operand2);
+                    case "m":   return getJumpCode(0xFC, operand2);
+                    case "(hl)": return new int[] {0xE9};
+                    case "(ix)": return new int[] {0xDD, 0xE9};
+                    case "(iy)": return new int[] {0xFD, 0xE9};
+                    default:
+                        if (""==operand2){
+                            return getJumpCode(0xCD, operand1);
+                        }
+                }
+                break;
+
         }
         throw new Exception("not recognized "+operation+" "+operand1+" "+operand2);
 
     }
 
+    /**
+     * @TODO: take in account the labels ...
+     * @param opCode
+     * @param operand
+     * @return
+     */
     private int[] getJumpCode(int opCode, String operand) {
         int address = getLiteral(operand);
 
