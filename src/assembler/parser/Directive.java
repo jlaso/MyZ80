@@ -3,16 +3,16 @@ package assembler.parser;
 /**
  * Created by joseluislaso on 06/09/15.
  */
-public class Constant extends Item {
+public class Directive extends Item {
 
     protected String name;
     protected String value;
 
-    public Constant(String name) {
+    public Directive(String name) {
         this(name, "");
     }
 
-    public Constant(String name, String value) {
+    public Directive(String name, String value) {
         this.name = name;
         this.value = value;
         setSize(0);
@@ -20,6 +20,6 @@ public class Constant extends Item {
 
     @Override
     public String toString() {
-        return "Constant{" + name + " = " + value + "}";
+        return "Directive{ name='" + name + "', value='" + value + "'}";
     }
 }

@@ -11,4 +11,11 @@ public class Label extends Item {
         this.label = label;
         setSize(0);
     }
+
+    @Override
+    public String toString() {
+        return "Label{" +
+                "'" + label + "', address=" + address +
+                '}';
+    }
 }

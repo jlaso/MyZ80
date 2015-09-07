@@ -21,6 +21,8 @@ public class TestAssembler {
             program.assemble();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         program.saveBin();
