@@ -323,6 +323,7 @@ public class Token extends Item {
             case "ret":
                 if (""!=operand2) break;
                 switch (operand1){
+                    case "": return new int[] {0xC9};
                     case "nz":  return new int[] {0xC0};
                     case "z" :  return new int[] {0xC8};
                     case "nc":  return new int[] {0xD0};
