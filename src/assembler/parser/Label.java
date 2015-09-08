@@ -12,6 +12,10 @@ public class Label extends Item {
         setSize(0);
     }
 
+    public String getLabel() {
+        return label;
+    }
+
     @Override
     public String toString() {
         return "Label{" +

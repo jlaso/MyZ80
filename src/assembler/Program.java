@@ -16,7 +16,7 @@ public class Program {
 
     protected Token[] tokens;
     protected Constant[] constants;
-    protected Label[] labels;
+    protected ArrayList<Label> labels = new ArrayList<Label>();
     protected String fileName;
     protected String baseFileName;
     protected ArrayList<Item> program = new ArrayList<Item>();
@@ -37,7 +37,9 @@ public class Program {
             if (';' == c) break;  // comment ends tokenize process
 
             if ((0 == current) && (':' == c)) { // label ends with :
-                return new Label(temp[0]);
+                Label label = new Label(temp[0]);
+                labels.add(label);
+                return label;
             }
 
             if ((' ' == c) || (',' == c)) {
@@ -117,7 +119,7 @@ public class Program {
                 Token token = (Token) item;
 
                 if (token.isPending()){
-                    token.setAddress(getValueOfLabel(token.getPendingCause()));
+                    token.resolvePending(token.getPendingCause(), getValueOfLabel(token.getPendingCause()));
                     token.setPending(false);
                 }
 
@@ -126,49 +128,66 @@ public class Program {
 
     }
 
-    protected int getValueOfLabel(String label)
-    {
-        return 0x00;
+    /**
+     *
+     * @param labelSrch
+     * @return
+     * @throws Exception
+     */
+    protected int getValueOfLabel(String labelSrch) throws Exception {
+        for (int l=0; l<labels.size(); l++){
+            Label label = labels.get(l);
+            if (label.getLabel().equals(labelSrch)){
+                return label.getAddress();
+            }
+        }
+
+        throw new Exception("label '"+labelSrch+"' was not found");
     }
 
     public void saveBin() {
 
-        String content = "";
+        String hex = "";
         for (int i=0; i<program.size(); i++){
             Item item = program.get(i);
 
-            System.out.println(item.toString());
-
             if (item instanceof Token) {
-                int[] opCodes = ((Token)item).getOpCode();
-                for (int o=0; o<opCodes.length; o++) {
-                    content += (char)opCodes[o];
-                }
+                hex += ((Token) item).getOpCodeAsHexString(' ');
             }
         }
+        System.out.println(hex);
 
         // save bin file
-        BufferedWriter writer = null;
+        DataOutputStream writer = null;
         try
         {
-            writer = new BufferedWriter( new FileWriter( baseFileName+".bin" ));
-            writer.write(content);
+            writer = new DataOutputStream(new FileOutputStream(baseFileName+".bin" ));
+            for (int i=0; i<program.size(); i++){
+                Item item = program.get(i);
 
+                System.out.println(item.toString());
+
+                if (item instanceof Token) {
+                    int[] opCodes = ((Token)item).getOpCode();
+                    for (int b=0; b<opCodes.length; b++) {
+                        writer.writeByte((byte)(opCodes[b] & 0xff));
+                    }
+                }
+            }
         }
         catch ( IOException e)
         {
         }
-        finally
+
+        try
         {
-            try
-            {
-                if ( writer != null)
-                    writer.close( );
-            }
-            catch ( IOException e)
-            {
-            }
+            if ( writer != null)
+                writer.close( );
         }
+        catch ( IOException e)
+        {
+        }
+
     }
 
 }
