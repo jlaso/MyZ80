@@ -13,6 +13,11 @@ public class Tools {
         return "" + hexChars.charAt(b >>> 4) + hexChars.charAt(b & 0x0F);
     }
 
+    public static String addressToHex(int a)
+    {
+        return byteToHex(a >>> 8) + byteToHex(a & 0xff);
+    }
+
     public static String bytesToHex(int[] bytes) {
         String result = "";
         for ( int j = 0; j < bytes.length; j++ ) {

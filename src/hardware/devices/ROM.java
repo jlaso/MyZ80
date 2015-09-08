@@ -15,13 +15,13 @@ public class ROM extends RAM {
     public ROM(int size, int baseAddress, String romFile) throws Exception {
         super(size, baseAddress);
         this.romFile = romFile;
-        File file = new File("myFile");
-        if (file.length() != size){
-            System.out.println("Error in size of ROM "+romFile+" file!");
-            throw new Exception("Error in size of ROM "+romFile+" file!");
-        }
+        File file = new File(romFile);
+//        if (file.length() != size){
+//            System.out.println("Error in size of ROM "+romFile+" file! "+file.length()+" vs "+size);
+//            throw new Exception("Error in size of ROM "+romFile+" file! "+file.length()+" vs "+size);
+//        }
         DataInputStream dis = new DataInputStream(new FileInputStream(romFile));
-        dis.readFully(memory);
+        dis.readFully(memory, 0, (int)Math.min(file.length(), size));
         dis.close();
     }
 

@@ -15,10 +15,15 @@ public class Memory implements MemorySystemInterface {
     protected static int MAXBANK = 0;
 
     public Memory() throws Exception {
+        this("./resources/rom0.bin");
+    }
 
-        ROM rom0 = new ROM(16384, 0, "./resources/rom0.bin");
+    public Memory(String romFile) throws Exception {
+
+        ROM rom0 = new ROM(16384, 0, romFile);
         RAM ram0 = new RAM(16384*3, 16384);
 
+        map = new RW[1][2];
         map[0][0] = rom0;
         map[0][1] = ram0;
     }
