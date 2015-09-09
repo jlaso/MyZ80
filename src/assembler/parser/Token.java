@@ -301,7 +301,7 @@ public class Token extends Item {
                                 } catch (Unrecognized8bitsRegister e) {
 
                                     // detect between ld a,x and ld a,(xx)
-                                    return new int[]{0x3E, 0xff & Integer.parseInt(operand2)};
+                                    return new int[]{0x3E, 0xff & getLiteralLo(operand2)};
                                 }
                         }
 
@@ -309,37 +309,37 @@ public class Token extends Item {
                         try {
                             return new int[] {0x40 | code8bitsRegister(operand2)};
                         }catch (Unrecognized8bitsRegister e){
-                            return new int[]{0x06, Integer.parseInt(operand2)};
+                            return new int[]{0x06, getLiteralLo(operand2)};
                         }
                     case "c":
                         try{
                             return new int[] {0x48 | code8bitsRegister(operand2)};
                         }catch (Unrecognized8bitsRegister e){
-                            return new int[]{0x0E, Integer.parseInt(operand2)};
+                            return new int[]{0x0E, getLiteralLo(operand2)};
                         }
                     case "d":
                         try{
                             return new int[] {0x50 | code8bitsRegister(operand2)};
                         }catch (Unrecognized8bitsRegister e){
-                            return new int[]{0x16, Integer.parseInt(operand2)};
+                            return new int[]{0x16, getLiteralLo(operand2)};
                         }
                     case "e":
                         try{
                             return new int[] {0x58 | code8bitsRegister(operand2)};
                         }catch (Unrecognized8bitsRegister e){
-                            return new int[]{0x1E, Integer.parseInt(operand2)};
+                            return new int[]{0x1E, getLiteralLo(operand2)};
                         }
                     case "h":
                         try{
                             return new int[] {0x60 | code8bitsRegister(operand2)};
                         }catch (Unrecognized8bitsRegister e){
-                            return new int[]{0x26, Integer.parseInt(operand2)};
+                            return new int[]{0x26, getLiteralLo(operand2)};
                         }
                     case "l":
                         try{
                             return new int[] {0x68 | code8bitsRegister(operand2)};
                         }catch (Unrecognized8bitsRegister e){
-                            return new int[]{0x2E, Integer.parseInt(operand2)};
+                            return new int[]{0x2E, getLiteralLo(operand2)};
                         }
                     case "bc": return new int[] {0x01, getLiteralLo(op2), getLiteralHi(op2)};
                     case "de": return new int[] {0x11, getLiteralLo(op2), getLiteralHi(op2)};
@@ -357,7 +357,7 @@ public class Token extends Item {
                             try {
                                 return new int[] {0x70 | code8bitsRegister(operand2)};
                             }catch (Unrecognized8bitsRegister e){
-                                return new int[]{0x36, Integer.parseInt(operand1)};
+                                return new int[]{0x36, getLiteralLo(operand1)};
                             }
                         }
                         break;
@@ -574,7 +574,12 @@ public class Token extends Item {
 
     protected int calcOffset(int from, int to)
     {
-        return to - from;
+        int offset = Math.abs(from - to);
+        if (from>to) {
+            return (256 - offset);
+        }else{
+            return offset;
+        }
     }
 
     public int getSize() {
@@ -603,7 +608,7 @@ public class Token extends Item {
                 solved = true;
             }
             if (opCode[o] == pendingMarkOffset) {
-                opCode[o] = 0xff & calcOffset(address+getSize(), toAddress);
+                opCode[o] = 0xff & calcOffset(address+opCode.length, toAddress);
                 solved = true;
             }
         }

@@ -25,7 +25,7 @@ public class RAM implements Memory {
 
         if (pos < size){
             byte b = memory[pos];
-            return b>0 ? (int) b : (int)(256+b);
+            return (b>=0) ? (int) b : (int)(256+b);
         }
 
         return UNKNOWN;

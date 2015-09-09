@@ -105,6 +105,21 @@ public class Z80 {
 
         return b;
     }
+    protected int decByte(int b)
+    {
+        b = (b-1) & 0x00ff;
+        if (b==255) F = F | 1;
+
+        return b;
+    }
+
+    protected int addByte(int a, int b)
+    {
+        int c = (a+b) & 0x00ff;
+        if (a+b > 255) F = F | 1;
+
+        return c;
+    }
 
     protected int DE() {
         return (D << 8) | E;
@@ -223,8 +238,8 @@ public class Z80 {
      */
     protected int readMem(int address)
     {
-        int read = memory.peek(address);
-        if (debug) System.out.print(Tools.byteToHex(read)+" ");
+        int read = memory.peek(address) ;
+        if (debug) System.out.print(Tools.byteToHex(read)+" ("+read+") ");
         return read;
     }
 
@@ -263,11 +278,47 @@ public class Z80 {
             case 4: H=incByte(H); return "H";
             case 5: L=incByte(L); return "L";
             //case 6:
-            //case 7:
-            case 8: A=incByte(A); return "A";
+            case 7: A=incByte(A); return "A";
         }
 
         return "?";
+    }
+
+    protected String set8bRegister(int r, int value)
+    {
+        switch (r){
+            case 0: B=value; return "B";
+            case 1: C=value; return "C";
+            case 2: D=value; return "D";
+            case 3: E=value; return "E";
+            case 4: H=value; return "H";
+            case 5: L=value; return "L";
+            //case 6:
+            case 7: A=value; return "A";
+        }
+
+        return "?";
+    }
+
+    protected String add8bRegisterToA(int r)
+    {
+        switch (r){
+            case 0: A=addByte(A,B); return "B";
+            case 1: A=addByte(A,C); return "C";
+            case 2: A=addByte(A,D); return "D";
+            case 3: A=addByte(A,E); return "E";
+            case 4: A=addByte(A,H); return "H";
+            case 5: A=addByte(A,L); return "L";
+            case 6: A=addByte(A,readMem(HL())); return "(HL)";
+            case 7: A=addByte(A,A); return "A";
+        }
+
+        return "?";
+    }
+
+    protected int c2byte(int value)
+    {
+        return 256 - (byte)value;
     }
 
     /**
@@ -283,7 +334,24 @@ public class Z80 {
         switch (opcode) {
 
             case 0x00: // NOP
-                t(1,4);
+                t(1, 4);
+                if (debug) currentInstruction = "NOP";
+                break;
+
+            case 0x10:  // djnz
+                byte offset = (byte)readMem(PC++);
+                System.out.println(offset);
+                int address = PC + c2byte(offset);
+                B=decByte(B);
+                if (B==0){
+                    t(2,8);
+                }else{
+                    t(3,13);
+                    PC = address;
+                }
+                if (debug) currentInstruction = "DJNZ "+Tools.addressToHex(address);
+                System.out.println(currentInstruction);
+                System.exit(0);
                 break;
 
             case 0x01:
@@ -305,14 +373,41 @@ public class Z80 {
             case 0x2C:
             case 0x34:
             case 0x3C:
-                t(1,4);
-                reg = inc8bRegister((opcode >>> 3) & 0x08);
+                t(1, 4);
+                reg = inc8bRegister((opcode >>> 3) & 0x07);
                 if (debug) currentInstruction = "INC "+reg;
+                break;
+
+            case 0x06:
+            case 0x0E:
+            case 0x16:
+            case 0x1E:
+            case 0x26:
+            case 0x2E:
+            case 0x36:
+            case 0x3E:
+                t(2,7);
+                int operand = readMem(PC++);
+                reg = set8bRegister((opcode >>> 3) & 0x07, operand);
+                if (debug) currentInstruction = "LD "+reg+","+Tools.byteToHex(operand)+"h";
                 break;
 
             case 0x76: // HALT
                 t(1,4);
                 halted = true;
+                break;
+
+            case 0x80:
+            case 0x81:
+            case 0x82:
+            case 0x83:
+            case 0x84:
+            case 0x85:
+            case 0x86:
+            case 0x87:
+                t(1,4);
+                reg = add8bRegisterToA(opcode & 0x07);
+                if (debug) currentInstruction = "ADD A,"+reg;
                 break;
 
             case 0xED:  // extended ED instructions
