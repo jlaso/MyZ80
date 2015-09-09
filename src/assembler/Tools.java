@@ -15,7 +15,7 @@ public class Tools {
 
     public static String addressToHex(int a)
     {
-        return byteToHex(a >>> 8) + byteToHex(a & 0xff);
+        return byteToHex(a >>> 8) + byteToHex(a);
     }
 
     public static String bytesToHex(int[] bytes) {

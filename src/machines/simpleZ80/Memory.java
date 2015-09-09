@@ -61,12 +61,14 @@ public class Memory implements MemorySystemInterface {
     }
 
     @Override
-    public byte peek(int address) {
+    public int peek(int address) {
         return map[bank][getBlock(address)].read(address);
     }
 
     @Override
-    public void poke(int address, byte value) {
+    public void poke(int address, int value) {
+
         map[bank][getBlock(address)].write(address, value);
+
     }
 }

@@ -26,7 +26,7 @@ public class ROM extends RAM {
     }
 
     @Override
-    public void write(int address, byte value) {
+    public void write(int address, int value) {
         // do nothing because ROM is read only
     }
 

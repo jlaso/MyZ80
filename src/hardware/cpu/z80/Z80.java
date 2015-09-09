@@ -89,22 +89,21 @@ public class Z80 {
         L = l;
     }
 
-    protected int BC() {
-        return (B << 8) | C;
-    }
+    protected final int BC() { return (B<<8) | C; }
     protected void BC(int BC){
         B = BC >>> 8;
-        C = BC & 0xFF;
+        C = BC & 0x00FF;
     }
     protected void BC(int b, int c){
         B = b;
         C = c;
     }
-    protected void incB()
+    protected int incByte(int b)
     {
-        if (B == 0xff) setCarryFlag();
+        b = (b+1) & 0x00ff;
+        if (b==0) F = F | 1;
 
-        B = (B+1) & 0xff;
+        return b;
     }
 
     protected int DE() {
@@ -257,15 +256,15 @@ public class Z80 {
     protected String inc8bRegister(int r)
     {
         switch (r){
-            case 0: incB(); return "B";
-            case 1: C++; return "C";
-            case 2: D++; return "D";
-            case 3: E++; return "E";
-            case 4: H++; return "H";
-            case 5: L++; return "L";
+            case 0: B=incByte(B); return "B";
+            case 1: C=incByte(C); return "C";
+            case 2: D=incByte(D); return "D";
+            case 3: E=incByte(E); return "E";
+            case 4: H=incByte(H); return "H";
+            case 5: L=incByte(L); return "L";
             //case 6:
             //case 7:
-            case 8: A++; return "A";
+            case 8: A=incByte(A); return "A";
         }
 
         return "?";

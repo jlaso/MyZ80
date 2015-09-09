@@ -5,9 +5,9 @@ package hardware.system;
  */
 public interface MemorySystemInterface {
 
-    public byte peek(int address);
+    public int peek(int address);
 
-    public void poke(int address, byte value);
+    public void poke(int address, int value);
 
     public void reset();
 

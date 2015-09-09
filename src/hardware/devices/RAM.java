@@ -19,23 +19,24 @@ public class RAM implements Memory {
     }
 
     @Override
-    public byte read(int address) {
+    public int read(int address) {
 
         int pos = address - baseAdress;
 
         if (pos < size){
-            return memory[pos];
+            byte b = memory[pos];
+            return b>0 ? (int) b : (int)(256+b);
         }
 
         return UNKNOWN;
     }
 
     @Override
-    public void write(int address, byte value) {
+    public void write(int address, int value) {
         int pos = address - baseAdress;
 
         if (pos < size){
-            memory[pos] = value;
+            memory[pos] = (byte) value;
         }
     }
 

@@ -5,8 +5,8 @@ package hardware.devices;
  */
 public interface RW extends Peripheral{
 
-    public byte read(int address);
+    public int read(int address);
 
-    public void write(int address, byte value);
+    public void write(int address, int value);
 
 }
