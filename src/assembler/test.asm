@@ -2,6 +2,7 @@
 
 .org 0
 
+jp label1
 nop
 
 label1:
@@ -33,6 +34,15 @@ add a,h
 add a,l
 add a,(hl)
 
+adc a,a
+adc a,b
+adc a,c
+adc a,d
+adc a,e
+adc a,h
+adc a,l
+adc a,(hl)
+
 ld c,10
 ld b,10
 
@@ -42,4 +52,14 @@ nop
 nop
 djnz wait
 
+jp z end
+jp nz end
+jp c end
+jp nc end
+jp po end
+jp pe end
+jp p end
+jp m end
+
+end:
 halt

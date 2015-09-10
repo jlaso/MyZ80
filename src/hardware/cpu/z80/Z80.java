@@ -141,43 +141,6 @@ public class Z80 {
     }
 
 
-    /**
-     * EXECUTE INSTRUCTIONS
-     */
-
-    protected void run_ED_opcode() {
-
-        int opcode = memory.peek(PC++);
-
-        switch (opcode) {
-
-            case 0x46: // set IM to 0
-                t(2,8);
-                IM = 0;
-                break;
-
-            case 0x56: // set IM to 1
-                t(2,8);
-                IM = 1;
-                break;
-
-            case 0x5E: // set IM to 2
-                t(2,8);
-                IM = 2;
-                break;
-
-            // HL <- HL + ss + C
-            case 0x4a:
-            case 0x5a:
-            case 0x6a:
-            case 0x7a:
-                t(4,15);
-                adcHL(ssValue((opcode & 0b00110000) >>> 4));
-                break;
-
-        }
-    }
-
     protected final int add16(int a, int b) {
         int result = a + b;
         F = (F & 0xc4) | (((a ^ result ^ b) >> 8) & 0x10) | ((result >> 16) & 1);
@@ -185,21 +148,65 @@ public class Z80 {
     }
 
     /**
-     * HL <-  HL + nn + C
+     * HL <- HL + ss
+     *
+     * @param ss
+     * @return
      */
-    private final void adcHL(int value) {
+    private String addSSToHL(int ss)
+    {
+        String reg = "";
+        int value = 0;
+
+        switch (ss) {
+            case 0x00: reg="BC"; value=BC(); break;
+            case 0x01: reg="DE"; value=DE(); break;
+            case 0x02: reg="HL"; value=HL(); break;
+            case 0x03: reg="SP"; value=SP; break;
+        }
+
+        HL(add16(HL(), value));
+
+        return reg;
+    }
+
+    /**
+     * HL <-  HL + ss + C
+     *
+     * @param ss
+     * @return
+     */
+    private String adcSSToHL(int ss) {
+        String reg = "";
+        int value = 0;
+
+        switch (ss) {
+            case 0x00: reg="BC"; value=BC(); break;
+            case 0x01: reg="DE"; value=DE(); break;
+            case 0x02: reg="HL"; value=HL(); break;
+            case 0x03: reg="SP"; value=SP; break;
+        }
+
         int tmp = HL();
         int result = tmp + value + carryFlag();
         F = (((tmp ^ result ^ value) >> 8) & 0x10) |
-            ((result >> 16) & 1) |   // carry flag
-            ((result >> 8) & 0x80) |
-            (((result & 0xffff) != 0) ? 0 : 0x40) |
-            (((value ^ tmp ^ 0x8000) & (value ^ result) & 0x8000) >> 13);
+                ((result >> 16) & 1) |   // carry flag
+                ((result >> 8) & 0x80) |
+                (((result & 0xffff) != 0) ? 0 : 0x40) |
+                (((value ^ tmp ^ 0x8000) & (value ^ result) & 0x8000) >> 13);
 
         H = (result >> 8) & 0xff;
         L = result & 0xff;
+
+        return reg;
     }
 
+    /**
+     * returns the register of 16 bits indicated by "ss"
+     *
+     * @param ss
+     * @return
+     */
     protected int ssValue(int ss) {
         switch (ss) {
             case 0x00: return BC();
@@ -210,23 +217,55 @@ public class Z80 {
         return 0;
     }
 
+
+    // wrappers for flags
+
+    protected boolean isSignPositive(){ return (F & 0b10000000) == 0;}
+    protected boolean isSignNegative(){ return (F & 0b10000000) > 0;}
+    protected boolean isZero(){ return (F & 0b01000000) > 0;}
+    protected boolean isNonZero(){ return (F & 0b01000000) == 0;}
+    protected boolean isCarry(){ return (F & 0b00000001) > 0;}
+    protected boolean isNoCarry(){ return (F & 0b00000001) == 0;}
+    protected boolean isParityOdd(){ return (F & 0b00000100) == 0;}
+    protected boolean isParityEven(){ return (F & 0b00000100) > 0;}
+    protected boolean isSubstract(){ return (F & 0b00000010) > 0;}
+    protected boolean isHalfCarry(){ return (F & 0b00010000) > 0;}
+
+    /**
+     * clock and machine cycles control
+     *
+     * @param m
+     * @param t
+     */
     protected void t(int m, int t){
         mcycles+=m;
         tstates+=t;
     }
 
+    /**
+     * prints the content of the registers
+     */
     protected void dumpRegisters()
     {
         System.out.println(
-                "A:"+Tools.byteToHex(A)+ "|" +
-                "F:"+Tools.byteToHex(F)+ "|" +
+                "~~~~~|"+
+                "A:"+Tools.byteToHex(A)+ "("+A+")|" +
+                "F:"+Tools.byteToHex(F)+
+                        "[S:"+(isSignNegative()?"X":"-")+"]"+
+                        "[Z:"+(isZero()?"X":"-")+"]"+
+                        "[H"+(isHalfCarry()?"X":"-")+"]"+
+                        "[P/V:"+(isParityEven()?"X":"-")+"]"+
+                        "[N:"+(isSubstract()?"X":"-")+"]"+
+                        "[C:"+(isCarry()?"X":"-")+"]"+
+                     "|" +
                 "I:"+Tools.byteToHex(I)+ "|" +
                 "R:"+Tools.byteToHex(R)+ "|" +
-                "BC:"+Tools.addressToHex(BC())+ "|" +
-                "DE:"+Tools.addressToHex(DE())+ "|" +
-                "HL:"+Tools.addressToHex(HL())+ "|" +
+                "BC:"+Tools.addressToHex(BC())+"("+BC()+")|" +
+                "DE:"+Tools.addressToHex(DE())+"("+DE()+")|" +
+                "HL:"+Tools.addressToHex(HL())+"("+HL()+")|" +
                 "SP:"+Tools.addressToHex(SP)+ "|" +
-                "PC:"+Tools.addressToHex(PC)+ "|"
+                "PC:"+Tools.addressToHex(PC)+
+                "|~~~~~"
         );
     }
 
@@ -243,9 +282,32 @@ public class Z80 {
         return read;
     }
 
-    protected String set16bRegister(int r, int hi, int lo)
+    /**
+     * Read a word from memory
+     *
+     * @param address
+     * @return
+     */
+    protected int readWord(int address)
     {
-        switch (r){
+        int lo = readMem(address);
+        int hi = readMem(address+1);
+        int value = (hi << 8) | lo;
+        if (debug) System.out.print(Tools.addressToHex(value)+" ("+value+") ");
+        return value;
+    }
+
+    /**
+     * set a register of 16 bits identified by "ss" and returns its mnemonic
+     *
+     * @param ss
+     * @param hi
+     * @param lo
+     * @return
+     */
+    protected String set16bRegister(int ss, int hi, int lo)
+    {
+        switch (ss){
 
             case 0x00: // BC
                 BC(hi,lo);
@@ -268,6 +330,12 @@ public class Z80 {
         return "?";
     }
 
+    /**
+     * increments the register of 8 bits identified by "r" and returns its mnemonic
+     *
+     * @param r
+     * @return
+     */
     protected String inc8bRegister(int r)
     {
         switch (r){
@@ -284,6 +352,13 @@ public class Z80 {
         return "?";
     }
 
+    /**
+     * sets the register of 8 bits identified by "r" and returns its mnemonic
+     *
+     * @param r
+     * @param value
+     * @return
+     */
     protected String set8bRegister(int r, int value)
     {
         switch (r){
@@ -300,6 +375,12 @@ public class Z80 {
         return "?";
     }
 
+    /**
+     * add the content of the register of 8 bits identified by "r" to Accumulator and returns its mnemonic
+     *
+     * @param r
+     * @return
+     */
     protected String add8bRegisterToA(int r)
     {
         switch (r){
@@ -316,18 +397,44 @@ public class Z80 {
         return "?";
     }
 
-    protected int c2byte(int value)
-    {
-        return 256 - (byte)value;
-    }
+    // break flow routines
 
     /**
-     * executes one instruction
+     *
+     * @param cond
+     * @param address
+     * @return
+     */
+    protected String jump(int cond, int address)
+    {
+        String reg = "";
+        switch (cond){
+            case 0b000: reg="NZ"; if(isNonZero()) PC=address; break;
+            case 0b001: reg="Z"; if(isZero()) PC=address; break;
+            case 0b010: reg="NC"; if(isNoCarry()) PC=address; break;
+            case 0b011: reg="C"; if(isCarry()) PC=address; break;
+            case 0b100: reg="PO"; if(isParityOdd()) PC=address; break;
+            case 0b101: reg="PE"; if(isParityEven()) PC=address; break;
+            case 0b110: reg="P"; if(isSignPositive()) PC=address; break;
+            case 0b111: reg="M"; if(isSignNegative()) PC=address; break;
+        }
+
+        return reg;
+    }
+
+//    protected int c2byte(int value)
+//    {
+//        return 256 - (byte)value;
+//    }
+
+    /**
+     * executes the instruction pointed by PC
      */
     protected void step() {
 
-        String reg;
-        if (debug) System.out.print(Tools.addressToHex(PC)+": ");
+        String reg;   // temp variable
+        int address;  // temp variable
+        if (debug) System.out.print(Tools.addressToHex(PC)+": ");    // prints the current address (PC)
 
         int opcode = readMem(PC++);
 
@@ -338,10 +445,9 @@ public class Z80 {
                 if (debug) currentInstruction = "NOP";
                 break;
 
-            case 0x10:  // djnz
+            case 0x10:  // DJNZ
                 byte offset = (byte)readMem(PC++);
-                System.out.println(offset);
-                int address = PC + c2byte(offset);
+                address = PC + offset;
                 B=decByte(B);
                 if (B==0){
                     t(2,8);
@@ -349,12 +455,10 @@ public class Z80 {
                     t(3,13);
                     PC = address;
                 }
-                if (debug) currentInstruction = "DJNZ "+Tools.addressToHex(address);
-                System.out.println(currentInstruction);
-                System.exit(0);
+                if (debug) currentInstruction = "DJNZ "+Tools.addressToHex(address)+" ("+offset+")";
                 break;
 
-            case 0x01:
+            case 0x01:  // LD ss,nn
             case 0x11:
             case 0x21:
             case 0x31:
@@ -365,7 +469,7 @@ public class Z80 {
                 if (debug) currentInstruction = "LD "+reg+","+Tools.byteToHex(hi)+Tools.byteToHex(lo)+"h";
                 break;
 
-            case 0x04:
+            case 0x04:  // INC
             case 0x0C:
             case 0x14:
             case 0x1C:
@@ -378,7 +482,7 @@ public class Z80 {
                 if (debug) currentInstruction = "INC "+reg;
                 break;
 
-            case 0x06:
+            case 0x06:  // LD r,r
             case 0x0E:
             case 0x16:
             case 0x1E:
@@ -395,9 +499,10 @@ public class Z80 {
             case 0x76: // HALT
                 t(1,4);
                 halted = true;
+                if (debug) currentInstruction = "HALT";
                 break;
 
-            case 0x80:
+            case 0x80:  // ADD A,r
             case 0x81:
             case 0x82:
             case 0x83:
@@ -417,28 +522,94 @@ public class Z80 {
             case 0xF3:  // DI
                 t(1,4);
                 IFF0 = IFF1 = false;
+                if (debug) currentInstruction = "DI";
                 break;
 
             case 0xFB:  // EI
                 t(1,4);
                 IFF0 = IFF1 = true;
+                if (debug) currentInstruction = "EI";
                 break;
 
             // arithmetic operations
 
-            // HL <- HL + ss
-            case 0x09:
+            case 0x09:  // HL <- HL + ss
             case 0x19:
             case 0x29:
             case 0x39:
                 t(3,11);
-                HL(add16(HL(),ssValue((opcode & 0b00110000) >>> 4)));
+                reg = addSSToHL((opcode & 0b00110000) >>> 4);
+                if (debug) currentInstruction = "ADD HL,"+reg;
                 break;
 
 
+            // break flow
 
+            case 0xC3:  // JP address
+                address = readWord(PC); PC+=2;
+                PC = address;
+                if (debug) currentInstruction = "JP "+Tools.addressToHex(address);
+                break;
+
+            case 0xC2:  // JP cond,address
+            case 0xCA:
+            case 0xD2:
+            case 0xDA:
+            case 0xE2:
+            case 0xEA:
+            case 0xF2:
+            case 0xFA:
+                address = readWord(PC); PC+=2;
+                reg = jump((opcode & 0b00111000) >>> 3, address);
+                if (debug) currentInstruction = "JP "+reg+" "+Tools.addressToHex(address);
+                break;
         }
 
     }
+
+
+
+    /**
+     * EXECUTE INSTRUCTIONS WITH ED PREFIX
+     */
+
+    protected void run_ED_opcode() {
+
+        String reg; // temp variable
+        int opcode = readMem(PC++);
+
+        switch (opcode) {
+
+            case 0x46: // set IM to 0
+                t(2,8);
+                IM = 0;
+                if (debug) currentInstruction = "IM 0";
+                break;
+
+            case 0x56: // set IM to 1
+                t(2,8);
+                IM = 1;
+                if (debug) currentInstruction = "IM 1";
+                break;
+
+            case 0x5E: // set IM to 2
+                t(2,8);
+                IM = 2;
+                if (debug) currentInstruction = "IM 2";
+                break;
+
+            // HL <- HL + ss + C
+            case 0x4a:
+            case 0x5a:
+            case 0x6a:
+            case 0x7a:
+                t(4,15);
+                reg = adcSSToHL((opcode & 0b00110000) >>> 4);
+                if (debug) currentInstruction = "ADC HL,"+reg;
+                break;
+
+        }
+    }
+
 
 }
