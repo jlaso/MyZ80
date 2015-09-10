@@ -16,7 +16,6 @@ inc e
 inc h
 inc l
 
-
 ld a,10h
 ld b,1eh
 ld c,feh
@@ -43,9 +42,14 @@ adc a,h
 adc a,l
 adc a,(hl)
 
-ld c,10
-ld b,10
-
+sub a
+sub b
+sub c
+sub d
+sub e
+sub h
+sub l
+sub (hl)
 
 wait:
 nop

@@ -113,6 +113,14 @@ public class Z80 {
         return b;
     }
 
+    protected int subByte(int a, int b)
+    {
+        int c = (a-b) & 0x00ff;
+        F = F | 0b00000010;
+
+        return c;
+    }
+
     protected int addByte(int a, int b)
     {
         int c = (a+b) & 0x00ff;
@@ -389,6 +397,28 @@ public class Z80 {
      * @param r
      * @return
      */
+    protected String sub8bRegisterToA(int r)
+    {
+        switch (r){
+            case 0: A=subByte(A,B); return "B";
+            case 1: A=subByte(A,C); return "C";
+            case 2: A=subByte(A,D); return "D";
+            case 3: A=subByte(A,E); return "E";
+            case 4: A=subByte(A,H); return "H";
+            case 5: A=subByte(A,L); return "L";
+            case 6: A=subByte(A,readMem(HL())); return "(HL)";
+            case 7: A=subByte(A,A); return "A";
+        }
+
+        return "?";
+    }
+
+    /**
+     * add the content of the register of 8 bits identified by "r" to Accumulator and returns its mnemonic
+     *
+     * @param r
+     * @return
+     */
     protected String add8bRegisterToA(int r)
     {
         switch (r){
@@ -556,6 +586,19 @@ public class Z80 {
                 t(1,4);
                 reg = adc8bRegisterToA(opcode & 0x07);
                 if (debug) currentInstruction = "ADC A,"+reg;
+                break;
+
+            case 0x90:  // SUB r   A <- A - r
+            case 0x91:
+            case 0x92:
+            case 0x93:
+            case 0x94:
+            case 0x95:
+            case 0x96:
+            case 0x97:
+                t(1,4);
+                reg = sub8bRegisterToA(opcode & 0x07);
+                if (debug) currentInstruction = "SUB "+reg;
                 break;
 
             case 0xED:  // extended ED instructions
