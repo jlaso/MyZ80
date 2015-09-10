@@ -121,6 +121,14 @@ public class Z80 {
         return c;
     }
 
+    protected int adcByte(int a, int b)
+    {
+        int c = (a+b+(F|1)) & 0x00ff;
+        if (a+b+(F|1) > 255) F = F | 1;
+
+        return c;
+    }
+
     protected int DE() {
         return (D << 8) | E;
     }
@@ -397,6 +405,28 @@ public class Z80 {
         return "?";
     }
 
+    /**
+     * add the carry and the content of the register of 8 bits identified by "r" to Accumulator and returns its mnemonic
+     *
+     * @param r
+     * @return
+     */
+    protected String adc8bRegisterToA(int r)
+    {
+        switch (r){
+            case 0: A=adcByte(A,B); return "B";
+            case 1: A=adcByte(A,C); return "C";
+            case 2: A=adcByte(A,D); return "D";
+            case 3: A=adcByte(A,E); return "E";
+            case 4: A=adcByte(A,H); return "H";
+            case 5: A=adcByte(A,L); return "L";
+            case 6: A=adcByte(A,readMem(HL())); return "(HL)";
+            case 7: A=adcByte(A,A); return "A";
+        }
+
+        return "?";
+    }
+
     // break flow routines
 
     /**
@@ -513,6 +543,19 @@ public class Z80 {
                 t(1,4);
                 reg = add8bRegisterToA(opcode & 0x07);
                 if (debug) currentInstruction = "ADD A,"+reg;
+                break;
+
+            case 0x88:  // ADC A,r
+            case 0x89:
+            case 0x8A:
+            case 0x8B:
+            case 0x8C:
+            case 0x8D:
+            case 0x8E:
+            case 0x8F:
+                t(1,4);
+                reg = adc8bRegisterToA(opcode & 0x07);
+                if (debug) currentInstruction = "ADC A,"+reg;
                 break;
 
             case 0xED:  // extended ED instructions
