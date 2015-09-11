@@ -1,7 +1,10 @@
 package machines.simpleZ80;
 
 import assembler.Program;
+import assembler.Tools;
+import fileFormat.Z80FileFormat;
 import hardware.cpu.z80.Z80;
+import samples.Samples;
 
 import java.io.FileNotFoundException;
 import java.net.URL;
@@ -16,15 +19,19 @@ public class TestMachine {
      */
     public static void main(String[] args) throws Exception {
 
-        URL path = Program.class.getResource("test.bin");
-        System.out.println("System memory is assigned to "+path.getFile());
+        String romFile = Samples.getFile("test2.bin");
+        System.out.println("System memory is assigned to " + romFile);
 
-        Memory systemMemory = new Memory(path.getFile());
+        Z80FileFormat z80file = new Z80FileFormat(Memory.ROM_SIZE);
+        z80file.readFromFile(romFile);
+
+        Memory systemMemory = new Memory(z80file);
         Z80 cpu = new Z80(Z80.DEBUG);
         cpu.attachSystemMemory(systemMemory);
 
         cpu.reset();
-        cpu.run(0);
+        Tools.println("red", "PC="+z80file.getPC());
+        cpu.run(z80file.getPC());
 
     }
 }

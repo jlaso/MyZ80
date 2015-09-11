@@ -1,5 +1,6 @@
 package machines.simpleZ80;
 
+import fileFormat.BinaryFileInterface;
 import hardware.devices.RAM;
 import hardware.devices.ROM;
 import hardware.devices.RW;
@@ -13,15 +14,12 @@ public class Memory implements MemorySystemInterface {
     protected RW[][] map;
     protected int bank = 0;
     protected static int MAXBANK = 0;
+    public final static int ROM_SIZE = 16384;
 
-    public Memory() throws Exception {
-        this("./resources/rom0.bin");
-    }
+    public Memory(BinaryFileInterface romFile) throws Exception {
 
-    public Memory(String romFile) throws Exception {
-
-        ROM rom0 = new ROM(16384, 0, romFile);
-        RAM ram0 = new RAM(16384*3, 16384);
+        ROM rom0 = new ROM(ROM_SIZE, 0, romFile);
+        RAM ram0 = new RAM(16384*3, ROM_SIZE);
 
         map = new RW[1][2];
         map[0][0] = rom0;

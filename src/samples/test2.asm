@@ -1,6 +1,6 @@
 #include    "ti83plus.inc"
 #include    "dcs.inc"
-#define     progStart   $9D95
+#define     progStart   $1095
 .org        progStart-2
 .db         $BB,$6D
 Init:

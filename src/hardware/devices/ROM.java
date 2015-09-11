@@ -1,5 +1,8 @@
 package hardware.devices;
 
+import fileFormat.BinaryFileInterface;
+import fileFormat.Z80FileFormat;
+
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,19 +13,12 @@ import java.io.InputStream;
  */
 public class ROM extends RAM {
 
-    protected String romFile;
+    protected BinaryFileInterface romFile;
 
-    public ROM(int size, int baseAddress, String romFile) throws Exception {
+    public ROM(int size, int baseAddress, BinaryFileInterface romFile) throws Exception {
         super(size, baseAddress);
         this.romFile = romFile;
-        File file = new File(romFile);
-//        if (file.length() != size){
-//            System.out.println("Error in size of ROM "+romFile+" file! "+file.length()+" vs "+size);
-//            throw new Exception("Error in size of ROM "+romFile+" file! "+file.length()+" vs "+size);
-//        }
-        DataInputStream dis = new DataInputStream(new FileInputStream(romFile));
-        dis.readFully(memory, 0, (int)Math.min(file.length(), size));
-        dis.close();
+        memory = romFile.getBytes();
     }
 
     @Override

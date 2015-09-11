@@ -22,13 +22,11 @@ public class Program {
     protected ArrayList<Label> labels = new ArrayList<Label>();
     protected ArrayList<Constant> constants = new ArrayList<Constant>();
     protected String fileName;
-    protected int maxFileSize;
     protected String baseFileName;
     protected int org = 0;
 
-    public Program(String file, int maxFileSize) {
+    public Program(String file) {
         fileName = file;
-        this.maxFileSize = maxFileSize;
         baseFileName = file.substring(0, file.lastIndexOf('.'));
     }
 
@@ -284,7 +282,12 @@ public class Program {
         throw new Exception("label '"+labelSrch+"' was not found");
     }
 
-    public void saveBin() {
+    /**
+     *
+     * @param outputFile
+     * @param maxFileSize
+     */
+    public void saveBin(String outputFile, int maxFileSize) {
 
         /*
         String hex = "";
@@ -313,10 +316,14 @@ public class Program {
 
         // save bin file
         try {
-            z80file.saveToFile(baseFileName+".bin");
+
+            z80file.saveToFile(outputFile);
+
         }catch ( IOException e) {
 
         }
+
+        Tools.println("red", "\t~~ generated "+outputFile+" with "+maxFileSize+" bytes. ~~");
 
     }
 
