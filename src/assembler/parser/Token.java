@@ -13,14 +13,7 @@ import java.util.regex.Pattern;
  */
 public class Token extends Item {
 
-    protected int[] opCode;
     protected String instruction, op1, op2;
-    protected boolean pending;
-    protected String pendingCause;
-    final protected static int pendingMarkAbsoluteHi = 0x0ff1;
-    final protected static int pendingMarkAbsoluteLo = 0x0ff2;
-    final protected static int pendingMarkDisplacement = 0x0ff8;
-    final protected static int pendingMarkOffset = 0x0ff0;
 
     public Token(String instruction, String op1, String op2) throws Exception {
         this.instruction = instruction;
@@ -39,30 +32,26 @@ public class Token extends Item {
         switch (operation ){
 
             case "nop":     return new int[] {0x00};
-            case "halt":     return new int[] {0x76};
-            case "di":     return new int[] {0xF3};
-            case "ei":     return new int[] {0xFB};
+            case "halt":    return new int[] {0x76};
 
-            case "djnz":    return new int[] {0x10, getOffset(operand1)};
+            case "di":      return new int[] {0xF3};
+            case "ei":      return new int[] {0xFB};
+
+            case "djnz":    return new int[] {0x10, getOffset(operand1, 1)};
 
             case "rrca":    return new int[] {0x0F};
+            case "rra":     return new int[] {0x1F};
+            case "rlca":    return new int[] {0x07};
+            case "rla":     return new int[] {0x17};
 
-            case "rra":    return new int[] {0x1F};
+            case "daa":     return new int[] {0x27};
 
-            case "rlca": return new int[] {0x07};
+            case "cpl":     return new int[] {0x2f};
+            case "ccf":     return new int[] {0x3f};
+            case "scf":     return new int[] {0x37};
 
-            case "rla": return new int[] {0x17};
-
-            case "daa": return new int[] {0x27};
-
-            case "cpl": return new int[] {0x2f};
-
-            case "ccf": return new int[] {0x3f};
-
-            case "scf": return new int[] {0x37};
-
-            case "neg": return new int[] {0xED, 0x44};
-            case "retn": return new int[] {0xED, 0x45};
+            case "neg":     return new int[] {0xED, 0x44};
+            case "retn":    return new int[] {0xED, 0x45};
 
             case "rst":
                 switch (operand1){
@@ -171,7 +160,7 @@ public class Token extends Item {
                         Matcher m =p.matcher(operand1);
                         if (m.find()){
                             int first = (m.group("r").equals("ix")) ? 0xdd : 0xfd;
-                            return new int[] {first, 0x35, getDisplacement(m.group("m"))};
+                            return new int[] {first, 0x35, getDisplacement(m.group("m"), 2)};
                         }
                 }
                 break;
@@ -202,7 +191,7 @@ public class Token extends Item {
                         Matcher m =p.matcher(operand1);
                         if (m.find()){
                             int first = (m.group("r").equals("ix")) ? 0xdd : 0xfd;
-                            return new int[] {first, 0x34, getDisplacement(m.group("m"))};
+                            return new int[] {first, 0x34, getDisplacement(m.group("m"), 2)};
                         }
                 }
                 break;
@@ -301,7 +290,7 @@ public class Token extends Item {
                                 } catch (Unrecognized8bitsRegister e) {
 
                                     // detect between ld a,x and ld a,(xx)
-                                    return new int[]{0x3E, 0xff & getLiteralLo(operand2)};
+                                    return new int[]{0x3E, 0xff & getLiteralLo(operand2, 2)};
                                 }
                         }
 
@@ -309,47 +298,47 @@ public class Token extends Item {
                         try {
                             return new int[] {0x40 | code8bitsRegister(operand2)};
                         }catch (Unrecognized8bitsRegister e){
-                            return new int[]{0x06, getLiteralLo(operand2)};
+                            return new int[]{0x06, getLiteralLo(operand2, 1)};
                         }
                     case "c":
                         try{
                             return new int[] {0x48 | code8bitsRegister(operand2)};
                         }catch (Unrecognized8bitsRegister e){
-                            return new int[]{0x0E, getLiteralLo(operand2)};
+                            return new int[]{0x0E, getLiteralLo(operand2, 1)};
                         }
                     case "d":
                         try{
                             return new int[] {0x50 | code8bitsRegister(operand2)};
                         }catch (Unrecognized8bitsRegister e){
-                            return new int[]{0x16, getLiteralLo(operand2)};
+                            return new int[]{0x16, getLiteralLo(operand2, 1)};
                         }
                     case "e":
                         try{
                             return new int[] {0x58 | code8bitsRegister(operand2)};
                         }catch (Unrecognized8bitsRegister e){
-                            return new int[]{0x1E, getLiteralLo(operand2)};
+                            return new int[]{0x1E, getLiteralLo(operand2, 1)};
                         }
                     case "h":
                         try{
                             return new int[] {0x60 | code8bitsRegister(operand2)};
                         }catch (Unrecognized8bitsRegister e){
-                            return new int[]{0x26, getLiteralLo(operand2)};
+                            return new int[]{0x26, getLiteralLo(operand2, 1)};
                         }
                     case "l":
                         try{
                             return new int[] {0x68 | code8bitsRegister(operand2)};
                         }catch (Unrecognized8bitsRegister e){
-                            return new int[]{0x2E, getLiteralLo(operand2)};
+                            return new int[]{0x2E, getLiteralLo(operand2, 1)};
                         }
-                    case "bc": return new int[] {0x01, getLiteralLo(op2), getLiteralHi(op2)};
-                    case "de": return new int[] {0x11, getLiteralLo(op2), getLiteralHi(op2)};
-                    case "hl": return new int[] {0x21, getLiteralLo(op2), getLiteralHi(op2)};
+                    case "bc": return new int[] {0x01, getLiteralLo(op2, 1), getLiteralHi(op2, 2)};
+                    case "de": return new int[] {0x11, getLiteralLo(op2, 1), getLiteralHi(op2, 2)};
+                    case "hl": return new int[] {0x21, getLiteralLo(op2, 1), getLiteralHi(op2, 2)};
                     case "sp":
                         switch (operand2) {
                             case "hl":
                                 return new int[]{0xF9};
                             default:
-                                return new int[]{0x31, getLiteralLo(op2), getLiteralHi(op2)};
+                                return new int[]{0x31, getLiteralLo(op2, 1), getLiteralHi(op2, 2)};
                         }
 
                     case "(hl)":
@@ -357,7 +346,7 @@ public class Token extends Item {
                             try {
                                 return new int[] {0x70 | code8bitsRegister(operand2)};
                             }catch (Unrecognized8bitsRegister e){
-                                return new int[]{0x36, getLiteralLo(operand1)};
+                                return new int[]{0x36, getLiteralLo(operand1, 1)};
                             }
                         }
                         break;
@@ -374,8 +363,8 @@ public class Token extends Item {
                     default:
                         Pattern p = Pattern.compile("\\(\\s*(?<n>\\w+)\\s*\\)");
                         Matcher m =p.matcher(operand1);
-                        int literalHi = getLiteralHi(m.group("n"));
-                        int literalLo = getLiteralLo(m.group("n"));
+                        int literalHi = getLiteralHi(m.group("n"), 2);
+                        int literalLo = getLiteralLo(m.group("n"), 1);
                         switch (operand2) {
                             case "hl":
                                 return new int[] {0x22, literalLo, literalHi};
@@ -388,13 +377,13 @@ public class Token extends Item {
 
             case "jr":
                 switch (operand1){
-                    case "nz":  return new int[] {0x20, getOffset(operand2)};
-                    case "z":   return new int[] {0x28, getOffset(operand2)};
-                    case "nc":  return new int[] {0x30, getOffset(operand2)};
-                    case "c":   return new int[] {0x38, getOffset(operand2)};
+                    case "nz":  return new int[] {0x20, getOffset(operand2, 1)};
+                    case "z":   return new int[] {0x28, getOffset(operand2, 1)};
+                    case "nc":  return new int[] {0x30, getOffset(operand2, 1)};
+                    case "c":   return new int[] {0x38, getOffset(operand2, 1)};
                     default:
                         if (operand2.isEmpty()){
-                            return new int[] {0x18, getOffset(operand1)};
+                            return new int[] {0x18, getOffset(operand1, 1)};
                         }
                 }
                 break;
@@ -460,14 +449,13 @@ public class Token extends Item {
     }
 
     /**
-     * @TODO: take in account the labels ...
-     * @param opCode
-     * @param operand
-     * @return
+     * @param opCode int
+     * @param operand String
+     * @return int[]
      */
     private int[] getJumpCode(int opCode, String operand) {
-        int addressHi = getLiteralHi(operand);
-        int addressLo = getLiteralLo(operand);
+        int addressHi = getLiteralHi(operand, 2);
+        int addressLo = getLiteralLo(operand, 1);
 
         return new int[] {opCode, addressLo, addressHi};
     }
@@ -494,84 +482,76 @@ public class Token extends Item {
 
     /**
      * get a literal address (16-bit) (can be a label also)
-     * @param literal
-     * @return
+     * @param literal String
+     * @param pos int
+     * @return int
      */
-    protected int getLiteralHi(String literal)
+    protected int getLiteralHi(String literal, int pos)
     {
         try {
-            return figureOut(literal) >>> 8;
+            return Tools.figureOut(literal) >>> 8;
         }catch (Exception e){
-            pending = true;
-            pendingCause = literal;
+            addPending(literal, pos, Pending.BYTE_HI);
+            return 0;
         }
-        return pendingMarkAbsoluteHi;
     }
     /**
      * get a literal address (16-bit) (can be a label also)
-     * @param literal
-     * @return
+     * @param literal String
+     * @param pos int
+     * @return int
      */
-    protected int getLiteralLo(String literal)
+    protected int getLiteralLo(String literal, int pos)
     {
         try {
-            return figureOut(literal) & 0xff;
+            return Tools.figureOut(literal) & 0xff;
         }catch (Exception e){
-            pending = true;
-            pendingCause = literal;
+            addPending(literal, pos, Pending.BYTE_LO);
+            return 0;
         }
-        return pendingMarkAbsoluteLo;
-    }
-
-    protected int figureOut(String literal)
-    {
-        int r;
-        String lo = literal.toLowerCase();
-        if (lo.charAt(literal.length() - 1) == 'h') {
-            r = Integer.parseInt(lo.substring(0,lo.length()-1), 16);
-            return r & 0xffff;
-        }
-        if (lo.charAt(literal.length() - 1) == 'o') {
-            r = Integer.parseInt(lo.substring(0,lo.length()-1), 8);
-            return r & 0xffff;
-        }
-        r = Integer.parseInt(lo);
-        return r & 0xffff;
     }
 
     /**
-     * get a literal dispacement (8-bits) (can be a label also)
-     * @TODO: interpret hexadecimal, octal and  binary literals, and CONSTANTS
-     * @param literal
-     * @return
+     * get a literal displacement (8-bits) (can be a label too)
+     *
+     * @param literal String
+     * @param pos int
+     * @return int
      */
-    protected int getDisplacement(String literal)
+    protected int getDisplacement(String literal, int pos)
     {
         try {
-            return Integer.parseInt(literal);
+            return Tools.figureOut(literal);
         }catch (Exception e){
-            pending = true;
-            pendingCause = literal;
+            addPending(literal, pos, Pending.OFFSET_8_BITS_C2);
+            return 0;
         }
-        return pendingMarkDisplacement;
     }
 
     /**
      * return the address computed for a short jump
-     * @param offset
-     * @return
+     *
+     * @param offset String
+     * @param pos int
+     * @return int
      */
-    protected int getOffset(String offset)
+    protected int getOffset(String offset, int pos)
     {
         try{
             return Integer.parseInt(offset);
         }catch (Exception e) {
-            pending = true;
-            pendingCause = offset;
+            addPending(offset, pos, Pending.OFFSET_8_BITS_C2);
+            return 0;
         }
-        return pendingMarkOffset;
     }
 
+    /**
+     * calculate the offset in c2 between two addresses
+     *
+     * @param from int
+     * @param to int
+     * @return int
+     */
     protected int calcOffset(int from, int to)
     {
         int offset = Math.abs(from - to);
@@ -582,68 +562,50 @@ public class Token extends Item {
         }
     }
 
-    public int getSize() {
-        return opCode.length;
-    }
+//    /**
+//     *
+//     * @param pendingCause
+//     * @param toAddress
+//     * @throws Exception
+//     */
+//    public void resolvePending(String pendingCause, int toAddress) throws Exception {
+//        boolean solved = false;
+//        for(int o=0; o<opCode.length; o++){
+//            if (opCode[o] == pendingMarkAbsoluteLo){
+//                opCode[o] = toAddress & 0xff;
+//                solved = true;
+//            }
+//            if (opCode[o] == pendingMarkAbsoluteHi){
+//                opCode[o] = toAddress >>> 8;
+//                solved = true;
+//            }
+//            if (opCode[o] == pendingMarkOffset) {
+//                opCode[o] = 0xff & calcOffset(address+opCode.length, toAddress);
+//                solved = true;
+//            }
+//        }
+//        if (!solved) {
+//            throw new Exception("trying to resolve when is no pending, pendingCause='" + pendingCause + "'");
+//        }
+//    }
 
-    public int[] getOpCode() {
-        return opCode;
-    }
+//    public boolean isPending() {
+//        return pending;
+//    }
 
-    /**
-     *
-     * @param pendingCause
-     * @param toAddress
-     * @throws Exception
-     */
-    public void resolvePending(String pendingCause, int toAddress) throws Exception {
-        boolean solved = false;
-        for(int o=0; o<opCode.length; o++){
-            if (opCode[o] == pendingMarkAbsoluteLo){
-                opCode[o] = toAddress & 0xff;
-                solved = true;
-            }
-            if (opCode[o] == pendingMarkAbsoluteHi){
-                opCode[o] = toAddress >>> 8;
-                solved = true;
-            }
-            if (opCode[o] == pendingMarkOffset) {
-                opCode[o] = 0xff & calcOffset(address+opCode.length, toAddress);
-                solved = true;
-            }
-        }
-        if (!solved) {
-            throw new Exception("trying to resolve when is no pending, pendingCause='" + pendingCause + "'");
-        }
-    }
-
-    public String getOpCodeAsHexString(char separator)
-    {
-        String result = "";
-        for (int o=0; o<getSize(); o++) {
-            result += Tools.byteToHex(opCode[o]) + separator;
-        }
-
-        return result;
-    }
-
-    public boolean isPending() {
-        return pending;
-    }
-
-    /**
-     * @param pending
-     */
-    public void setPending(boolean pending) {
-        this.pending = pending;
-        if (!pending) {
-            pendingCause = "";
-        }
-    }
-
-    public String getPendingCause() {
-        return pendingCause;
-    }
+//    /**
+//     * @param pending
+//     */
+//    public void setPending(boolean pending) {
+//        this.pending = pending;
+//        if (!pending) {
+//            pendingCause = "";
+//        }
+//    }
+//
+//    public String getPendingCause() {
+//        return pendingCause;
+//    }
 
     @Override
     public String toString() {
@@ -651,8 +613,8 @@ public class Token extends Item {
         return "Token{ " +
                 Tools.bytesToHex(new int[]{address>>>8, address&0xff}) + ": " +
                 instruction + " " + op1 + (op2.isEmpty() ? "" : ","+ op2)  +
-                (pending ? "    pending: "+pendingCause : "") + " " +
-                Tools.bytesToHex(getOpCode()) +
+                (hasPending() ? "    pending " : "") +
+                " [" + getOpCodeAsHexString(':') + "] " +
                 " }";
     }
 

@@ -9,7 +9,7 @@ public class Label extends Item {
 
     public Label(String label){
         this.label = label;
-        setSize(0);
+        this.opCode = null;
     }
 
     public String getLabel() {

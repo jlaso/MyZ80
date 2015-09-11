@@ -15,7 +15,7 @@ public class TestAssembler {
      */
     public static void main(String[] args) throws FileNotFoundException {
 
-        Program program = new Program("./src/assembler/test.asm");
+        Program program = new Program("./src/assembler/test2.asm", 48*1024);
 
         try {
             program.assemble();
