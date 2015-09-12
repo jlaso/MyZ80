@@ -217,7 +217,105 @@ public class Program {
         }
     }
 
-    protected String evaluate(String formula) {
+    protected String evaluate(String formula) throws Exception {
+
+        //  $dd+constant/$a0
+
+        if (formula.equals("")) return "";
+
+        if (formula.contains(",")) return resolveConstants(formula);
+
+        formula += " ";  // in order to process last term
+        String current = "";
+        String acum = "";
+
+        for (int i=0; i<formula.length(); i++) {
+            char c = formula.charAt(i);
+
+            switch (c) {
+
+                case ')':
+                case ' ':
+                case '-':
+                case '+':
+                case '/':
+                case '*':
+                    // process
+                    if (!current.equals("")) {
+                        try {
+                            current = "" + Tools.figureOut(current);
+                        } catch (NumberFormatException e) {
+                            try {
+                                current = "" + getValueOfConstant(current);
+                            } catch (Exception exp) {
+                                throw new Exception("Unknown term " + current + " in field");
+                            }
+                        }
+                    }
+                    acum += current + c;
+                    current = "";
+                    break;
+
+                default:
+                    current += c;
+                    break;
+            }
+        }
+
+        Tools.println("red", "(O) formula='"+formula+"' ~~~> '"+acum+"'");
+
+        return "" + (int) Tools.eval(acum);
+    }
+
+
+    protected String resolveConstants(String formula) {
+
+        if (formula.equals("")) return "";
+
+        formula += " ";  // in order to process last term
+        String current = "";
+        String acum = "";
+
+        for (int i=0; i<formula.length(); i++) {
+            char c = formula.charAt(i);
+
+            switch (c) {
+
+                case '(':
+                case ',':
+                case ')':
+                case ' ':
+                case '-':
+                case '+':
+                case '/':
+                case '*':
+                    if (!current.equals("")) {
+                        try {
+                            int a = Tools.figureOut(current);
+                        }catch (NumberFormatException e) {
+                            try {
+                                current = "" + getValueOfConstant(current);
+                            } catch (Exception exp) {
+
+                            }
+                        }
+                    }
+                    acum += current + c;
+                    current = "";
+                    break;
+
+                default:
+                    current += c;
+                    break;
+            }
+        }
+
+        Tools.println("red", "(C) formula='"+formula+"' ~~~> '"+acum+"'");
+
+        return acum;
+    }
+
+    protected String evaluateNOOOOO(String formula) {
 
         if (formula.equals("")) return "";
 
@@ -242,17 +340,6 @@ public class Program {
 
         return "" + (int) Tools.eval(formula);
     }
-
-//    protected int getConstantValue(String term) {
-//        for (int i = 0; i < constants.size(); i++) {
-//            Constant c = constants.get(i);
-//            if (term.equals(c.getName())) {
-//                return c.getValue();
-//            }
-//        }
-//
-//        return 0;
-//    }
 
     protected int getValueOfConstant(String constant) throws Exception {
         for (int i = 0; i < constants.size(); i++) {
