@@ -1,7 +1,5 @@
 package fileFormat;
 
-import assembler.parser.Item;
-
 import java.io.*;
 
 /**

@@ -1,6 +1,6 @@
 package assembler;
 
-import assembler.parser.*;
+import assembler.items.*;
 import fileFormat.Z80FileFormat;
 
 import java.io.*;
