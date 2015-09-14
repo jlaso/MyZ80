@@ -4,6 +4,8 @@ import java.io.*;
 
 /**
  * Created by joseluislaso on 11/09/15.
+ *
+ * need more ideas ?  take a look http://www.worldofspectrum.org/faq/reference/z80format.htm
  */
 public class Z80FileFormat implements BinaryFileInterface{
 

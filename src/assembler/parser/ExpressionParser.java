@@ -2,6 +2,7 @@ package assembler.parser;
 
 import assembler.items.Constant;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -9,11 +10,13 @@ import java.util.ArrayList;
  */
 public class ExpressionParser {
 
-    protected static char END = ' ';
+    final protected static char END = ' ';
     protected String expression;
     protected int index;
     protected char current;
     protected ArrayList<Constant> constants = new ArrayList<Constant>();
+    final protected static String validCharsInLiteral = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_";
+    protected ArrayList<String> pendingList = new ArrayList<String>();
 
     public ExpressionParser(ArrayList<Constant> constants) {
         this.constants = constants;
@@ -98,19 +101,38 @@ public class ExpressionParser {
         return Integer.parseInt(temp, 10);
     }
 
-    protected String getLiteral() {
-        String temp = "";
-        for (; ; ) {
-            char c = look();
-            if (isSeparator(c)) break;
-            getChar();
-            temp += c;
-        }
+    protected char getAlpha() throws ExpectedAlphaException {
+        char c = look();
 
-        return temp;
+        if (validCharsInLiteral.indexOf(c) >= 0) {
+            getChar();
+            return c;
+        }else{
+            throw new ExpectedAlphaException();
+        }
     }
 
-    protected String getTerm() {
+    protected char getAlphaNumeric() throws ExpectedAlphaNumericException {
+        char c = look();
+        String validChars = validCharsInLiteral + "01234556789";
+
+        if (validChars.indexOf(c) >= 0) {
+            return getChar();
+        }else{
+            throw new ExpectedAlphaNumericException();
+        }
+    }
+
+    protected String getLiteral() throws ExpectedAlphaNumericException, ExpectedAlphaException {
+        eatSpaces();
+        String temp = "" + getAlpha();
+        for(;;) {
+            if (isSeparator(look())) return temp;
+            temp += getAlphaNumeric();
+        }
+    }
+
+    protected String getTerm() throws UnrecognizedLiteralException {
 
         eatSpaces();
 
@@ -137,12 +159,17 @@ public class ExpressionParser {
                 return "" + getDecimalNumber();
 
             default:
-                String literal = getLiteral();
                 try {
-                    int value = getConstantValue(literal);
-                    return "" + value;
-                } catch (UndefinedConstantException e) {
-                    return " #"+literal+"# ";
+                    String literal = getLiteral();
+                    try {
+                        int value = getConstantValue(literal);
+                        return "" + value;
+                    } catch (UndefinedConstantException e) {
+                        pendingList.add(literal);
+                        return " #"+literal+"# ";
+                    }
+                }catch (Exception e){
+                    throw new UnrecognizedLiteralException(expression, look(), index);
                 }
 
         }
@@ -156,10 +183,10 @@ public class ExpressionParser {
             }
         }
 
-        throw new UndefinedConstantException();
+        throw new UndefinedConstantException(constantName);
     }
 
-    public String preParse(String expression) {
+    public String preParse(String expression) throws UnrecognizedLiteralException {
 
         index = 0;
         this.expression = expression;
@@ -181,6 +208,14 @@ public class ExpressionParser {
 
         return result;
 
+    }
+
+    public boolean arePendingLiterals() {
+        return pendingList.size() > 0;
+    }
+
+    public ArrayList<String> getPendingList() {
+        return pendingList;
     }
 
 

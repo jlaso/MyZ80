@@ -26,5 +26,19 @@ public class TestExpressionParser {
 
         System.out.println(exp1 + " ~~~> " + parser.preParse(exp1));
 
+        if (parser.arePendingLiterals()) dumpStringArrayList(parser.getPendingList());
+
+        String exp2 = "#$0a+label1+pi/10-%0101";
+
+        System.out.println(exp2 + " ~~~> " + parser.preParse(exp2));
+
+        if (parser.arePendingLiterals()) dumpStringArrayList(parser.getPendingList());
+    }
+
+    public static void dumpStringArrayList(ArrayList<String> list) {
+        System.out.println("There are these literals pending of solve ...");
+        for (int i = 0; i < list.size(); i++) {
+            System.out.println(list.get(i));
+        }
     }
 }
