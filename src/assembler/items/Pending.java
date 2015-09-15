@@ -5,7 +5,9 @@ package assembler.items;
  */
 public class Pending {
 
-    /** types **/
+    /**
+     * types
+     **/
     final static int OFFSET_8_BITS_C2 = 1;
     final static int BYTE_LO = 2;
     final static int BYTE_HI = 3;
@@ -31,5 +33,20 @@ public class Pending {
 
     public boolean match(String cause) {
         return this.cause.equals(cause);
+    }
+
+    protected String typeAsString() {
+        switch (type) {
+            case OFFSET_8_BITS_C2: return "OFFSET_8_BITS_C2";
+            case BYTE_LO: return "BYTE_LO";
+            case BYTE_HI: return "BYTE_HI";
+            case ADDRESS: return "ADDRESS";
+            default: return ""+type;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Pending{ " + cause + " pos=" + position + ", [" + typeAsString() + "] }";
     }
 }

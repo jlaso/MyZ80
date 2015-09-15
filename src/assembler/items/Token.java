@@ -1,6 +1,8 @@
 package assembler.items;
 
 import assembler.Tools;
+import assembler.parser.ExpressionParser;
+import assembler.parser.UnrecognizedLiteralException;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,10 +17,14 @@ public class Token extends Item {
 
     protected String instruction, op1, op2;
 
-    public Token(String instruction, String op1, String op2) throws Exception {
+    protected ExpressionParser parser;
+
+    public Token(String instruction, String op1, String op2, String src, ExpressionParser parser) throws Exception {
+        super(src);
         this.instruction = instruction;
         this.op1 = op1;
         this.op2 = op2;
+        this.parser = parser;
 
         opCode = process();
     }
@@ -26,10 +32,10 @@ public class Token extends Item {
     protected int[] process() throws Exception {
 
         String operation = instruction.toLowerCase().trim();
-        String operand1 = op1.toLowerCase().trim();
-        String operand2 = op2.toLowerCase().trim();
+        String operand1 = op1.trim(), _operand1 = op1.toLowerCase();
+        String operand2 = op2.trim(), _operand2 = op2.toLowerCase();
 
-        switch (operation ){
+        switch (operation){
 
             case "nop":     return new int[] {0x00};
             case "halt":    return new int[] {0x76};
@@ -54,7 +60,7 @@ public class Token extends Item {
             case "retn":    return new int[] {0xED, 0x45};
 
             case "rst":
-                switch (operand1){
+                switch (_operand1){
                     case "00h": return new int[] {0xC7};
                     case "08h": return new int[] {0xCF};
                     case "10h": return new int[] {0xD7};
@@ -67,7 +73,7 @@ public class Token extends Item {
                 break;
 
             case "im":
-                switch (operand1){
+                switch (_operand1){
                     case "0": return new int[] {0xED, 0x46};
                     case "1": return new int[] {0xED, 0x56};
                     case "2": return new int[] {0xD7, 0x5E};
@@ -75,7 +81,7 @@ public class Token extends Item {
                 break;
 
             case "push":
-                switch (operand1) {
+                switch (_operand1) {
                     case "bc":
                         return new int[]{0xC5};
                     case "de":
@@ -95,7 +101,7 @@ public class Token extends Item {
                 return new int[] {0xD9};
 
             case "ex":
-                switch (operand2) {
+                switch (_operand2) {
                     case "hl":
                         switch (operand1) {
                             case "(sp)":
@@ -111,13 +117,13 @@ public class Token extends Item {
                 break;
 
             case "out":
-                if (operand2.equals("a")){
+                if (_operand2.equals("a")){
 
                 }
                 break;
 
             case "pop":
-                switch (operand1) {
+                switch (_operand1) {
                     case "bc":
                         return new int[]{0xC1};
                     case "de":
@@ -135,7 +141,7 @@ public class Token extends Item {
 
 
             case "dec":  // 20 instructions with dec nemonic
-                switch (operand1) {
+                switch (_operand1) {
                     case "a": return new int[] {0x3d};
                     case "b": return new int[] {0x05};
                     case "c": return new int[] {0x0d};
@@ -157,7 +163,7 @@ public class Token extends Item {
 
                     default:
                         Pattern p = Pattern.compile("\\(\\s*(?<r>ix|iy)\\s*\\+\\s*(?<n>\\d+)\\s*\\)");
-                        Matcher m =p.matcher(operand1);
+                        Matcher m =p.matcher(_operand1);
                         if (m.find()){
                             int first = (m.group("r").equals("ix")) ? 0xdd : 0xfd;
                             return new int[] {first, 0x35, getDisplacement(m.group("m"), 2)};
@@ -166,7 +172,7 @@ public class Token extends Item {
                 break;
 
             case "inc":  // 20 instructions with inc nemonic
-                switch (operand1) {
+                switch (_operand1) {
                     case "a": return new int[] {0x3c};
                     case "b": return new int[] {0x04};
                     case "c": return new int[] {0x0c};
@@ -188,7 +194,7 @@ public class Token extends Item {
 
                     default:
                         Pattern p = Pattern.compile("\\(\\s*(?<r>ix|iy)\\s*\\+\\s*(?<n>\\d+)\\s*\\)");
-                        Matcher m =p.matcher(operand1);
+                        Matcher m =p.matcher(_operand1);
                         if (m.find()){
                             int first = (m.group("r").equals("ix")) ? 0xdd : 0xfd;
                             return new int[] {first, 0x34, getDisplacement(m.group("m"), 2)};
@@ -199,9 +205,9 @@ public class Token extends Item {
             case "sub":
                 if (operand2.isEmpty()){
                     try {
-                        return new int[]{0x90 | code8bitsRegister(operand1)};
+                        return new int[]{0x90 | code8bitsRegister(_operand1)};
                     }catch (Unrecognized8bitsRegister e){
-                        return new int[]{0xD6, Integer.parseInt(operand1)};
+                        return new int[]{0xD6, Tools.figureOut(operand1)};
                     }
                 }
                 break;
@@ -209,9 +215,9 @@ public class Token extends Item {
             case "sbc":   // sbc a,?
                 if (operand1.equals("a")){
                     try {
-                        return new int[]{0x98 | code8bitsRegister(operand2)};
+                        return new int[]{0x98 | code8bitsRegister(_operand2)};
                     }catch (Unrecognized8bitsRegister e){
-                        return new int[]{0xDE, Integer.parseInt(operand2)};
+                        return new int[]{0xDE, Tools.figureOut(operand2)};
                     }
                 }
                 break;
@@ -219,9 +225,9 @@ public class Token extends Item {
             case "add":   // add a,?
                 if (operand1.equals("a")){
                     try {
-                        return new int[]{0x80 | code8bitsRegister(operand2)};
+                        return new int[]{0x80 | code8bitsRegister(_operand2)};
                     }catch (Unrecognized8bitsRegister e){
-                        return new int[]{0xC6, Integer.parseInt(operand2)};
+                        return new int[]{0xC6, Tools.figureOut(operand2)};
                     }
                 }
                 break;
@@ -229,9 +235,9 @@ public class Token extends Item {
             case "adc":   // adc a,?
                 if (operand1.equals("a")){
                     try {
-                        return new int[]{0x88 | code8bitsRegister(operand2)};
+                        return new int[]{0x88 | code8bitsRegister(_operand2)};
                     }catch (Unrecognized8bitsRegister e){
-                        return new int[]{0xCE, Integer.parseInt(operand2)};
+                        return new int[]{0xCE, Tools.figureOut(operand2)};
                     }
                 }
                 break;
@@ -239,9 +245,9 @@ public class Token extends Item {
             case "and":
                 if (operand2.isEmpty()){
                     try {
-                        return new int[]{0xA0 | code8bitsRegister(operand1)};
+                        return new int[]{0xA0 | code8bitsRegister(_operand1)};
                     }catch (Unrecognized8bitsRegister e){
-                        return new int[]{0xE6, Integer.parseInt(operand1)};
+                        return new int[]{0xE6, Tools.figureOut(operand1)};
                     }
                 }
                 break;
@@ -249,9 +255,9 @@ public class Token extends Item {
             case "cp":
                 if (operand2.isEmpty()){
                     try {
-                        return new int[]{0xB8 | code8bitsRegister(operand1)};
+                        return new int[]{0xB8 | code8bitsRegister(_operand1)};
                     }catch (Unrecognized8bitsRegister e){
-                        return new int[]{0xFE, Integer.parseInt(operand1)};
+                        return new int[]{0xFE, Tools.figureOut(operand1)};
                     }
                 }
                 break;
@@ -259,9 +265,9 @@ public class Token extends Item {
             case "or":
                 if (operand2.isEmpty()){
                     try {
-                        return new int[]{0xB0 | code8bitsRegister(operand1)};
+                        return new int[]{0xB0 | code8bitsRegister(_operand1)};
                     }catch (Unrecognized8bitsRegister e){
-                        return new int[]{0xF6, Integer.parseInt(operand1)};
+                        return new int[]{0xF6, Tools.figureOut(operand1)};
                     }
                 }
                 break;
@@ -269,24 +275,24 @@ public class Token extends Item {
             case "xor":
                 if (operand2.isEmpty()){
                     try {
-                        return new int[]{0xA8 | code8bitsRegister(operand1)};
+                        return new int[]{0xA8 | code8bitsRegister(_operand1)};
                     }catch (Unrecognized8bitsRegister e){
-                        return new int[]{0xEE, Integer.parseInt(operand1)};
+                        return new int[]{0xEE, Tools.figureOut(operand1)};
                     }
                 }
                 break;
 
             case "ld":
-                switch (operand1) {
+                switch (_operand1) {
 
                     case "a":
-                        switch (operand2) {
+                        switch (_operand2) {
 
                             case "(bc)": return new int[]{0x0A};
                             case "(de)": return new int[]{0x1A};
                             default:
                                 try {
-                                    return new int[]{0x78 | code8bitsRegister(operand2)};
+                                    return new int[]{0x78 | code8bitsRegister(_operand2)};
                                 } catch (Unrecognized8bitsRegister e) {
 
                                     // detect between ld a,x and ld a,(xx)
@@ -296,43 +302,43 @@ public class Token extends Item {
 
                     case "b":
                         try {
-                            return new int[] {0x40 | code8bitsRegister(operand2)};
+                            return new int[] {0x40 | code8bitsRegister(_operand2)};
                         }catch (Unrecognized8bitsRegister e){
                             return new int[]{0x06, getLiteralLo(operand2, 1)};
                         }
                     case "c":
                         try{
-                            return new int[] {0x48 | code8bitsRegister(operand2)};
+                            return new int[] {0x48 | code8bitsRegister(_operand2)};
                         }catch (Unrecognized8bitsRegister e){
                             return new int[]{0x0E, getLiteralLo(operand2, 1)};
                         }
                     case "d":
                         try{
-                            return new int[] {0x50 | code8bitsRegister(operand2)};
+                            return new int[] {0x50 | code8bitsRegister(_operand2)};
                         }catch (Unrecognized8bitsRegister e){
                             return new int[]{0x16, getLiteralLo(operand2, 1)};
                         }
                     case "e":
                         try{
-                            return new int[] {0x58 | code8bitsRegister(operand2)};
+                            return new int[] {0x58 | code8bitsRegister(_operand2)};
                         }catch (Unrecognized8bitsRegister e){
                             return new int[]{0x1E, getLiteralLo(operand2, 1)};
                         }
                     case "h":
                         try{
-                            return new int[] {0x60 | code8bitsRegister(operand2)};
+                            return new int[] {0x60 | code8bitsRegister(_operand2)};
                         }catch (Unrecognized8bitsRegister e){
                             return new int[]{0x26, getLiteralLo(operand2, 1)};
                         }
                     case "l":
                         try{
-                            return new int[] {0x68 | code8bitsRegister(operand2)};
+                            return new int[] {0x68 | code8bitsRegister(_operand2)};
                         }catch (Unrecognized8bitsRegister e){
                             return new int[]{0x2E, getLiteralLo(operand2, 1)};
                         }
-                    case "bc": return new int[] {0x01, getLiteralLo(op2, 1), getLiteralHi(op2, 2)};
-                    case "de": return new int[] {0x11, getLiteralLo(op2, 1), getLiteralHi(op2, 2)};
-                    case "hl": return new int[] {0x21, getLiteralLo(op2, 1), getLiteralHi(op2, 2)};
+                    case "bc": return parse16bitsArgument(new int[] {0x01}, op2);
+                    case "de": return parse16bitsArgument(new int[] {0x11}, op2);
+                    case "hl": return parse16bitsArgument(new int[] {0x21}, op2);
                     case "sp":
                         switch (operand2) {
                             case "hl":
@@ -342,41 +348,43 @@ public class Token extends Item {
                         }
 
                     case "(hl)":
-                        if ("(hl)"!=operand2){  // because the theoretical code for "ld (hl),(hl)" it's the same for "halt"
+                        if (!_operand2.equals("(hl)")){  // because the theoretical code for "ld (hl),(hl)" it's the same for "halt"
                             try {
-                                return new int[] {0x70 | code8bitsRegister(operand2)};
+                                return new int[] {0x70 | code8bitsRegister(_operand2)};
                             }catch (Unrecognized8bitsRegister e){
                                 return new int[]{0x36, getLiteralLo(operand1, 1)};
                             }
                         }
                         break;
                     case "(bc)":
-                        if (operand2.equals("a")){
+                        if (_operand2.equals("a")){
                             return new int[] {0x02};
                         }
                         break;
                     case "(de)":
-                        if (operand2.equals("a")){
+                        if (_operand2.equals("a")){
                             return new int[] {0x12};
                         }
                         break;
                     default:
                         Pattern p = Pattern.compile("\\(\\s*(?<n>\\w+)\\s*\\)");
-                        Matcher m =p.matcher(operand1);
-                        int literalHi = getLiteralHi(m.group("n"), 2);
-                        int literalLo = getLiteralLo(m.group("n"), 1);
-                        switch (operand2) {
-                            case "hl":
-                                return new int[] {0x22, literalLo, literalHi};
-                            case "a":
-                                return new int[] {0x23, literalLo, literalHi};
+                        Matcher m = p.matcher(_operand1);
+                        if(m.find()) {
+                            int literalHi = getLiteralHi(m.group("n"), 2);
+                            int literalLo = getLiteralLo(m.group("n"), 1);
+                            switch (_operand2) {
+                                case "hl":
+                                    return new int[]{0x22, literalLo, literalHi};
+                                case "a":
+                                    return new int[]{0x23, literalLo, literalHi};
+                            }
                         }
 
                 }
                 break;
 
             case "jr":
-                switch (operand1){
+                switch (_operand1){
                     case "nz":  return new int[] {0x20, getOffset(operand2, 1)};
                     case "z":   return new int[] {0x28, getOffset(operand2, 1)};
                     case "nc":  return new int[] {0x30, getOffset(operand2, 1)};
@@ -390,7 +398,7 @@ public class Token extends Item {
 
             case "ret":
                 if (!operand2.isEmpty()) break;
-                switch (operand1){
+                switch (_operand1){
                     case "": return new int[] {0xC9};
                     case "nz":  return new int[] {0xC0};
                     case "z" :  return new int[] {0xC8};
@@ -404,7 +412,7 @@ public class Token extends Item {
                 break;
 
             case "jp":
-                switch (operand1){
+                switch (_operand1){
                     case "nz":  return getJumpCode(0xC2, operand2);
                     case "z":   return getJumpCode(0xCA, operand2);
                     case "nc":  return getJumpCode(0xD2, operand2);
@@ -424,7 +432,7 @@ public class Token extends Item {
                 break;
 
             case "call":
-                switch (operand1){
+                switch (_operand1){
                     case "nz":  return getJumpCode(0xC4, operand2);
                     case "z":   return getJumpCode(0xCC, operand2);
                     case "nc":  return getJumpCode(0xD4, operand2);
@@ -467,7 +475,7 @@ public class Token extends Item {
      * @throws Exception
      */
     protected int code8bitsRegister(String reg) throws Exception {
-        switch (reg){
+        switch (reg.toLowerCase()){
             case "a": return 0x07;
             case "b": return 0x00;
             case "c": return 0x01;
@@ -610,7 +618,7 @@ public class Token extends Item {
     @Override
     public String toString() {
         int address = getAddress();
-        return "Token{ " +
+        return src + " => Token{ " +
                 Tools.bytesToHex(new int[]{address>>>8, address&0xff}) + ": " +
                 instruction + " " + op1 + (op2.isEmpty() ? "" : ","+ op2)  +
                 (hasPending() ? "    pending " : "") +
@@ -626,4 +634,31 @@ public class Token extends Item {
             super("unrecognized "+register+" trying to figure out a 8 bit register");
         }
     }
+
+    /**
+     * parse a literal argument of 16 bits
+     *
+     * @param prefix int[]  opcode prefix to add at the beginning of the result
+     * @param literal String
+     * @return int[]
+     * @throws UnrecognizedLiteralException
+     */
+    protected int[] parse16bitsArgument(int[] prefix, String literal) throws UnrecognizedLiteralException {
+        int pos = prefix.length;
+        int[] result = new int[pos+2];
+        for (int i = 0; i < pos; i++) {
+            result[i] = prefix[i];
+        }
+        literal = parser.preParse(literal);
+        if(parser.arePendingLiterals()) {
+            addPending(literal, pos + 1, Pending.BYTE_HI);
+            addPending(literal, pos, Pending.BYTE_LO);
+        }else{
+            double d = Tools.eval(literal);
+            result[pos] = (int)d & 0xff;
+            result[pos+1] = (int)d >> 8;
+        }
+        return result;
+    }
+
 }

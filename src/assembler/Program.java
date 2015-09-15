@@ -1,6 +1,7 @@
 package assembler;
 
 import assembler.items.*;
+import assembler.parser.ExpressionParser;
 import fileFormat.Z80FileFormat;
 
 import java.io.*;
@@ -25,9 +26,12 @@ public class Program {
     protected String baseFileName;
     protected int org = 0;
 
+    protected ExpressionParser parser;
+
     public Program(String file) {
         fileName = file;
         baseFileName = file.substring(0, file.lastIndexOf('.'));
+        parser = new ExpressionParser(constants);
     }
 
     /**
@@ -131,17 +135,17 @@ public class Program {
 
             switch (type) {
                 case CONSTANT:
-                    Constant constant = new Constant(temp[1], temp[2]);
+                    Constant constant = new Constant(temp[1], temp[2], line);
                     constants.add(constant);
                     Tools.println("green", "\t"+constant.toString());
                     return constant;
 
                 case DIRECTIVE:
-                    Tools.println("yellow", "~~~~~~~ temp[0]='" + temp[0] + "', temp[1]='" + temp[1] + "', temp[2]='" + temp[2] + "' ~~~~~~");
+                    //Tools.println("yellow", "~~~~~~~ temp[0]='" + temp[0] + "', temp[1]='" + temp[1] + "', temp[2]='" + temp[2] + "' ~~~~~~");
                     temp[1] = evaluate(temp[1]);
                     temp[2] = evaluate(temp[2]);
-                    Tools.println("green","~~~~~~~ temp[0]='"+temp[0]+"', temp[1]='"+temp[1]+"', temp[2]='"+temp[2]+"' ~~~~~~");
-                    Directive directive = new Directive(temp[0], temp[1], temp[2]);
+                    //Tools.println("green","~~~~~~~ temp[0]='"+temp[0]+"', temp[1]='"+temp[1]+"', temp[2]='"+temp[2]+"' ~~~~~~");
+                    Directive directive = new Directive(temp[0], temp[1], temp[2], line, parser);
                     //Tools.println("green", "\t"+temp[0]+"|\t"+temp[1]+"|\t"+temp[2]+"|");
                     Tools.println("red", "\t"+directive.toString());
                     return directive;
@@ -152,12 +156,12 @@ public class Program {
                     break;
 
                 case TOKEN:
-                    Token token = new Token(temp[0], temp[1], temp[2]);
+                    Token token = new Token(temp[0], temp[1], temp[2], line, parser);
                     Tools.println("purple", "\t"+token.toString());
                     return token;
 
                 case LABEL:
-                    Label label = new Label(temp[0]);
+                    Label label = new Label(temp[0], line);
                     labels.add(label);
                     return label;
 
@@ -205,7 +209,9 @@ public class Program {
         // pass 2  -  ??
 
         // pass 3  -  solve labels
+        Tools.println("red", "\n\n~~~~~~~~~~ propagating labels ~~~~~~~~~\n");
         for (int i=0; i<labels.size(); i++){
+            Tools.println("", "~^~ propagating label "+labels.get(i).getLabel()+" "+labels.get(i).getAddress()+" ~^~");
             propagateLabel(labels.get(i));
         }
 
@@ -223,7 +229,15 @@ public class Program {
 
         if (formula.equals("")) return "";
 
-        if (formula.contains(",")) return resolveConstants(formula);
+        formula = parser.preParse(formula);
+
+        if (parser.arePendingLiterals()) {
+            return formula;
+        }
+
+        if (formula.contains(",") || formula.contains("\"")) return formula; //resolveConstants(formula);
+
+        String acum = formula; /*
 
         formula += " ";  // in order to process last term
         String current = "";
@@ -261,7 +275,7 @@ public class Program {
                     break;
             }
         }
-
+        */
         Tools.println("red", "(O) formula='"+formula+"' ~~~> '"+acum+"'");
 
         return "" + (int) Tools.eval(acum);
@@ -369,6 +383,21 @@ public class Program {
         throw new Exception("label '"+labelSrch+"' was not found");
     }
 
+    protected void dumpLabels() {
+        for (int i = 0; i < labels.size(); i++) {
+            Tools.println("", labels.get(i).toString());
+        }
+    }
+
+    protected void dumpPendings() {
+        for (int i = 0; i < program.size(); i++) {
+            ArrayList<Pending> p = program.get(i).getPendingList();
+            for (int j = 0; j < p.size(); j++) {
+                Tools.println("", p.get(j).toString()+ " " + program.get(i).toString());
+            }
+        }
+    }
+
     /**
      *
      * @param outputFile
@@ -387,6 +416,8 @@ public class Program {
         }
         System.out.println(hex);
         */
+
+        Tools.println("red", "\n\n~~~~~~~~~~~~ dump ~~~~~~~~~~~");
 
         Z80FileFormat z80file = new Z80FileFormat(maxFileSize);
         z80file.setPC(org);
@@ -410,7 +441,13 @@ public class Program {
 
         }
 
-        Tools.println("red", "\t~~ generated "+outputFile+" with "+maxFileSize+" bytes. ~~");
+        Tools.println("red", "\n\n~~~~~~~~~~ labels ~~~~~~~~~~");
+        dumpLabels();
+
+        Tools.println("red", "\n\n~~~~~~~~~~ pendings ~~~~~~~~~~");
+        dumpPendings();
+
+        Tools.println("red", "\n\n\t~~ generated "+outputFile+" with "+maxFileSize+" bytes. ~~");
 
     }
 

@@ -18,7 +18,7 @@ public class TestExpressionParser {
 
         ArrayList<Constant> constants = new ArrayList<Constant>();
 
-        constants.add(new Constant("pi", "314"));
+        constants.add(new Constant("pi", "314", "#define pi 314"));
 
         String exp1 = "$0a+label1+pi/10-%0101";
 

@@ -47,6 +47,10 @@ public class ExpressionParser {
         return ((c==END) || (c == ' ') || (c == '+') || (c == '-') || (c == '*') || (c == '/') || (c == ','));
     }
 
+    protected boolean isDoubleQuote(char c) {
+        return c=='"';
+    }
+
     protected int getHexNumber() {
 
         String temp = "";
@@ -193,7 +197,15 @@ public class ExpressionParser {
 
             char c = look();
 
-            if (isSeparator(c)){
+            if (isDoubleQuote(c)){
+                // respect literals quoted
+                result += getChar();
+                while (!isDoubleQuote(look())) {
+                    result += getChar();
+                }
+                result += getChar();
+
+            }else if (isSeparator(c)){
                 result += getChar();
             }else{
                 result += getTerm();
@@ -219,7 +231,7 @@ public class ExpressionParser {
         if (expression.contains(pendingLabel)) {
             expression = expression.replace(pendingLabel, pendingValue);
         }
-        
+
         return preParse(expression);
     }
 

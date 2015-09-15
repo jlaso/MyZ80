@@ -12,6 +12,11 @@ public class Item {
     protected int address;
     protected int[] opCode;
     protected ArrayList<Pending> pendingList = new ArrayList<Pending>();
+    protected String src;
+
+    public Item(String src) {
+        this.src = src;
+    }
 
     public int getAddress() {
         return address;
@@ -61,13 +66,13 @@ public class Item {
 
             if (pending.match(cause)) {
                 int pos = pending.getPosition();
+                Tools.println("cyan", "pos="+pos+",cause="+cause+"  ||  "+toString());
                 switch (pending.getType()) {
                     case Pending.OFFSET_8_BITS_C2:
                         opCode[pos] = (byte) value;
                         break;
 
                     case Pending.ADDRESS:
-                        Tools.println("cyan", "pos="+pos+",cause="+cause+"  ||  "+toString());
                         opCode[pos] = value & 0xff;
                         opCode[pos+1] = value >>> 8;
                         break;
@@ -89,6 +94,10 @@ public class Item {
 
     public boolean hasPending() {
         return (pendingList.size() > 0);
+    }
+
+    public ArrayList<Pending> getPendingList() {
+        return pendingList;
     }
 
     /**

@@ -10,7 +10,8 @@ public class Constant extends Item {
     protected String name;
     protected int value;
 
-    public Constant(String name, String value) {
+    public Constant(String name, String value, String src) {
+        super(src);
         this.name = name;
         this.value = Tools.figureOut(value);
         this.opCode = null;
@@ -26,6 +27,6 @@ public class Constant extends Item {
 
     @Override
     public String toString() {
-        return "Constant{" + name + " = " + value + "}";
+        return src + " => Constant{" + name + " = " + value + "}";
     }
 }

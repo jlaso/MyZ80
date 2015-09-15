@@ -7,7 +7,8 @@ public class Label extends Item {
 
     protected String label;
 
-    public Label(String label){
+    public Label(String label, String src){
+        super(src);
         this.label = label;
         this.opCode = null;
     }
@@ -18,7 +19,7 @@ public class Label extends Item {
 
     @Override
     public String toString() {
-        return "Label{" +
+        return src + " => Label{" +
                 "'" + label + "', address=" + address +
                 '}';
     }
