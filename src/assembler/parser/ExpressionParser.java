@@ -43,14 +43,8 @@ public class ExpressionParser {
 
     }
 
-    protected char lookLowerCase() {
-
-        return expression.toLowerCase().charAt(index);
-
-    }
-
     protected boolean isSeparator(char c) {
-        return ((c==END) || (c == ' ') || (c == '+') || (c == '-') || (c == '*') || (c == '/'));
+        return ((c==END) || (c == ' ') || (c == '+') || (c == '-') || (c == '*') || (c == '/') || (c == ','));
     }
 
     protected int getHexNumber() {
@@ -166,7 +160,7 @@ public class ExpressionParser {
                         return "" + value;
                     } catch (UndefinedConstantException e) {
                         pendingList.add(literal);
-                        return " #"+literal+"# ";
+                        return " "+literal+" ";
                     }
                 }catch (Exception e){
                     throw new UnrecognizedLiteralException(expression, look(), index);
@@ -188,6 +182,7 @@ public class ExpressionParser {
 
     public String preParse(String expression) throws UnrecognizedLiteralException {
 
+        pendingList = new ArrayList<String>();
         index = 0;
         this.expression = expression;
         String result = "";
@@ -218,5 +213,14 @@ public class ExpressionParser {
         return pendingList;
     }
 
+    public String solvePending(String expression, String pendingLabel, String pendingValue) throws UnrecognizedLiteralException {
+        pendingLabel = " "+pendingLabel+" ";
+        expression = preParse(expression);
+        if (expression.contains(pendingLabel)) {
+            expression = expression.replace(pendingLabel, pendingValue);
+        }
+        
+        return preParse(expression);
+    }
 
 }

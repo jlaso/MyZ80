@@ -28,9 +28,17 @@ public class TestExpressionParser {
 
         if (parser.arePendingLiterals()) dumpStringArrayList(parser.getPendingList());
 
-        String exp2 = "#$0a+label1+pi/10-%0101";
+        String exp2 = "$0a,label1,pi,10,%0101";
 
         System.out.println(exp2 + " ~~~> " + parser.preParse(exp2));
+
+        if (parser.arePendingLiterals()) dumpStringArrayList(parser.getPendingList());
+
+        System.out.println("Substituting --> " + parser.solvePending(exp2, "label1", "$0aaa"));
+
+        String exp3 = "#$0a+label1+pi/10-%0101";
+
+        System.out.println(exp3 + " ~~~> " + parser.preParse(exp3));
 
         if (parser.arePendingLiterals()) dumpStringArrayList(parser.getPendingList());
     }
