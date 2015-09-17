@@ -13,6 +13,11 @@ public class Label extends Item {
         this.opCode = null;
     }
 
+    public Label(String label, int address, String src){
+        this(label, src);
+        this.address = address;
+    }
+
     public String getLabel() {
         return label;
     }

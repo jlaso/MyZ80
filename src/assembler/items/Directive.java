@@ -21,6 +21,8 @@ public class Directive extends Item {
     protected String label;
     protected ExpressionParser parser;
 
+    protected final static String directives = "|.db|.dw|.org|";
+
 //    public Directive(String name) throws Exception {
 //        this(name, "");
 //    }
@@ -34,6 +36,10 @@ public class Directive extends Item {
 //
 //    }
 
+    public Directive(String name, String label, String value, String src) throws Exception {
+        this(name, label, value, src, null);
+    }
+
     public Directive(String name, String label, String value, String src, ExpressionParser parser) throws Exception {
         super(src);
         this.name = name;
@@ -42,6 +48,10 @@ public class Directive extends Item {
         this.parser = parser;
 
         opCode = process();
+    }
+
+    public static boolean is(String word) {
+        return directives.contains('|'+word+'|');
     }
 
     public String getName() {

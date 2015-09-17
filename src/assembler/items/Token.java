@@ -19,6 +19,10 @@ public class Token extends Item {
 
     protected ExpressionParser parser;
 
+    public Token(String instruction, String op1, String op2, String src) throws Exception {
+        this(instruction, op1, op2, src, null);
+    }
+
     public Token(String instruction, String op1, String op2, String src, ExpressionParser parser) throws Exception {
         super(src);
         this.instruction = instruction;
