@@ -3,6 +3,7 @@ package assembler.items;
 import assembler.Tools;
 import assembler.parser.ExpressionParser;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -73,55 +74,38 @@ public class Directive extends Item {
         int index = 0;
         String current = "";
         operands += ',';  // in order to process the last operand
+        Tools.println("yellow", operands);
         boolean insideDoubleQuotes = false;
-        boolean insideSingleQuotes = false;
         for (int i = 0; i < operands.length(); i++) {
             char c = operands.charAt(i);
 
             switch (c) {
                 case '"':
-                    if (!insideSingleQuotes) {
-                        insideDoubleQuotes = !insideDoubleQuotes;
-                        if (!insideDoubleQuotes) {
-                            if (!current.equals("")) {
-                                for (int j = 0; j < current.length(); j++) {
-                                    tmp[index++] = (byte) current.charAt(j);
-                                }
-                                current = "";
-                            }
-                        }
-                    } else {
-                        current += c;
-                    }
-                    break;
-
-                case '\'':
+                    insideDoubleQuotes = !insideDoubleQuotes;
                     if (!insideDoubleQuotes) {
-                        insideSingleQuotes = !insideSingleQuotes;
-                        if (!insideSingleQuotes) {
-                            if (!current.equals("")) {
-                                for (int j = 0; j < current.length(); j++) {
-                                    tmp[index++] = (byte) current.charAt(j);
-                                }
-                                current = "";
+                        if (!current.equals("")) {
+                            for (int j = 0; j < current.length(); j++) {
+                                tmp[index++] = (byte) current.charAt(j);
                             }
+                            current = "";
                         }
-                    } else {
-                        current += c;
                     }
                     break;
 
                 case ' ':
                 case ',':
-                    if (!insideDoubleQuotes && !insideSingleQuotes) {
+                    if (!insideDoubleQuotes) {
                         if (!current.equals("")) {
-                            current = parser.preParse(current);
+                            current = parser.preParse(current).trim();
                             if (parser.arePendingLiterals()){
                                 if (isDB()) {
-                                    addPending(current, index, Pending.BYTE_LO);
+                                    addPending(parser.getPendingList(), index, Pending.BYTE_LO);
+                                    tmp[index++] = 0;
                                 }else if (isDW()) {
-                                    addPending(current, index, Pending.BYTE_LO);
-                                    addPending(current, index+1, Pending.BYTE_HI);
+                                    addPending(parser.getPendingList(), index, Pending.BYTE_LO);
+                                    tmp[index++] = 0;
+                                    addPending(parser.getPendingList(), index+1, Pending.BYTE_HI);
+                                    tmp[index++] = 0;
                                 }
                             }else{
                                 double d = Tools.eval(current);
@@ -145,6 +129,12 @@ public class Directive extends Item {
         }
 
         return index > 0 ? Arrays.copyOfRange(tmp, 0, index) : null;
+    }
+
+    protected void addPending(ArrayList<String> pendings, int type, int pos) {
+        for (int i = 0; i < pendings.size(); i++) {
+            addPending(pendings.get(i), type, pos);
+        }
     }
 
     /**

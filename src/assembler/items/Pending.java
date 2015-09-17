@@ -31,8 +31,16 @@ public class Pending {
         return type;
     }
 
+    public String getCause() { return cause; }
+
+    public void setCause(String cause) { this.cause = cause; }
+
     public boolean match(String cause) {
-        return this.cause.equals(cause);
+        return this.cause.contains(" " + cause + " ");
+    }
+
+    public String replaceLabel(String label, String value) {
+        return cause = cause.replace(" "+label+" ", value);
     }
 
     protected String typeAsString() {

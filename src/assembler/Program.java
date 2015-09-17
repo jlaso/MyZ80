@@ -12,6 +12,8 @@ import java.util.ArrayList;
  */
 public class Program {
 
+    protected static Program instance = null;
+
     final protected static int UNKNOWN = 0;
     final protected static int TOKEN = 1;
     final protected static int CONSTANT = 2;
@@ -28,10 +30,19 @@ public class Program {
 
     protected ExpressionParser parser;
 
+    public static Program getInstance() {
+        return instance;
+    }
+
     public Program(String file) {
         fileName = file;
         baseFileName = file.substring(0, file.lastIndexOf('.'));
-        parser = new ExpressionParser(constants);
+        parser = new ExpressionParser(constants, labels);
+        instance = this;
+    }
+
+    public ExpressionParser getParser() {
+        return parser;
     }
 
     /**
@@ -47,7 +58,6 @@ public class Program {
         int type = UNKNOWN;
         int current = 0;
         boolean insideDoubleQuotes = false;
-        boolean insideSingleQuotes = false;
 
         char_loop:
         for (int i=0; i<line.length(); i++) {
@@ -55,36 +65,23 @@ public class Program {
 
             switch (c) {
                 case '"':
-                    if (!insideSingleQuotes) {
-                        insideDoubleQuotes = !insideDoubleQuotes;
-                        if (!insideDoubleQuotes && !temp[current].equals("") && (type == DIRECTIVE)) {
-                            temp[current] += c;
-                            break char_loop;
-                        }
-                    }
-                    temp[current] += c;
-                    break;
-
-                case '\'':
-                    if (!insideDoubleQuotes) {
-                        insideSingleQuotes = !insideSingleQuotes;
-                        if (!insideSingleQuotes && !temp[current].equals("") && (type == DIRECTIVE)) {
-                            temp[current] += c;
-                            break char_loop;
-                        }
+                    insideDoubleQuotes = !insideDoubleQuotes;
+                    if (!insideDoubleQuotes && !temp[current].equals("") && (type == DIRECTIVE)) {
+                        temp[current] += c;
+                        break char_loop;     // ?????
                     }
                     temp[current] += c;
                     break;
 
                 case ';':
-                    if (!insideDoubleQuotes && !insideSingleQuotes) {
+                    if (!insideDoubleQuotes) {
                         break char_loop;  // comment ends tokenize process
                     }
                     temp[current] += c;
                     break;
 
                 case ':':
-                    if (!insideDoubleQuotes && !insideSingleQuotes) {
+                    if (!insideDoubleQuotes) {
                         if (0 == current) { // label ends with :   label only accepted in the first part (0)
                             type = LABEL;
                             break char_loop;
@@ -94,30 +91,37 @@ public class Program {
                     break;
 
                 case ',':
+                    if (insideDoubleQuotes || (current==temp.length) || DIRECTIVE == type) {
+                        temp[current] += c;
+                    } else {
+                        current++;
+                    }
+                    break;
+
                 case ' ':
-                    if (!insideDoubleQuotes && !insideSingleQuotes) {
-                        if (((',' == c) && (DIRECTIVE != type)) || (' ' == c)) {
-                            if (!temp[current].equals("")) {
-                                if (UNKNOWN == type) {
-                                    if ((0 == current) && (temp[current].charAt(0) == '.')) {
-                                        type = DIRECTIVE;
-                                    } else if ((0 == current) && (temp[current].toLowerCase().equals("#define"))) {
-                                        type = CONSTANT;
-                                    } else if ((0 == current) && (temp[current].toLowerCase().equals("#include"))) {
-                                        type = INCLUDE;
-                                    } else if ((1 == current) && (temp[current].toLowerCase().equals("equ"))) {
-                                        type = CONSTANT;
-                                    } else {
-                                        type = TOKEN;
-                                    }
+                    if (insideDoubleQuotes || (DIRECTIVE == type)) {
+                        temp[current] += c;
+                    }else{
+
+                        if (!temp[current].equals("")) {
+                            if (UNKNOWN == type) {
+                                if (temp[0].charAt(0) == '.') {
+                                    type = DIRECTIVE;
+                                } else if (temp[0].toLowerCase().equals("#define")) {
+                                    type = CONSTANT;
+                                } else if (temp[0].toLowerCase().equals("#include")) {
+                                    type = INCLUDE;
+                                } else if ((current > 0) && (temp[1].toLowerCase().equals("equ"))) {
+                                    type = CONSTANT;
+                                } else if (current > 0) {
+                                    type = TOKEN;
                                 }
-                                current++;
                             }
+                            current++;
                         } else {
                             temp[current] += c;
                         }
-                    }else{
-                        temp[current] += c;
+
                     }
                     break;
 
@@ -126,7 +130,7 @@ public class Program {
                     break;
             }
 
-            if (current > temp.length) {
+            if (current >= temp.length) {
                 break;
             }
         }
@@ -141,10 +145,10 @@ public class Program {
                     return constant;
 
                 case DIRECTIVE:
-                    //Tools.println("yellow", "~~~~~~~ temp[0]='" + temp[0] + "', temp[1]='" + temp[1] + "', temp[2]='" + temp[2] + "' ~~~~~~");
+                    Tools.println("yellow", "~~~~~~~ temp[0]='" + temp[0] + "', temp[1]='" + temp[1] + "', temp[2]='" + temp[2] + "' ~~~~~~");
                     temp[1] = evaluate(temp[1]);
                     temp[2] = evaluate(temp[2]);
-                    //Tools.println("green","~~~~~~~ temp[0]='"+temp[0]+"', temp[1]='"+temp[1]+"', temp[2]='"+temp[2]+"' ~~~~~~");
+                    Tools.println("green","~~~~~~~ temp[0]='"+temp[0]+"', temp[1]='"+temp[1]+"', temp[2]='"+temp[2]+"' ~~~~~~");
                     Directive directive = new Directive(temp[0], temp[1], temp[2], line, parser);
                     //Tools.println("green", "\t"+temp[0]+"|\t"+temp[1]+"|\t"+temp[2]+"|");
                     Tools.println("red", "\t"+directive.toString());
@@ -207,6 +211,8 @@ public class Program {
         }
 
         // pass 2  -  ??
+
+        dumpPendings();
 
         // pass 3  -  solve labels
         Tools.println("red", "\n\n~~~~~~~~~~ propagating labels ~~~~~~~~~\n");
@@ -281,79 +287,79 @@ public class Program {
         return "" + (int) Tools.eval(acum);
     }
 
-
-    protected String resolveConstants(String formula) {
-
-        if (formula.equals("")) return "";
-
-        formula += " ";  // in order to process last term
-        String current = "";
-        String acum = "";
-
-        for (int i=0; i<formula.length(); i++) {
-            char c = formula.charAt(i);
-
-            switch (c) {
-
-                case '(':
-                case ',':
-                case ')':
-                case ' ':
-                case '-':
-                case '+':
-                case '/':
-                case '*':
-                    if (!current.equals("")) {
-                        try {
-                            int a = Tools.figureOut(current);
-                        }catch (NumberFormatException e) {
-                            try {
-                                current = "" + getValueOfConstant(current);
-                            } catch (Exception exp) {
-
-                            }
-                        }
-                    }
-                    acum += current + c;
-                    current = "";
-                    break;
-
-                default:
-                    current += c;
-                    break;
-            }
-        }
-
-        Tools.println("red", "(C) formula='"+formula+"' ~~~> '"+acum+"'");
-
-        return acum;
-    }
-
-    protected String evaluateNOOOOO(String formula) {
-
-        if (formula.equals("")) return "";
-
-        for (int i = 0; i < constants.size(); i++) {
-            Constant c = constants.get(i);
-            if (formula.contains(c.getName())) {
-                formula = formula.replace(c.getName(), ""+c.getValue());
-            }
-        }
-
-        String[] terms = formula.split("[+|-]");
-        int term;
-
-        for (int i = 0; i < terms.length; i++) {
-            try{
-                term = Tools.figureOut(terms[i]);
-                formula = formula.replace(terms[i], "" + term);
-            }catch (NumberFormatException e){
-                return formula;
-            }
-        }
-
-        return "" + (int) Tools.eval(formula);
-    }
+//
+//    protected String resolveConstants(String formula) {
+//
+//        if (formula.equals("")) return "";
+//
+//        formula += " ";  // in order to process last term
+//        String current = "";
+//        String acum = "";
+//
+//        for (int i=0; i<formula.length(); i++) {
+//            char c = formula.charAt(i);
+//
+//            switch (c) {
+//
+//                case '(':
+//                case ',':
+//                case ')':
+//                case ' ':
+//                case '-':
+//                case '+':
+//                case '/':
+//                case '*':
+//                    if (!current.equals("")) {
+//                        try {
+//                            int a = Tools.figureOut(current);
+//                        }catch (NumberFormatException e) {
+//                            try {
+//                                current = "" + getValueOfConstant(current);
+//                            } catch (Exception exp) {
+//
+//                            }
+//                        }
+//                    }
+//                    acum += current + c;
+//                    current = "";
+//                    break;
+//
+//                default:
+//                    current += c;
+//                    break;
+//            }
+//        }
+//
+//        Tools.println("red", "(C) formula='"+formula+"' ~~~> '"+acum+"'");
+//
+//        return acum;
+//    }
+//
+//    protected String evaluateNOOOOO(String formula) {
+//
+//        if (formula.equals("")) return "";
+//
+//        for (int i = 0; i < constants.size(); i++) {
+//            Constant c = constants.get(i);
+//            if (formula.contains(c.getName())) {
+//                formula = formula.replace(c.getName(), ""+c.getValue());
+//            }
+//        }
+//
+//        String[] terms = formula.split("[+|-]");
+//        int term;
+//
+//        for (int i = 0; i < terms.length; i++) {
+//            try{
+//                term = Tools.figureOut(terms[i]);
+//                formula = formula.replace(terms[i], "" + term);
+//            }catch (NumberFormatException e){
+//                return formula;
+//            }
+//        }
+//
+//        return "" + (int) Tools.eval(formula);
+//    }
 
     protected int getValueOfConstant(String constant) throws Exception {
         for (int i = 0; i < constants.size(); i++) {
@@ -365,31 +371,33 @@ public class Program {
 
         throw new Exception("Constant "+constant+" not declared yet!");
     }
-
-    /**
-     *
-     * @param labelSrch
-     * @return
-     * @throws Exception
-     */
-    protected int getValueOfLabel(String labelSrch) throws Exception {
-        for (int l=0; l<labels.size(); l++){
-            Label label = labels.get(l);
-            if (label.getLabel().equals(labelSrch)){
-                return label.getAddress();
-            }
-        }
-
-        throw new Exception("label '"+labelSrch+"' was not found");
-    }
+//
+//    /**
+//     *
+//     * @param labelSrch
+//     * @return
+//     * @throws Exception
+//     */
+//    protected int getValueOfLabel(String labelSrch) throws Exception {
+//        for (int l=0; l<labels.size(); l++){
+//            Label label = labels.get(l);
+//            if (label.getLabel().equals(labelSrch)){
+//                return label.getAddress();
+//            }
+//        }
+//
+//        throw new Exception("label '"+labelSrch+"' was not found");
+//    }
 
     protected void dumpLabels() {
+        Tools.println("red", "\n\n~~~~~~~~~~ labels ~~~~~~~~~~");
         for (int i = 0; i < labels.size(); i++) {
             Tools.println("", labels.get(i).toString());
         }
     }
 
     protected void dumpPendings() {
+        Tools.println("red", "\n\n~~~~~~~~~~ pendings ~~~~~~~~~~");
         for (int i = 0; i < program.size(); i++) {
             ArrayList<Pending> p = program.get(i).getPendingList();
             for (int j = 0; j < p.size(); j++) {
@@ -441,13 +449,11 @@ public class Program {
 
         }
 
-        Tools.println("red", "\n\n~~~~~~~~~~ labels ~~~~~~~~~~");
         dumpLabels();
 
-        Tools.println("red", "\n\n~~~~~~~~~~ pendings ~~~~~~~~~~");
         dumpPendings();
 
-        Tools.println("red", "\n\n\t~~ generated "+outputFile+" with "+maxFileSize+" bytes. ~~");
+        Tools.println("red", "\n\n\tO~~=> generated "+outputFile+" with "+maxFileSize+" bytes. <=~~O");
 
     }
 

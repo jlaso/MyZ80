@@ -22,7 +22,7 @@ public class TestExpressionParser {
 
         String exp1 = "$0a+label1+pi/10-%0101";
 
-        ExpressionParser parser = new ExpressionParser(constants);
+        ExpressionParser parser = new ExpressionParser(constants, null);
 
         System.out.println(exp1 + " ~~~> " + parser.preParse(exp1));
 

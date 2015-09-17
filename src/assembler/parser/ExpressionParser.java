@@ -1,6 +1,7 @@
 package assembler.parser;
 
 import assembler.items.Constant;
+import assembler.items.Label;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -15,10 +16,12 @@ public class ExpressionParser {
     protected int index;
     protected char current;
     protected ArrayList<Constant> constants = new ArrayList<Constant>();
+    protected ArrayList<Label> labels = new ArrayList<Label>();
     final protected static String validCharsInLiteral = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_";
     protected ArrayList<String> pendingList = new ArrayList<String>();
 
-    public ExpressionParser(ArrayList<Constant> constants) {
+    public ExpressionParser(ArrayList<Constant> constants, ArrayList<Label> labels) {
+        this.labels = labels;
         this.constants = constants;
     }
 
@@ -162,9 +165,14 @@ public class ExpressionParser {
                     try {
                         int value = getConstantValue(literal);
                         return "" + value;
-                    } catch (UndefinedConstantException e) {
-                        pendingList.add(literal);
-                        return " "+literal+" ";
+                    } catch (UndefinedConstantException e1) {
+                        try {
+                            int value = getLabelValue(literal);
+                            return ""+value;
+                        }catch (UndefinedLabelException e2) {
+                            pendingList.add(literal);
+                            return " " + literal + " ";
+                        }
                     }
                 }catch (Exception e){
                     throw new UnrecognizedLiteralException(expression, look(), index);
@@ -182,6 +190,17 @@ public class ExpressionParser {
         }
 
         throw new UndefinedConstantException(constantName);
+    }
+
+    protected int getLabelValue(String labelName) throws UndefinedLabelException {
+        for (int i = 0; i < labels.size(); i++) {
+            Label label = labels.get(i);
+            if (label.getLabel().equals(labelName)) {
+                return label.getAddress();
+            }
+        }
+
+        throw new UndefinedLabelException(labelName);
     }
 
     public String preParse(String expression) throws UnrecognizedLiteralException {

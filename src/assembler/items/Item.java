@@ -1,6 +1,8 @@
 package assembler.items;
 
+import assembler.Program;
 import assembler.Tools;
+import assembler.parser.ExpressionParser;
 
 import java.util.ArrayList;
 
@@ -46,9 +48,12 @@ public class Item {
      * @param type
      */
     public void addPending(String cause, int position, int type) {
-        Pending pending = new Pending(cause, position, type);
+        //cause = cause.trim();
+        if (!cause.equals("")) {
+            Pending pending = new Pending(cause, position, type);
 
-        pendingList.add(pending);
+            pendingList.add(pending);
+        }
     }
 
     /**
@@ -61,33 +66,46 @@ public class Item {
 
         if ( !hasPending() ) return;
 
+        ExpressionParser parser = Program.getInstance().getParser();
+
         for (int i = 0; i < pendingList.size(); i++) {
             Pending pending  = pendingList.get(i);
 
             if (pending.match(cause)) {
-                int pos = pending.getPosition();
-                Tools.println("cyan", "pos="+pos+",cause="+cause+"  ||  "+toString());
-                switch (pending.getType()) {
-                    case Pending.OFFSET_8_BITS_C2:
-                        opCode[pos] = (byte) value;
-                        break;
 
-                    case Pending.ADDRESS:
-                        opCode[pos] = value & 0xff;
-                        opCode[pos+1] = value >>> 8;
-                        break;
+                String tmp = pending.replaceLabel(cause, ""+value);
 
-                    case Pending.BYTE_HI:
-                        opCode[pos+1] = value >>> 8;
-                        break;
+                try {
+                    tmp = parser.preParse(tmp);
+                    double d = Tools.eval(tmp);
+                    int pos = pending.getPosition();
+                    Tools.println("cyan", "pos=" + pos + ",cause=" + cause + "  ||  " + toString());
+                    switch (pending.getType()) {
+                        case Pending.OFFSET_8_BITS_C2:
+                            opCode[pos] = (byte) value;
+                            break;
 
-                    case Pending.BYTE_LO:
-                        opCode[pos+1] = value & 0xff;
-                        break;
+                        case Pending.ADDRESS:
+                            opCode[pos] = value & 0xff;
+                            opCode[pos+1] = value >>> 8;
+                            break;
 
+                        case Pending.BYTE_HI:
+                            opCode[pos] = value >>> 8;
+                            break;
+
+                        case Pending.BYTE_LO:
+                            opCode[pos] = value & 0xff;
+                            break;
+
+                    }
+
+                }catch(Exception e) {
+                    // can't remove pending
                 }
 
                 pendingList.remove(i);
+
             }
         }
     }
