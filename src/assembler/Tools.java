@@ -55,6 +55,10 @@ public class Tools {
         System.out.println(color(color)+text+ANSI_RESET);
     }
 
+    public static void println_if(boolean print, String color, String text) {
+        if (print) println(color, text);
+    }
+
     /**
      * try to figure out which type of literal is and return as an integer value
      *

@@ -3,6 +3,7 @@ package assembler.items;
 import assembler.Tools;
 import assembler.parser.ExpressionParser;
 import assembler.parser.exceptions.UnrecognizedLiteralException;
+import di.Container;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,18 +18,14 @@ public class Token extends Item {
 
     protected String instruction, op1, op2;
 
-    protected ExpressionParser parser;
+    protected Container container;
 
-    public Token(String instruction, String op1, String op2, String src) throws Exception {
-        this(instruction, op1, op2, src, null);
-    }
-
-    public Token(String instruction, String op1, String op2, String src, ExpressionParser parser) throws Exception {
-        super(src);
+    public Token(String instruction, String op1, String op2, int address, String src) throws Exception {
+        super(src, address);
         this.instruction = instruction;
         this.op1 = op1;
         this.op2 = op2;
-        this.parser = parser;
+        container = Container.getContainer();
 
         opCode = process();
     }
@@ -356,7 +353,7 @@ public class Token extends Item {
                             try {
                                 return new int[] {0x70 | code8bitsRegister(_operand2)};
                             }catch (Unrecognized8bitsRegister e){
-                                return new int[]{0x36, getLiteralLo(operand1, 1)};
+                                return new int[]{0x36, getLiteralLo(operand2, 1)};
                             }
                         }
                         break;
@@ -653,8 +650,8 @@ public class Token extends Item {
         for (int i = 0; i < pos; i++) {
             result[i] = prefix[i];
         }
-        literal = parser.preParse(literal);
-        if(parser.arePendingLiterals()) {
+        literal = container.expressionParser.preParse(literal);
+        if(container.expressionParser.arePendingLiterals()) {
             addPending(literal, pos + 1, Pending.BYTE_HI);
             addPending(literal, pos, Pending.BYTE_LO);
         }else{

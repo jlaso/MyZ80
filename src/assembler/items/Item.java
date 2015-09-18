@@ -3,6 +3,7 @@ package assembler.items;
 import assembler.Program;
 import assembler.Tools;
 import assembler.parser.ExpressionParser;
+import di.Container;
 
 import java.util.ArrayList;
 
@@ -17,7 +18,12 @@ public class Item {
     protected String src;
 
     public Item(String src) {
+        this(src,0);
+    }
+
+    public Item(String src, int address) {
         this.src = src;
+        this.address = address;
     }
 
     public int getAddress() {
@@ -59,14 +65,12 @@ public class Item {
     /**
      * Try to solve pending cause, if any
      *
-     * @param cause
-     * @param value
+     * @param cause String
+     * @param value int
      */
     public void solvePending(String cause, int value) {
 
         if ( !hasPending() ) return;
-
-        ExpressionParser parser = Program.getInstance().getParser();
 
         for (int i = 0; i < pendingList.size(); i++) {
             Pending pending  = pendingList.get(i);
@@ -76,7 +80,7 @@ public class Item {
                 String tmp = pending.replaceLabel(cause, ""+value);
 
                 try {
-                    tmp = parser.preParse(tmp);
+                    tmp = Container.getContainer().expressionParser.preParse(tmp);
                     double d = Tools.eval(tmp);
                     int pos = pending.getPosition();
                     Tools.println("cyan", "pos=" + pos + ",cause=" + cause + "  ||  " + toString());
@@ -120,8 +124,8 @@ public class Item {
 
     /**
      *
-     * @param separator
-     * @return
+     * @param separator char
+     * @return String
      */
     public String getOpCodeAsHexString(char separator)
     {

@@ -1,9 +1,9 @@
-package assembler.parser;
+package assembler.tests;
 
-import assembler.Program;
+import assembler.parser.ExpressionParser;
+import di.Container;
 import assembler.items.Constant;
-import machines.simpleZ80.Memory;
-import samples.Samples;
+import assembler.items.Valuable;
 
 import java.util.ArrayList;
 
@@ -16,13 +16,13 @@ public class TestExpressionParser {
      */
     public static void main(String[] args) throws Exception {
 
-        ArrayList<Constant> constants = new ArrayList<Constant>();
+        Container container = Container.getContainer();
 
-        constants.add(new Constant("pi", "314", "#define pi 314"));
+        container.constants.add(new Constant("pi", "314", "#define pi 314"));
 
         String exp1 = "$0a+label1+pi/10-%0101";
 
-        ExpressionParser parser = new ExpressionParser(constants, null);
+        ExpressionParser parser = new ExpressionParser();
 
         System.out.println(exp1 + " ~~~> " + parser.preParse(exp1));
 

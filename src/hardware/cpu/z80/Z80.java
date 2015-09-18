@@ -608,7 +608,7 @@ public class Z80 {
             case 0xF3:  // DI
                 t(1,4);
                 IFF0 = IFF1 = false;
-                if (debug) currentInstruction = "DI";
+                if (debug) currentInstruction = "di";
                 break;
 
             case 0xFB:  // EI

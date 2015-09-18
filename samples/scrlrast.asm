@@ -10,7 +10,7 @@ nolist
 ;; turn off firmware interrupts
 ;; install a null interrupt handler
 
-di
+container
 ld hl,&c9fb		;; EI:RET
 ld (&38),hl		;; Interrupt mode 1 interrupt routine location
 

@@ -3,6 +3,7 @@ package assembler.items;
 import assembler.Tools;
 import assembler.parser.ExpressionParser;
 import assembler.parser.exceptions.UnrecognizedLiteralException;
+import di.Container;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +20,7 @@ public class Directive extends Item {
 
     protected String name;
     protected String value;
-    protected ExpressionParser parser;
+    protected Container container;
 
     protected final static String directives = "|.db|.dw|.org|";
 
@@ -37,14 +38,14 @@ public class Directive extends Item {
 //    }
 
     public Directive(String name, String value, String src) throws Exception {
-        this(name, value, src, null);
+        this(name, value, 0, src);
     }
 
-    public Directive(String name, String value, String src, ExpressionParser parser) throws Exception {
-        super(src);
+    public Directive(String name, String value, int address, String src) throws Exception {
+        super(src, address);
         this.name = name;
         this.value = value;
-        this.parser = parser;
+        container = Container.getContainer();
 
         opCode = process();
     }
@@ -62,10 +63,7 @@ public class Directive extends Item {
     }
 
     protected String parse(String expression) throws UnrecognizedLiteralException {
-        if (parser!=null){
-            return parser.preParse(expression);
-        }
-        return expression;
+        return container.expressionParser.preParse(expression);
     }
 
     protected boolean isDB() {
@@ -76,7 +74,7 @@ public class Directive extends Item {
         return name.toLowerCase().equals(_DW);
     }
 
-    protected boolean isORG() {
+    public boolean isORG() {
         return name.toLowerCase().equals(_ORG);
     }
 
@@ -109,25 +107,25 @@ public class Directive extends Item {
                     if (!insideDoubleQuotes) {
                         if (!current.equals("")) {
                             current = parse(current).trim();
-//                            if (parser.arePendingLiterals()){
-//                                if (isDB()) {
-//                                    addPending(parser.getPendingList(), index, Pending.BYTE_LO);
-//                                    tmp[index++] = 0;
-//                                }else if (isDW()) {
-//                                    addPending(parser.getPendingList(), index, Pending.BYTE_LO);
-//                                    tmp[index++] = 0;
-//                                    addPending(parser.getPendingList(), index+1, Pending.BYTE_HI);
-//                                    tmp[index++] = 0;
-//                                }
-//                            }else{
-//                                double d = Tools.eval(current);
-//                                if (isDB()) {
-//                                    tmp[index++] = (int) d & 0xff;
-//                                } else if (isDW()) {
-//                                    tmp[index++] = (int) d & 0xff;
-//                                    tmp[index++] = (int) d >>> 8;
-//                                }
-//                            }
+                            if (container.expressionParser.arePendingLiterals()){
+                                if (isDB()) {
+                                    addPending(container.expressionParser.getPendingList(), index, Pending.BYTE_LO);
+                                    tmp[index++] = 0;
+                                }else if (isDW()) {
+                                    addPending(container.expressionParser.getPendingList(), index, Pending.BYTE_LO);
+                                    tmp[index++] = 0;
+                                    addPending(container.expressionParser.getPendingList(), index+1, Pending.BYTE_HI);
+                                    tmp[index++] = 0;
+                                }
+                            }else{
+                                double d = Tools.eval(current);
+                                if (isDB()) {
+                                    tmp[index++] = (int) d & 0xff;
+                                } else if (isDW()) {
+                                    tmp[index++] = (int) d & 0xff;
+                                    tmp[index++] = (int) d >>> 8;
+                                }
+                            }
                             current = "";
                         }
                     } else {
@@ -174,7 +172,9 @@ public class Directive extends Item {
 
     @Override
     public String toString() {
-        return src + " => Directive{ name='" + name +
+        return src + " => Directive{ " +
+                Tools.bytesToHex(new int[]{address>>>8, address&0xff}) + ": " +
+                "name='" + name +
                 "', value='" + value + "' " +
                 (hasPending() ? "    pending " : "") +
                 "  [" + getOpCodeAsHexString(':') +

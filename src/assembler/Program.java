@@ -1,7 +1,9 @@
 package assembler;
 
+import assembler.parser.ProgramParser;
+import common._;
+import di.Container;
 import assembler.items.*;
-import assembler.parser.ExpressionParser;
 import fileFormat.Z80FileFormat;
 
 import java.io.*;
@@ -12,8 +14,6 @@ import java.util.ArrayList;
  */
 public class Program {
 
-    protected static Program instance = null;
-
     final protected static int UNKNOWN = 0;
     final protected static int TOKEN = 1;
     final protected static int CONSTANT = 2;
@@ -21,163 +21,162 @@ public class Program {
     final protected static int INCLUDE = 4;
     final protected static int LABEL = 5;
 
+    protected Container container;
     protected ArrayList<Item> program = new ArrayList<Item>();
-    protected ArrayList<Label> labels = new ArrayList<Label>();
-    protected ArrayList<Valuable> constants = new ArrayList<Valuable>();
     protected String fileName;
     protected String baseFileName;
     protected int org = 0;
+    protected ProgramParser programParser;
+    protected boolean debug;
 
-    protected ExpressionParser parser;
-
-    public static Program getInstance() {
-        return instance;
-    }
-
-    public Program(String file) {
+    public Program(String file, boolean debug) {
+        container = Container.getContainer();
         fileName = file;
         baseFileName = file.substring(0, file.lastIndexOf('.'));
-        parser = new ExpressionParser(constants);
-        instance = this;
+        programParser = new ProgramParser();
+        this.debug = debug;
     }
 
-    public ExpressionParser getParser() {
-        return parser;
-    }
+//    /**
+//     * tokenize the line passed and return the corresponding Item
+//     *
+//     * @param line String
+//     * @return Item
+//     * @throws Exception
+//     */
+//    protected Item tokenize(String line) throws Exception {
+//
+//        String[] temp = new String[]{"", "", ""};
+//        int type = UNKNOWN;
+//        int current = 0;
+//        boolean insideDoubleQuotes = false;
+//
+//        char_loop:
+//        for (int i = 0; i < line.length(); i++) {
+//            char c = line.charAt(i);
+//
+//            switch (c) {
+//                case '"':
+//                    insideDoubleQuotes = !insideDoubleQuotes;
+//                    if (!insideDoubleQuotes && !temp[current].equals("") && (type == DIRECTIVE)) {
+//                        temp[current] += c;
+//                        break char_loop;     // ?????
+//                    }
+//                    temp[current] += c;
+//                    break;
+//
+//                case ';':
+//                    if (!insideDoubleQuotes) {
+//                        break char_loop;  // comment ends tokenize process
+//                    }
+//                    temp[current] += c;
+//                    break;
+//
+//                case ':':
+//                    if (!insideDoubleQuotes) {
+//                        if (0 == current) { // label ends with :   label only accepted in the first part (0)
+//                            type = LABEL;
+//                            break char_loop;
+//                        }
+//                    }
+//                    temp[current] += c;
+//                    break;
+//
+//                case ',':
+//                    if (insideDoubleQuotes || (current == temp.length) || DIRECTIVE == type) {
+//                        temp[current] += c;
+//                    } else {
+//                        current++;
+//                    }
+//                    break;
+//
+//                case ' ':
+//                    if (insideDoubleQuotes || (DIRECTIVE == type)) {
+//                        temp[current] += c;
+//                    } else {
+//
+//                        if (!temp[current].equals("")) {
+//                            if (UNKNOWN == type) {
+//                                if (temp[0].charAt(0) == '.') {
+//                                    type = DIRECTIVE;
+//                                } else if (temp[0].toLowerCase().equals("#define")) {
+//                                    type = CONSTANT;
+//                                } else if (temp[0].toLowerCase().equals("#include")) {
+//                                    type = INCLUDE;
+//                                } else if ((current > 0) && (temp[1].toLowerCase().equals("equ"))) {
+//                                    type = CONSTANT;
+//                                } else if (current > 0) {
+//                                    type = TOKEN;
+//                                }
+//                            }
+//                            current++;
+//                        } else {
+//                            temp[current] += c;
+//                        }
+//
+//                    }
+//                    break;
+//
+//                default:
+//                    temp[current] += c;
+//                    break;
+//            }
+//
+//            if (current >= temp.length) {
+//                break;
+//            }
+//        }
+//
+//        if (!temp[0].equals("")) {
+//
+//            switch (type) {
+//                case CONSTANT:
+//                    Constant constant = new Constant(temp[1], temp[2], line);
+//                    container.constants.add(constant);
+//                    Tools.println_if(debug, "green", _.TAB + constant.toString());
+//                    return constant;
+//
+//                case DIRECTIVE:
+//                    Tools.println_if(debug, "yellow", "~~~~~~~ temp[0]='" + temp[0] + "', temp[1]='" + temp[1] + "', temp[2]='" + temp[2] + "' ~~~~~~");
+//                    temp[1] = evaluate(temp[1]);
+//                    temp[2] = evaluate(temp[2]);
+//                    Tools.println_if(debug, "green", "~~~~~~~ temp[0]='" + temp[0] + "', temp[1]='" + temp[1] + "', temp[2]='" + temp[2] + "' ~~~~~~");
+//                    Directive directive = new Directive(temp[0], temp[1] + " " + temp[2], line);
+//                    //Tools.println("green", "\t"+temp[0]+"|\t"+temp[1]+"|\t"+temp[2]+"|");
+//                    Tools.println_if(debug, "red", _.TAB + directive.toString());
+//                    return directive;
+//
+//                case INCLUDE:
+//                    // have to include the file in the
+//                    System.out.println(_.TAB + "have to include the file " + temp[1]);
+//                    break;
+//
+//                case TOKEN:
+//                    Token token = new Token(temp[0], temp[1], temp[2], line);
+//                    Tools.println_if(debug, "purple", _.TAB + token.toString());
+//                    return token;
+//
+//                case LABEL:
+//                    Label label = new Label(temp[0], line);
+//                    labels.add(label);
+//                    return label;
+//
+//            }
+//        }
+//
+//        return null;
+//    }
 
-    /**
-     * tokenize the line passed and return the corresponding Item
-     *
-     * @param line String
-     * @return Item
-     * @throws Exception
-     */
-    protected Item tokenize(String line) throws Exception {
-
-        String[] temp = new String[] {"","",""};
-        int type = UNKNOWN;
-        int current = 0;
-        boolean insideDoubleQuotes = false;
-
-        char_loop:
-        for (int i=0; i<line.length(); i++) {
-            char c = line.charAt(i);
-
-            switch (c) {
-                case '"':
-                    insideDoubleQuotes = !insideDoubleQuotes;
-                    if (!insideDoubleQuotes && !temp[current].equals("") && (type == DIRECTIVE)) {
-                        temp[current] += c;
-                        break char_loop;     // ?????
-                    }
-                    temp[current] += c;
-                    break;
-
-                case ';':
-                    if (!insideDoubleQuotes) {
-                        break char_loop;  // comment ends tokenize process
-                    }
-                    temp[current] += c;
-                    break;
-
-                case ':':
-                    if (!insideDoubleQuotes) {
-                        if (0 == current) { // label ends with :   label only accepted in the first part (0)
-                            type = LABEL;
-                            break char_loop;
-                        }
-                    }
-                    temp[current] += c;
-                    break;
-
-                case ',':
-                    if (insideDoubleQuotes || (current==temp.length) || DIRECTIVE == type) {
-                        temp[current] += c;
-                    } else {
-                        current++;
-                    }
-                    break;
-
-                case ' ':
-                    if (insideDoubleQuotes || (DIRECTIVE == type)) {
-                        temp[current] += c;
-                    }else{
-
-                        if (!temp[current].equals("")) {
-                            if (UNKNOWN == type) {
-                                if (temp[0].charAt(0) == '.') {
-                                    type = DIRECTIVE;
-                                } else if (temp[0].toLowerCase().equals("#define")) {
-                                    type = CONSTANT;
-                                } else if (temp[0].toLowerCase().equals("#include")) {
-                                    type = INCLUDE;
-                                } else if ((current > 0) && (temp[1].toLowerCase().equals("equ"))) {
-                                    type = CONSTANT;
-                                } else if (current > 0) {
-                                    type = TOKEN;
-                                }
-                            }
-                            current++;
-                        } else {
-                            temp[current] += c;
-                        }
-
-                    }
-                    break;
-
-                default:
-                    temp[current] += c;
-                    break;
-            }
-
-            if (current >= temp.length) {
-                break;
-            }
+    public void debug(String message, String color) {
+        if (debug) {
+            Tools.println(color, message);
         }
-
-        if (!temp[0].equals("")) {
-
-            switch (type) {
-                case CONSTANT:
-                    Constant constant = new Constant(temp[1], temp[2], line);
-                    constants.add(constant);
-                    Tools.println("green", "\t"+constant.toString());
-                    return constant;
-
-                case DIRECTIVE:
-                    Tools.println("yellow", "~~~~~~~ temp[0]='" + temp[0] + "', temp[1]='" + temp[1] + "', temp[2]='" + temp[2] + "' ~~~~~~");
-                    temp[1] = evaluate(temp[1]);
-                    temp[2] = evaluate(temp[2]);
-                    Tools.println("green","~~~~~~~ temp[0]='"+temp[0]+"', temp[1]='"+temp[1]+"', temp[2]='"+temp[2]+"' ~~~~~~");
-                    Directive directive = new Directive(temp[0], temp[1]+" "+temp[2], line, parser);
-                    //Tools.println("green", "\t"+temp[0]+"|\t"+temp[1]+"|\t"+temp[2]+"|");
-                    Tools.println("red", "\t"+directive.toString());
-                    return directive;
-
-                case INCLUDE:
-                    // have to include the file in the
-                    System.out.println("\thave to include the file "+temp[1]);
-                    break;
-
-                case TOKEN:
-                    Token token = new Token(temp[0], temp[1], temp[2], line, parser);
-                    Tools.println("purple", "\t"+token.toString());
-                    return token;
-
-                case LABEL:
-                    Label label = new Label(temp[0], line);
-                    labels.add(label);
-                    return label;
-
-            }
-        }
-
-        return null;
     }
 
     public void assemble() throws Exception {
 
         int address = 0;
+        int lineNumber = 1;
 
         // pass 1
         try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
@@ -187,105 +186,110 @@ public class Program {
                 line = line.trim();
                 Tools.println("blue", line);
 
-                if (""!=line) {
-                    Item item = tokenize(line);
+                if (!line.isEmpty()) {
+                    //Item item = tokenize(line);
+                    Item item = programParser.itemizeLine(line, address, lineNumber);
 
-                    if (item instanceof Directive) {
-                        Directive directive = ((Directive) item);
-                        if (directive.getName().equals(Directive._ORG)) {
-                            org = address = Integer.parseInt(directive.getValue());
-                            Tools.println("yellow","\t\t\t~~~~==** org address "+address+" **==~~~~");
+                    if (null != item) {
+                        if ((item instanceof Directive) && ((Directive) item).isORG()) {
+                            org = address = Integer.parseInt(((Directive) item).getValue());
+                            debug(_.TAB + _.TAB + _.TAB + "~~~~==** org address " + address + " **==~~~~", _.YELLOW);
                         }
-                    }
-                    if (null!=item) {
-                        item.setAddress(address);
+                        //item.setAddress(address);
                         address += item.getSize();
-
                         program.add(item);
+
+                        if (item instanceof Constant) {
+                            container.constants.add((Constant)item);
+                        }else if (item instanceof Label) {
+                            container.constants.add((Label)item);
+                            if (((Label)item).match("Description")){
+                              //  System.exit(0);
+                            }
+                        }
                     }
                 }
 
+                lineNumber++;
             }
         } catch (IOException e) {
             e.printStackTrace();
+            System.exit(-1);
         }
 
         // pass 2  -  ??
-
         dumpPendings();
 
         // pass 3  -  solve labels
-        Tools.println("red", "\n\n~~~~~~~~~~ propagating labels ~~~~~~~~~\n");
-        for (int i=0; i<labels.size(); i++){
-            Tools.println("", "~^~ propagating label "+labels.get(i).getLabel()+" "+labels.get(i).getAddress()+" ~^~");
-            propagateLabel(labels.get(i));
+        debug(_.CR + _.CR + "~~~~~~~~~~ propagating labels ~~~~~~~~~" + _.CR, _.RED);
+        for (Item item : program) {
+            if (item instanceof Label) propagateLabel((Label)item);
         }
 
     }
 
     protected void propagateLabel(Label label) {
-        for (int i = 0; i < program.size(); i++) {
-            program.get(i).solvePending(label.getLabel(), label.getAddress());
+        Tools.println_if(debug, "", "~^~ propagating label " + label.getLabel() + " " + label.getAddress() + " ~^~");
+        for (Item item: program) {
+            item.solvePending(label.getLabel(), label.getAddress());
         }
     }
-
-    protected String evaluate(String formula) throws Exception {
-
-        //  $dd+constant/$a0
-
-        if (formula.equals("")) return "";
-
-        formula = parser.preParse(formula);
-
-        if (parser.arePendingLiterals()) {
-            return formula;
-        }
-
-        if (formula.contains(",") || formula.contains("\"")) return formula; //resolveConstants(formula);
-
-        String acum = formula; /*
-
-        formula += " ";  // in order to process last term
-        String current = "";
-        String acum = "";
-
-        for (int i=0; i<formula.length(); i++) {
-            char c = formula.charAt(i);
-
-            switch (c) {
-
-                case ')':
-                case ' ':
-                case '-':
-                case '+':
-                case '/':
-                case '*':
-                    // process
-                    if (!current.equals("")) {
-                        try {
-                            current = "" + Tools.figureOut(current);
-                        } catch (NumberFormatException e) {
-                            try {
-                                current = getValueOf(current);
-                            } catch (Exception exp) {
-                                throw new Exception("Unknown term " + current + " in field");
-                            }
-                        }
-                    }
-                    acum += current + c;
-                    current = "";
-                    break;
-
-                default:
-                    current += c;
-                    break;
-            }
-        }
-        */
-        Tools.println("red", "(O) formula='"+formula+"' ~~~> '"+acum+"'");
-
-        return "" + (int) Tools.eval(acum);
-    }
+//
+//    protected String evaluate(String formula) throws Exception {
+//
+//        if (formula.isEmpty()) return "";
+//
+//        formula = container.expressionParser.preParse(formula);
+//
+//        if (container.expressionParser.arePendingLiterals()) {
+//            return formula;
+//        }
+//
+//        if (formula.contains(",") || formula.contains("\"")) return formula; //resolveConstants(formula);
+//
+//        String acum = formula; /*
+//
+//        formula += " ";  // in order to process last term
+//        String current = "";
+//        String acum = "";
+//
+//        for (int i=0; i<formula.length(); i++) {
+//            char c = formula.charAt(i);
+//
+//            switch (c) {
+//
+//                case ')':
+//                case ' ':
+//                case '-':
+//                case '+':
+//                case '/':
+//                case '*':
+//                    // process
+//                    if (!current.equals("")) {
+//                        try {
+//                            current = "" + Tools.figureOut(current);
+//                        } catch (NumberFormatException e) {
+//                            try {
+//                                current = getValueOf(current);
+//                            } catch (Exception exp) {
+//                                throw new Exception("Unknown term " + current + " in field");
+//                            }
+//                        }
+//                    }
+//                    acum += current + c;
+//                    current = "";
+//                    break;
+//
+//                default:
+//                    current += c;
+//                    break;
+//            }
+//        }
+//        */
+//        debug("(O) formula='" + formula + "' ~~~> '" + acum + "'", _.RED);
+//
+//        return "" + (int) Tools.eval(acum);
+//    }
 
 //
 //    protected String resolveConstants(String formula) {
@@ -361,77 +365,58 @@ public class Program {
 //        return "" + (int) Tools.eval(formula);
 //    }
 
-    protected String getValueOf(String constant) throws Exception {
-        for (int i = 0; i < constants.size(); i++) {
-            Valuable c = constants.get(i);
-            if (c.match(constant)) {
-                return c.getValue();
+    protected String getValueOf(String constantName) throws Exception {
+        for (Valuable constant : container.constants) {
+            if (constant.match(constantName)) {
+                return constant.getValue();
             }
         }
 
-        throw new Exception("Constant "+constant+" not declared yet!");
+        throw new Exception("Constant " + constantName + " not declared yet!");
     }
-//
-//    /**
-//     *
-//     * @param labelSrch
-//     * @return
-//     * @throws Exception
-//     */
-//    protected int getValueOfLabel(String labelSrch) throws Exception {
-//        for (int l=0; l<labels.size(); l++){
-//            Label label = labels.get(l);
-//            if (label.getLabel().equals(labelSrch)){
-//                return label.getAddress();
-//            }
-//        }
-//
-//        throw new Exception("label '"+labelSrch+"' was not found");
-//    }
 
     protected void dumpLabels() {
-        Tools.println("red", "\n\n~~~~~~~~~~ labels ~~~~~~~~~~");
-        for (int i = 0; i < labels.size(); i++) {
-            Tools.println("", labels.get(i).toString());
+        if (!debug) return;
+        Tools.println("red", _.CR + _.CR + "~~~~~~~~~~ labels ~~~~~~~~~~");
+        for (Item item : program) {
+            if (item instanceof Label) Tools.println("", item.toString());
         }
     }
 
     protected void dumpPendings() {
-        Tools.println("red", "\n\n~~~~~~~~~~ pendings ~~~~~~~~~~");
-        for (int i = 0; i < program.size(); i++) {
-            ArrayList<Pending> p = program.get(i).getPendingList();
-            for (int j = 0; j < p.size(); j++) {
-                Tools.println("", p.get(j).toString()+ " " + program.get(i).toString());
+        if (!debug) return;
+        Tools.println("red", _.CR + _.CR + "~~~~~~~~~~ pendings ~~~~~~~~~~");
+        for (Item item : program) {
+            for (Pending pending : item.getPendingList()) {
+                Tools.println("", pending.toString() + " " + item.toString());
             }
         }
     }
 
-    /**
-     *
-     * @param outputFile
-     * @param maxFileSize
-     */
-    public void saveBin(String outputFile, int maxFileSize) {
-
-        /*
+    public void dumpHexProgram() {
         String hex = "";
-        for (int i=0; i<program.size(); i++){
+        for (int i = 0; i < program.size(); i++) {
             Item item = program.get(i);
 
-            if (item.getSize() > 0){
+            if (item.getSize() > 0) {
                 hex += item.getOpCodeAsHexString(' ');
             }
         }
         System.out.println(hex);
-        */
+    }
 
-        Tools.println("red", "\n\n~~~~~~~~~~~~ dump ~~~~~~~~~~~");
+    /**
+     * @param outputFile  String
+     * @param maxFileSize int
+     */
+    public void saveBin(String outputFile, int maxFileSize) {
+
+        Tools.println_if(debug, "red", _.CR + _.CR + "~~~~~~~~~~~~ dump ~~~~~~~~~~~");
 
         Z80FileFormat z80file = new Z80FileFormat(maxFileSize);
         z80file.setPC(org);
 
-        for (int i=0; i<program.size(); i++){
-            Item item = program.get(i);
+        for (Item item : program) {
 
             System.out.println(item.toString());
 
@@ -445,15 +430,16 @@ public class Program {
 
             z80file.saveToFile(outputFile);
 
-        }catch ( IOException e) {
+            dumpLabels();
+            dumpPendings();
 
+            Tools.println("red", _.CR + _.CR + _.TAB + "O~~=> generated " + outputFile + " with " + maxFileSize + " bytes. <=~~O");
+
+        } catch (IOException e) {
+
+            System.out.println ("Some error happened saving binary file." + _.CR + e.getMessage());
+            System.exit(-1);
         }
-
-        dumpLabels();
-
-        dumpPendings();
-
-        Tools.println("red", "\n\n\tO~~=> generated "+outputFile+" with "+maxFileSize+" bytes. <=~~O");
 
     }
 

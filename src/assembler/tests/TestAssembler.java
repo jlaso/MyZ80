@@ -1,11 +1,9 @@
-package assembler;
+package assembler.tests;
 
+import assembler.Program;
 import machines.simpleZ80.Memory;
-import myz80.Project;
 import samples.Samples;
-
-import java.io.FileNotFoundException;
-import java.net.URL;
+import common._;
 
 /**
  * Created by joseluislaso on 06/09/15.
@@ -20,7 +18,7 @@ public class TestAssembler {
 
         String file = "test2";
 
-        Program program = new Program(Samples.getFile(file+".asm"));
+        Program program = new Program(Samples.getFile(file+".asm"), _.DEBUG);
 
         program.assemble();
 

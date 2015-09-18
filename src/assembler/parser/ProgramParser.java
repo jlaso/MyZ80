@@ -1,9 +1,12 @@
 package assembler.parser;
 
+import assembler.Tools;
 import assembler.items.*;
 import assembler.parser.exceptions.OperandNotFoundException;
 import assembler.parser.exceptions.UnexpectedCharException;
 import assembler.parser.exceptions.UnexpectedWordException;
+import assembler.parser.exceptions.UnrecognizedLiteralException;
+import di.Container;
 
 /**
  * Created by joseluislaso on 17/09/15.
@@ -13,7 +16,12 @@ public class ProgramParser {
     String buffer;
     char current;
     int index, lineNum;
-    boolean eof, eofc, isSpace, isDoubleQuotes, isComma;
+    boolean eof, eofc, isSpace, isDoubleQuotes, isComma, isSemicolon;
+    Container container;
+
+    public ProgramParser() {
+        container = Container.getContainer();
+    }
 
     /**
      * advances the pointer and reads the char
@@ -24,7 +32,8 @@ public class ProgramParser {
         //if (eof) return current;
         current = buffer.charAt(++index);
         eof = (index>=buffer.length()-1);
-        eofc = (eof || ((current == ';') && !isDoubleQuotes));
+        isSemicolon = (current == ';');
+        eofc = (eof || (isSemicolon && !isDoubleQuotes));
         if (current == '"'){
             isDoubleQuotes = !isDoubleQuotes;
         }
@@ -52,6 +61,8 @@ public class ProgramParser {
             result += current;
             next();
         }
+        if (!isSpace) result += current;
+
         return result;
     }
 
@@ -77,6 +88,9 @@ public class ProgramParser {
             result += current;
             next();
         }
+        if (isSpace || isComma) next();  // discards comma or space
+            else result+=current;
+
         if (result.equals("")) throw new OperandNotFoundException();
 
         return result;
@@ -94,6 +108,7 @@ public class ProgramParser {
             result += current;
             next();
         }
+        if (!isSemicolon) result += current;
 
         return result.trim();
     }
@@ -123,32 +138,37 @@ public class ProgramParser {
         String word = getWord();
         if (ReservedWords.is(ReservedWords.WITHOUT_OPERANDS, word)) {
             dontExpectMore();
-            return new Token(word, "", "", buffer);
+            return new Token(word, "", "", address, buffer);
+        }
+        if (ReservedWords.is(ReservedWords.WITH_ONE_OR_NONE_OPERANDS, word)) {
+            discardSpaces();
+            String operand = "";
+            if (!eofc) operand = getOperand();
+            dontExpectMore();
+            return new Token(word, operand, "", address, buffer);
         }
         if (ReservedWords.is(ReservedWords.WITH_ONE_OPERAND, word)) {
             String operand = getOperand();
             dontExpectMore();
-            return new Token(word, operand, "", buffer);
+            return new Token(word, operand, "", address, buffer);
         }
         if (ReservedWords.is(ReservedWords.WITH_ONE_OR_TWO_OPERANDS, word)) {
             String operand1 = getOperand();
             String operand2 = "";
-            try {
-                operand2 = getOperand();
-            }catch (OperandNotFoundException e){
-                operand2 = "";
-            }
+            discardSpaces();
+            if (!eofc) operand2 = getOperand();
             dontExpectMore();
-            return new Token(word, operand1, operand2, buffer);
+            return new Token(word, operand1, operand2, address, buffer);
         }
         if (ReservedWords.is(ReservedWords.WITH_TWO_OPERANDS, word)) {
             String operand1 = getOperand();
             String operand2 = getOperand();
             dontExpectMore();
-            return new Token(word, operand1, operand2, buffer);
+            return new Token(word, operand1, operand2, address, buffer);
         }
         if (current == ':') {
             dontExpectMore();
+            word = word.substring(0, word.length()-1);
             return new Label(word, address, buffer);
         }
         switch (word.charAt(0)) {
@@ -168,7 +188,19 @@ public class ProgramParser {
             case '.':
                 if (Directive.is(word)) {
                     String expression = getUntilEofc();
-                    return new Directive(word, expression, buffer);
+                    try {
+                        expression = container.expressionParser.preParse(expression);
+                        try {
+                            double d = Tools.eval(expression);
+                            expression = "" + (int) d;
+                        }catch(Exception ex){
+
+                        }
+                    }catch (UnrecognizedLiteralException e){
+                        System.out.println("Unrecognized literal in '" + expression + "' => '"+buffer+"'");
+                        System.exit(-1);
+                    }
+                    return new Directive(word, expression, address, buffer);
                 }
 
         }

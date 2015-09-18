@@ -1,5 +1,7 @@
 package assembler.items;
 
+import assembler.Tools;
+
 /**
  * Created by joseluislaso on 06/09/15.
  */
@@ -36,6 +38,7 @@ public class Label extends Item implements Valuable{
     public String toString() {
         return src + " => Label{" +
                 "'" + label + "', address=" + address +
+                " ["+Tools.bytesToHex(new int[]{address >>> 8, address & 0xff}) + "] " +
                 '}';
     }
 }

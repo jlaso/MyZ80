@@ -1,7 +1,6 @@
 package assembler.parser;
 
-import assembler.items.Constant;
-import assembler.items.Label;
+import di.Container;
 import assembler.items.Valuable;
 import assembler.parser.exceptions.*;
 
@@ -13,16 +12,18 @@ import java.util.ArrayList;
 public class ExpressionParser {
 
     final protected static char END = ' ';
+    protected Container container;
     protected String expression;
     protected int index;
     protected char current;
-    protected ArrayList<Valuable> constants = new ArrayList<Valuable>();
     final protected static String validCharsInLiteral = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_";
     protected ArrayList<String> pendingList = new ArrayList<String>();
 
-    public ExpressionParser(ArrayList<Valuable> constants) {
-        this.constants = constants;
+    public ExpressionParser(Container container){
+        this.container = container;
     }
+
+    public ExpressionParser() { this(Container.getContainer()); }
 
     protected void eatSpaces() {
 
@@ -46,7 +47,7 @@ public class ExpressionParser {
     }
 
     protected boolean isSeparator(char c) {
-        return ((c==END) || (c == ' ') || (c == '+') || (c == '-') || (c == '*') || (c == '/') || (c == ','));
+        return ((c == END) || (c == ' ') || (c == '+') || (c == '-') || (c == '*') || (c == '/') || (c == ','));
     }
 
     protected boolean isDoubleQuote(char c) {
@@ -175,8 +176,8 @@ public class ExpressionParser {
     }
 
     protected String getConstantValue(String constantName) throws UndefinedConstantException {
-        for (int i = 0; i < constants.size(); i++) {
-            Valuable constant = constants.get(i);
+        for (int i = 0; i < container.constants.size(); i++) {
+            Valuable constant = container.constants.get(i);
             if (constant.match(constantName)) {
                 return constant.getValue();
             }
