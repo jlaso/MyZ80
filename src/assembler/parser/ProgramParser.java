@@ -1,7 +1,9 @@
 package assembler.parser;
 
-import assembler.Program;
 import assembler.items.*;
+import assembler.parser.exceptions.OperandNotFoundException;
+import assembler.parser.exceptions.UnexpectedCharException;
+import assembler.parser.exceptions.UnexpectedWordException;
 
 /**
  * Created by joseluislaso on 17/09/15.
@@ -19,8 +21,9 @@ public class ProgramParser {
      * @return char
      */
     protected char next() {
+        //if (eof) return current;
         current = buffer.charAt(++index);
-        eof = (index>=buffer.length());
+        eof = (index>=buffer.length()-1);
         eofc = (eof || ((current == ';') && !isDoubleQuotes));
         if (current == '"'){
             isDoubleQuotes = !isDoubleQuotes;
@@ -70,7 +73,10 @@ public class ProgramParser {
     protected String getOperand() throws OperandNotFoundException {
         String result = "";
         discardSpaces();
-        while (!isSpace && !isComma && !eofc) result += next();
+        while (!isSpace && !isComma && !eofc) {
+            result += current;
+            next();
+        }
         if (result.equals("")) throw new OperandNotFoundException();
 
         return result;
@@ -84,9 +90,12 @@ public class ProgramParser {
     protected String getUntilEofc() {
         String result = "";
         discardSpaces();
-        while (!eofc) result += next();
+        while (!eofc) {
+            result += current;
+            next();
+        }
 
-        return result;
+        return result.trim();
     }
 
     protected String getQuotesContent() throws UnexpectedCharException {
@@ -159,7 +168,7 @@ public class ProgramParser {
             case '.':
                 if (Directive.is(word)) {
                     String expression = getUntilEofc();
-                    return new Directive(word, "", expression, buffer);
+                    return new Directive(word, expression, buffer);
                 }
 
         }

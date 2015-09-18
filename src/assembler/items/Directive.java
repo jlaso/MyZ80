@@ -2,6 +2,7 @@ package assembler.items;
 
 import assembler.Tools;
 import assembler.parser.ExpressionParser;
+import assembler.parser.exceptions.UnrecognizedLiteralException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,7 +19,6 @@ public class Directive extends Item {
 
     protected String name;
     protected String value;
-    protected String label;
     protected ExpressionParser parser;
 
     protected final static String directives = "|.db|.dw|.org|";
@@ -36,15 +36,14 @@ public class Directive extends Item {
 //
 //    }
 
-    public Directive(String name, String label, String value, String src) throws Exception {
-        this(name, label, value, src, null);
+    public Directive(String name, String value, String src) throws Exception {
+        this(name, value, src, null);
     }
 
-    public Directive(String name, String label, String value, String src, ExpressionParser parser) throws Exception {
+    public Directive(String name, String value, String src, ExpressionParser parser) throws Exception {
         super(src);
         this.name = name;
-        this.value = isDB() || isDW() || isORG() ? label : value;
-        this.label = isDB() || isDW() || isORG() ? "" : label;
+        this.value = value;
         this.parser = parser;
 
         opCode = process();
@@ -62,8 +61,11 @@ public class Directive extends Item {
         return value;
     }
 
-    public String getLabel() {
-        return label;
+    protected String parse(String expression) throws UnrecognizedLiteralException {
+        if (parser!=null){
+            return parser.preParse(expression);
+        }
+        return expression;
     }
 
     protected boolean isDB() {
@@ -83,7 +85,7 @@ public class Directive extends Item {
         int[] tmp = new int[MAXDATA];
         int index = 0;
         String current = "";
-        operands += ',';  // in order to process the last operand
+        operands += ' ';  // in order to process the last operand
         Tools.println("yellow", operands);
         boolean insideDoubleQuotes = false;
         for (int i = 0; i < operands.length(); i++) {
@@ -106,26 +108,26 @@ public class Directive extends Item {
                 case ',':
                     if (!insideDoubleQuotes) {
                         if (!current.equals("")) {
-                            current = parser.preParse(current).trim();
-                            if (parser.arePendingLiterals()){
-                                if (isDB()) {
-                                    addPending(parser.getPendingList(), index, Pending.BYTE_LO);
-                                    tmp[index++] = 0;
-                                }else if (isDW()) {
-                                    addPending(parser.getPendingList(), index, Pending.BYTE_LO);
-                                    tmp[index++] = 0;
-                                    addPending(parser.getPendingList(), index+1, Pending.BYTE_HI);
-                                    tmp[index++] = 0;
-                                }
-                            }else{
-                                double d = Tools.eval(current);
-                                if (isDB()) {
-                                    tmp[index++] = (int) d & 0xff;
-                                } else if (isDW()) {
-                                    tmp[index++] = (int) d & 0xff;
-                                    tmp[index++] = (int) d >>> 8;
-                                }
-                            }
+                            current = parse(current).trim();
+//                            if (parser.arePendingLiterals()){
+//                                if (isDB()) {
+//                                    addPending(parser.getPendingList(), index, Pending.BYTE_LO);
+//                                    tmp[index++] = 0;
+//                                }else if (isDW()) {
+//                                    addPending(parser.getPendingList(), index, Pending.BYTE_LO);
+//                                    tmp[index++] = 0;
+//                                    addPending(parser.getPendingList(), index+1, Pending.BYTE_HI);
+//                                    tmp[index++] = 0;
+//                                }
+//                            }else{
+//                                double d = Tools.eval(current);
+//                                if (isDB()) {
+//                                    tmp[index++] = (int) d & 0xff;
+//                                } else if (isDW()) {
+//                                    tmp[index++] = (int) d & 0xff;
+//                                    tmp[index++] = (int) d >>> 8;
+//                                }
+//                            }
                             current = "";
                         }
                     } else {
@@ -173,7 +175,6 @@ public class Directive extends Item {
     @Override
     public String toString() {
         return src + " => Directive{ name='" + name +
-                "',label='" + label +
                 "', value='" + value + "' " +
                 (hasPending() ? "    pending " : "") +
                 "  [" + getOpCodeAsHexString(':') +

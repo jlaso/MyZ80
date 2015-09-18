@@ -2,8 +2,9 @@ package assembler.parser;
 
 import assembler.items.Constant;
 import assembler.items.Label;
+import assembler.items.Valuable;
+import assembler.parser.exceptions.*;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -15,13 +16,11 @@ public class ExpressionParser {
     protected String expression;
     protected int index;
     protected char current;
-    protected ArrayList<Constant> constants = new ArrayList<Constant>();
-    protected ArrayList<Label> labels = new ArrayList<Label>();
+    protected ArrayList<Valuable> constants = new ArrayList<Valuable>();
     final protected static String validCharsInLiteral = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_";
     protected ArrayList<String> pendingList = new ArrayList<String>();
 
-    public ExpressionParser(ArrayList<Constant> constants, ArrayList<Label> labels) {
-        this.labels = labels;
+    public ExpressionParser(ArrayList<Valuable> constants) {
         this.constants = constants;
     }
 
@@ -163,16 +162,10 @@ public class ExpressionParser {
                 try {
                     String literal = getLiteral();
                     try {
-                        int value = getConstantValue(literal);
-                        return "" + value;
+                        return getConstantValue(literal);
                     } catch (UndefinedConstantException e1) {
-                        try {
-                            int value = getLabelValue(literal);
-                            return ""+value;
-                        }catch (UndefinedLabelException e2) {
-                            pendingList.add(literal);
-                            return " " + literal + " ";
-                        }
+                        pendingList.add(literal);
+                        return " " + literal + " ";
                     }
                 }catch (Exception e){
                     throw new UnrecognizedLiteralException(expression, look(), index);
@@ -181,26 +174,15 @@ public class ExpressionParser {
         }
     }
 
-    protected int getConstantValue(String constantName) throws UndefinedConstantException {
+    protected String getConstantValue(String constantName) throws UndefinedConstantException {
         for (int i = 0; i < constants.size(); i++) {
-            Constant constant = constants.get(i);
-            if (constant.getName().equals(constantName)) {
+            Valuable constant = constants.get(i);
+            if (constant.match(constantName)) {
                 return constant.getValue();
             }
         }
 
         throw new UndefinedConstantException(constantName);
-    }
-
-    protected int getLabelValue(String labelName) throws UndefinedLabelException {
-        for (int i = 0; i < labels.size(); i++) {
-            Label label = labels.get(i);
-            if (label.getLabel().equals(labelName)) {
-                return label.getAddress();
-            }
-        }
-
-        throw new UndefinedLabelException(labelName);
     }
 
     public String preParse(String expression) throws UnrecognizedLiteralException {

@@ -23,7 +23,7 @@ public class Program {
 
     protected ArrayList<Item> program = new ArrayList<Item>();
     protected ArrayList<Label> labels = new ArrayList<Label>();
-    protected ArrayList<Constant> constants = new ArrayList<Constant>();
+    protected ArrayList<Valuable> constants = new ArrayList<Valuable>();
     protected String fileName;
     protected String baseFileName;
     protected int org = 0;
@@ -37,7 +37,7 @@ public class Program {
     public Program(String file) {
         fileName = file;
         baseFileName = file.substring(0, file.lastIndexOf('.'));
-        parser = new ExpressionParser(constants, labels);
+        parser = new ExpressionParser(constants);
         instance = this;
     }
 
@@ -149,7 +149,7 @@ public class Program {
                     temp[1] = evaluate(temp[1]);
                     temp[2] = evaluate(temp[2]);
                     Tools.println("green","~~~~~~~ temp[0]='"+temp[0]+"', temp[1]='"+temp[1]+"', temp[2]='"+temp[2]+"' ~~~~~~");
-                    Directive directive = new Directive(temp[0], temp[1], temp[2], line, parser);
+                    Directive directive = new Directive(temp[0], temp[1]+" "+temp[2], line, parser);
                     //Tools.println("green", "\t"+temp[0]+"|\t"+temp[1]+"|\t"+temp[2]+"|");
                     Tools.println("red", "\t"+directive.toString());
                     return directive;
@@ -266,7 +266,7 @@ public class Program {
                             current = "" + Tools.figureOut(current);
                         } catch (NumberFormatException e) {
                             try {
-                                current = "" + getValueOfConstant(current);
+                                current = getValueOf(current);
                             } catch (Exception exp) {
                                 throw new Exception("Unknown term " + current + " in field");
                             }
@@ -314,7 +314,7 @@ public class Program {
 //                            int a = Tools.figureOut(current);
 //                        }catch (NumberFormatException e) {
 //                            try {
-//                                current = "" + getValueOfConstant(current);
+//                                current = getValueOf(current);
 //                            } catch (Exception exp) {
 //
 //                            }
@@ -361,10 +361,10 @@ public class Program {
 //        return "" + (int) Tools.eval(formula);
 //    }
 
-    protected int getValueOfConstant(String constant) throws Exception {
+    protected String getValueOf(String constant) throws Exception {
         for (int i = 0; i < constants.size(); i++) {
-            Constant c = constants.get(i);
-            if (c.getName().equals(constant)) {
+            Valuable c = constants.get(i);
+            if (c.match(constant)) {
                 return c.getValue();
             }
         }

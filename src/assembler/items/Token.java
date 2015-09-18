@@ -2,7 +2,7 @@ package assembler.items;
 
 import assembler.Tools;
 import assembler.parser.ExpressionParser;
-import assembler.parser.UnrecognizedLiteralException;
+import assembler.parser.exceptions.UnrecognizedLiteralException;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

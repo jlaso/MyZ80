@@ -16,8 +16,9 @@ public class TestProgramParser {
     public static void main(String[] args) throws Exception {
 
         String[] lines = {
-            "#include \"file1.asm\" ; this is a comment\n",
-            ".org  1000    ; this is the beginning"
+            "#include \"file1.asm\" ; this is a comment",
+            ".org  1000    ; this is the beginning",
+            ".db 1,2,3,4,5,6"
         };
 
         ProgramParser parser = new ProgramParser();

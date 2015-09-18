@@ -3,7 +3,7 @@ package assembler.items;
 /**
  * Created by joseluislaso on 06/09/15.
  */
-public class Label extends Item {
+public class Label extends Item implements Valuable{
 
     protected String label;
 
@@ -20,6 +20,16 @@ public class Label extends Item {
 
     public String getLabel() {
         return label;
+    }
+
+    @Override
+    public String getValue() {
+        return ""+address;
+    }
+
+    @Override
+    public boolean match(String name) {
+        return label.equals(name);
     }
 
     @Override

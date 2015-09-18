@@ -15,4 +15,11 @@ public class Include extends Item {
     public String getFile() {
         return file;
     }
+
+    @Override
+    public String toString() {
+        return "Include{" +
+                "file='" + file + '\'' +
+                '}';
+    }
 }

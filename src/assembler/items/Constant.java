@@ -5,7 +5,7 @@ import assembler.Tools;
 /**
  * Created by joseluislaso on 06/09/15.
  */
-public class Constant extends Item {
+public class Constant extends Item implements Valuable {
 
     protected String name;
     protected int value;
@@ -21,8 +21,14 @@ public class Constant extends Item {
         return name;
     }
 
-    public int getValue() {
-        return value;
+    @Override
+    public String getValue() {
+        return ""+value;
+    }
+
+    @Override
+    public boolean match(String name) {
+        return name.equals(name);
     }
 
     @Override
