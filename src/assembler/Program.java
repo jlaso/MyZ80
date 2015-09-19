@@ -39,7 +39,7 @@ public class Program {
 
     public void debug(String message, String color) {
         if (debug) {
-            Tools.println(color, message);
+            Tools.println(color == null ? "" : color, message);
         }
     }
 
@@ -96,6 +96,8 @@ public class Program {
             if (item instanceof Label) propagateLabel((Label)item);
         }
 
+        debug(_.CR + _.CR, null);
+
     }
 
     protected void propagateLabel(Label label) {
@@ -141,6 +143,15 @@ public class Program {
             if (item.getSize() > 0) {
                 hex += item.getOpCodeAsHexString(' ');
             }
+        }
+        System.out.println(hex);
+    }
+
+    public void dumpProgram() {
+        Tools.println(_.RED, _.CR+_.TAB+"~~~~~~  dumping assembled program ~~~~~~"+_.CR);
+        String hex = "";
+        for (Item item : program) {
+            System.out.println(item.toString());
         }
         System.out.println(hex);
     }

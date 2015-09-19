@@ -9,7 +9,6 @@ import hardware.system.MemorySystemInterface;
 public class Z80 {
 
     final public static long STD_CLK = 4000000;
-    final public static boolean DEBUG = true;
     protected long clock;
     protected MemorySystemInterface memory = null;
     protected boolean halted = true;

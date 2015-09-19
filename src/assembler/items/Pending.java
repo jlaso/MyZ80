@@ -18,7 +18,7 @@ public class Pending {
     protected int type;
 
     public Pending(String cause, int position, int type) {
-        this.cause = cause;
+        this.cause = " " + cause.trim() + " ";
         this.position = position;
         this.type = type;
     }

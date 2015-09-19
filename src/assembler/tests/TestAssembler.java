@@ -16,13 +16,15 @@ public class TestAssembler {
      */
     public static void main(String[] args) throws Exception {
 
-        String file = "test2";
+        String file = "functions";
 
-        Program program = new Program(Samples.getFile(file+".asm"), _.DEBUG);
+        Program program = new Program(Samples.getFile(file+".inc"), _.DEBUG);
 
         program.assemble();
 
         program.saveBin(Samples.getFile(file+".bin"), Memory.ROM_SIZE);
+
+        program.dumpProgram();
 
     }
 

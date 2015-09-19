@@ -30,6 +30,10 @@ public class Item {
         return address;
     }
 
+    public String getSrc() {
+        return src;
+    }
+
     public String prettyAddress() {
         return ""+address+"["+Tools.bytesToHex(new int[]{address>>>8, address&0xff}) + "]: ";
     }
@@ -58,11 +62,27 @@ public class Item {
      * @param type
      */
     public void addPending(String cause, int position, int type) {
-        //cause = cause.trim();
-        if (!cause.equals("")) {
-            Pending pending = new Pending(cause, position, type);
+        cause = cause.trim();
+        if (cause.isEmpty()) return;
 
-            pendingList.add(pending);
+        Pending pending = new Pending(cause, position, type);
+        pendingList.add(pending);
+    }
+
+    /**
+     * calculate the offset in c2 between two addresses
+     *
+     * @param from int
+     * @param to int
+     * @return int
+     */
+    protected int calcOffset(int from, int to)
+    {
+        int offset = Math.abs(from - to);
+        if (from>to) {
+            return 256 - offset;
+        }else{
+            return offset;
         }
     }
 
@@ -76,7 +96,13 @@ public class Item {
 
         if ( !hasPending() ) return;
 
-        for (Pending pending : pendingList) {
+        Tools.println("cyan", "finding pending '"+cause+"' in "+toString());
+
+        for (int i=0; i<pendingList.size(); i++) {
+
+            Pending pending = pendingList.get(i);
+
+            Tools.println("", "\t '"+pending.getCause()+"' ...");
 
             if (pending.match(cause)) {
 
@@ -87,11 +113,16 @@ public class Item {
                 try {
                     tmp = Container.getContainer().expressionParser.preParse(tmp);
                     double d = Tools.eval(tmp);
+                    //value = (int)d;
                     int pos = pending.getPosition();
                     Tools.println("cyan", "pos=" + pos + ",cause=" + cause + "  ||  " + toString());
                     switch (pending.getType()) {
                         case Pending.OFFSET_8_BITS_C2:
-                            opCode[pos] = (byte) value;
+                            //if ((value & 0xff00) != 0){
+                                opCode[pos] = calcOffset(address, value);
+                            //}else {
+                            //    opCode[pos] = (byte) value;
+                            //}
                             break;
 
                         case Pending.ADDRESS:
@@ -113,7 +144,7 @@ public class Item {
                     // can't remove pending
                 }
 
-                pendingList.remove(pending);
+                pendingList.remove(i);
 
             }
         }

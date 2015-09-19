@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 public class Token extends Item {
 
     protected String instruction, op1, op2;
-
+    protected boolean isOffset = false;  // indicates that there is one operand in offset terms
     protected Container container;
 
     public Token(String instruction, String op1, String op2, int address, String src) throws Exception {
@@ -44,7 +44,9 @@ public class Token extends Item {
             case "di":      return new int[] {0xF3};
             case "ei":      return new int[] {0xFB};
 
-            case "djnz":    return new int[] {0x10, getOffset(operand1, 1)};
+            case "djnz":
+                isOffset = true;
+                return new int[] {0x10, getOffset(operand1, 1)};
 
             case "rrca":    return new int[] {0x0F};
             case "rra":     return new int[] {0x1F};
@@ -119,7 +121,7 @@ public class Token extends Item {
 
             case "out":
                 if (_operand2.equals("a")){
-
+                    // @TODO
                 }
                 break;
 
@@ -385,6 +387,7 @@ public class Token extends Item {
                 break;
 
             case "jr":
+                isOffset = true;
                 switch (_operand1){
                     case "nz":  return new int[] {0x20, getOffset(operand2, 1)};
                     case "z":   return new int[] {0x28, getOffset(operand2, 1)};
@@ -622,9 +625,18 @@ public class Token extends Item {
         return src + " => Token{ " +
                 prettyAddress() +
                 instruction + " " + op1 + (op2.isEmpty() ? "" : ","+ op2)  +
+                (isOffset ? " ~"+Tools.addressToHex(realAddress(opCode[opCode.length-1]))+"~ " : "") +
                 (hasPending() ? "    pending " : "") +
                 " [" + getOpCodeAsHexString(':') + "] " +
                 " }";
+    }
+
+    protected int realAddress(int offset) {
+        if ((byte)offset<0) {
+            return (address - 256 + offset);
+        }else{
+            return address + offset;
+        }
     }
 
     /**

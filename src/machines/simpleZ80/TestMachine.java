@@ -5,6 +5,7 @@ import assembler.Tools;
 import fileFormat.Z80FileFormat;
 import hardware.cpu.z80.Z80;
 import samples.Samples;
+import common._;
 
 import java.io.FileNotFoundException;
 import java.net.URL;
@@ -26,7 +27,7 @@ public class TestMachine {
         z80file.readFromFile(romFile);
 
         Memory systemMemory = new Memory(z80file);
-        Z80 cpu = new Z80(Z80.DEBUG);
+        Z80 cpu = new Z80(_.DEBUG);
         cpu.attachSystemMemory(systemMemory);
 
         cpu.reset();

@@ -172,6 +172,9 @@ public class ProgramParser {
             return new Label(word, address, buffer);
         }
         switch (word.charAt(0)) {
+            case ';':
+                return null;   // it's a comment
+
             case '#':
                 switch (word.toLowerCase()) {
                     case "#include":
