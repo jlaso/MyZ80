@@ -1,10 +1,16 @@
 package assembler.tests;
 
+import assembler.Tools;
 import assembler.items.Directive;
 import assembler.items.Item;
+import assembler.items.Label;
+import assembler.items.Pending;
 import assembler.parser.ProgramParser;
+import common._;
 import machines.simpleZ80.Memory;
 import samples.Samples;
+
+import java.util.ArrayList;
 
 /**
  * Created by joseluislaso on 17/09/15.
@@ -26,22 +32,54 @@ public class TestProgramParser {
             "ld (hl),$25"
         };
 
+        ArrayList<Item> program = new ArrayList<>();
+
         ProgramParser parser = new ProgramParser();
         int PC = 0;
 
+        // first pass
         for (int i = 0; i < lines.length; i++) {
             String line = lines[i];
 
-            Item item = parser.itemizeLine(line, i, i);
+            Item item = parser.itemizeLine(line, PC, i);
+            program.add(item);
             if ((item instanceof Directive) && (((Directive)item).isORG())){
                 PC = Integer.parseInt(((Directive)item).getValue());
             }
-            item.setAddress(PC);
             PC += item.getSize();
 
+        }
+
+        dumpPendings(program);
+
+        // second pass resolve pending labels
+        for (Item item : program) {
+            if (item instanceof Label) propagateLabel(program, (Label)item);
+        }
+
+        dumpPendings(program);
+
+        Tools.println("cyan", "\n\nprogram listing\n\n");
+
+        // third, print result
+        for (Item item : program) {
             System.out.println (item.toString());
         }
 
     }
 
+    protected static void propagateLabel(ArrayList<Item> program, Label label) {
+        for (Item item: program) {
+            item.solvePending(label.getLabel(), label.getAddress());
+        }
+    }
+
+    protected static void dumpPendings(ArrayList<Item> program) {
+        Tools.println("red", _.CR + _.CR + "~~~~~~~~~~ pendings ~~~~~~~~~~");
+        for (Item item : program) {
+            for (Pending pending : item.getPendingList()) {
+                Tools.println("", pending.toString() + " " + item.toString());
+            }
+        }
+    }
 }

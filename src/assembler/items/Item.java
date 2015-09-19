@@ -30,6 +30,10 @@ public class Item {
         return address;
     }
 
+    public String prettyAddress() {
+        return ""+address+"["+Tools.bytesToHex(new int[]{address>>>8, address&0xff}) + "]: ";
+    }
+
     public void setAddress(int address) {
         this.address = address;
     }
@@ -72,10 +76,11 @@ public class Item {
 
         if ( !hasPending() ) return;
 
-        for (int i = 0; i < pendingList.size(); i++) {
-            Pending pending  = pendingList.get(i);
+        for (Pending pending : pendingList) {
 
             if (pending.match(cause)) {
+
+                Tools.println("yellow", "pending '"+cause+"' found in "+toString());
 
                 String tmp = pending.replaceLabel(cause, ""+value);
 
@@ -108,7 +113,7 @@ public class Item {
                     // can't remove pending
                 }
 
-                pendingList.remove(i);
+                pendingList.remove(pending);
 
             }
         }

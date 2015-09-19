@@ -84,8 +84,8 @@ public class Directive extends Item {
         int index = 0;
         String current = "";
         operands += ' ';  // in order to process the last operand
-        Tools.println("yellow", operands);
         boolean insideDoubleQuotes = false;
+
         for (int i = 0; i < operands.length(); i++) {
             char c = operands.charAt(i);
 
@@ -173,7 +173,7 @@ public class Directive extends Item {
     @Override
     public String toString() {
         return src + " => Directive{ " +
-                Tools.bytesToHex(new int[]{address>>>8, address&0xff}) + ": " +
+                prettyAddress() +
                 "name='" + name +
                 "', value='" + value + "' " +
                 (hasPending() ? "    pending " : "") +

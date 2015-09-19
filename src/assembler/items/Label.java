@@ -36,9 +36,8 @@ public class Label extends Item implements Valuable{
 
     @Override
     public String toString() {
-        return src + " => Label{" +
-                "'" + label + "', address=" + address +
-                " ["+Tools.bytesToHex(new int[]{address >>> 8, address & 0xff}) + "] " +
-                '}';
+        return src + " => Label{ " +
+                prettyAddress() +
+                "'" + label + "'}";
     }
 }

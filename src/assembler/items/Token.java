@@ -620,7 +620,7 @@ public class Token extends Item {
     public String toString() {
         int address = getAddress();
         return src + " => Token{ " +
-                Tools.bytesToHex(new int[]{address>>>8, address&0xff}) + ": " +
+                prettyAddress() +
                 instruction + " " + op1 + (op2.isEmpty() ? "" : ","+ op2)  +
                 (hasPending() ? "    pending " : "") +
                 " [" + getOpCodeAsHexString(':') + "] " +
