@@ -15,23 +15,17 @@ import java.util.ArrayList;
  */
 public class Program {
 
-    final protected static int UNKNOWN = 0;
-    final protected static int TOKEN = 1;
-    final protected static int CONSTANT = 2;
-    final protected static int DIRECTIVE = 3;
-    final protected static int INCLUDE = 4;
-    final protected static int LABEL = 5;
-
     protected Container container;
-    protected ArrayList<Item> program = new ArrayList<Item>();
-    protected String fileName;
-    protected String baseFileName;
-    protected int org = 0;
-    protected boolean orgDefined = false;
+    protected ArrayList<Item> program = new ArrayList<>();
+    protected String fileName, baseFileName;
+    protected int org = 0, address;
+    protected boolean orgDefined = false, debug;
     protected ProgramParser programParser;
-    protected boolean debug;
-    protected int address;
 
+    /**
+     * @param file String
+     * @param debug boolean
+     */
     public Program(String file, boolean debug) {
         container = Container.getContainer();
         fileName = file;
@@ -40,23 +34,38 @@ public class Program {
         this.debug = debug;
     }
 
+    /**
+     * prints the message if debug is active
+     *
+     * @param message String
+     * @param color String
+     */
     public void debug(String message, String color) {
         if (debug) {
             Tools.println(color == null ? "" : color, message);
         }
     }
 
-    protected void processFile(String fileName, int lineNumber) throws Exception {
-        // pass 1
+    /**
+     * processes the file passed
+     *
+     * @param fileName String
+     * @throws Exception
+     */
+    protected void processFile(String fileName) throws Exception {
+
+        int lineNumber = 1;
+
         try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
+
             String line;
+
             while ((line = br.readLine()) != null) {
 
                 line = line.trim();
-                Tools.println("blue", line);
+                debug(line, "blue");
 
                 if (!line.isEmpty()) {
-                    //Item item = tokenize(line);
                     Item item = programParser.itemizeLine(line, address, lineNumber);
 
                     if (null != item) {
@@ -68,7 +77,6 @@ public class Program {
                             orgDefined = true;
                             debug(_.TAB + _.TAB + _.TAB + "~~~~==** org address " + address + " **==~~~~", _.YELLOW);
                         }
-                        //item.setAddress(address);
                         address += item.getSize();
                         program.add(item);
 
@@ -76,11 +84,8 @@ public class Program {
                             container.constants.add((Constant)item);
                         }else if (item instanceof Label) {
                             container.constants.add((Label)item);
-                            if (((Label)item).match("Description")){
-                                //  System.exit(0);
-                            }
                         }else if (item instanceof Include) {
-                            processFile(Samples.getFile(((Include)item).getFile()), 1);
+                            processFile(Samples.getFile(((Include)item).getFile()));
                         }
                     }
                 }
@@ -92,6 +97,19 @@ public class Program {
             System.exit(-1);
         }
 
+    }
+
+    /**
+     *
+     * @throws Exception
+     */
+    public void assemble() throws Exception {
+
+        address = 0;
+
+        // pass 1
+        processFile(fileName);
+
         // pass 2  -  ??
         dumpPendings();
 
@@ -101,32 +119,22 @@ public class Program {
             if (item instanceof Label) propagateLabel((Label)item);
         }
 
+        dumpPendings();
+
         debug(_.CR + _.CR, null);
-    }
-
-    public void assemble() throws Exception {
-
-        address = 0;
-
-        processFile(fileName, 1);
 
     }
 
+    /**
+     * propagates the value of the label passed
+     *
+     * @param label Label
+     */
     protected void propagateLabel(Label label) {
         Tools.println_if(debug, "", "~^~ propagating label " + label.getLabel() + " " + label.getAddress() + " ~^~");
         for (Item item: program) {
             item.solvePending(label.getLabel(), label.getAddress());
         }
-    }
-
-    protected String getValueOf(String constantName) throws Exception {
-        for (Valuable constant : container.constants) {
-            if (constant.match(constantName)) {
-                return constant.getValue();
-            }
-        }
-
-        throw new Exception("Constant " + constantName + " not declared yet!");
     }
 
     protected void dumpLabels() {

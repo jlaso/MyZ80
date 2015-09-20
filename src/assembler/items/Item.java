@@ -118,11 +118,7 @@ public class Item {
                     Tools.println("cyan", "pos=" + pos + ",cause=" + cause + "  ||  " + toString());
                     switch (pending.getType()) {
                         case Pending.OFFSET_8_BITS_C2:
-                            //if ((value & 0xff00) != 0){
-                                opCode[pos] = calcOffset(address, value);
-                            //}else {
-                            //    opCode[pos] = (byte) value;
-                            //}
+                            opCode[pos] = calcOffset(address, value);
                             break;
 
                         case Pending.ADDRESS:
