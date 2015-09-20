@@ -13,7 +13,7 @@ public class ReservedWords {
 
     protected final static String[] reservedWords = {
             // WITHOUT_OPERANDS
-        "|nop|rrca|rra|cpl|ccf|ccf|rlca|rla|daa|scf|di|ei|halt",
+        "|nop|rrca|rra|cpl|ccf|ccf|rlca|rla|daa|scf|di|ei|halt|",
             // WITH_ONE_OPERANDS
         "|djnz|cp|im|sub|or|and|xor|rst|",
             // WITH_TWO_OPERANDS
@@ -21,7 +21,7 @@ public class ReservedWords {
             // WITH_ONE_OR_NONE_OPERANDS
         "|ret|",
             // WITH_ONE_OR_TWO_OPERANDS
-        "|jr|call|"
+        "|jr|call|jp|"
     };
 
     static boolean is(int type, String word) {

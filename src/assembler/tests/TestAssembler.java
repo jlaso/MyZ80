@@ -16,9 +16,9 @@ public class TestAssembler {
      */
     public static void main(String[] args) throws Exception {
 
-        String file = "functions";
+        String file = "simple1";
 
-        Program program = new Program(Samples.getFile(file+".inc"), _.DEBUG);
+        Program program = new Program(Samples.getFile(file+".asm"), _.DEBUG);
 
         program.assemble();
 

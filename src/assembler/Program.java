@@ -5,6 +5,7 @@ import common._;
 import di.Container;
 import assembler.items.*;
 import fileFormat.Z80FileFormat;
+import samples.Samples;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -26,8 +27,10 @@ public class Program {
     protected String fileName;
     protected String baseFileName;
     protected int org = 0;
+    protected boolean orgDefined = false;
     protected ProgramParser programParser;
     protected boolean debug;
+    protected int address;
 
     public Program(String file, boolean debug) {
         container = Container.getContainer();
@@ -43,11 +46,7 @@ public class Program {
         }
     }
 
-    public void assemble() throws Exception {
-
-        int address = 0;
-        int lineNumber = 1;
-
+    protected void processFile(String fileName, int lineNumber) throws Exception {
         // pass 1
         try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
             String line;
@@ -62,7 +61,11 @@ public class Program {
 
                     if (null != item) {
                         if ((item instanceof Directive) && ((Directive) item).isORG()) {
+                            if (orgDefined) {
+                                throw new Exception(".org was defined already, you can't define more times");
+                            }
                             org = address = Integer.parseInt(((Directive) item).getValue());
+                            orgDefined = true;
                             debug(_.TAB + _.TAB + _.TAB + "~~~~==** org address " + address + " **==~~~~", _.YELLOW);
                         }
                         //item.setAddress(address);
@@ -74,8 +77,10 @@ public class Program {
                         }else if (item instanceof Label) {
                             container.constants.add((Label)item);
                             if (((Label)item).match("Description")){
-                              //  System.exit(0);
+                                //  System.exit(0);
                             }
+                        }else if (item instanceof Include) {
+                            processFile(Samples.getFile(((Include)item).getFile()), 1);
                         }
                     }
                 }
@@ -97,6 +102,13 @@ public class Program {
         }
 
         debug(_.CR + _.CR, null);
+    }
+
+    public void assemble() throws Exception {
+
+        address = 0;
+
+        processFile(fileName, 1);
 
     }
 
