@@ -6,6 +6,7 @@ import assembler.parser.ExpressionParser;
 import di.Container;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Created by joseluislaso on 06/09/15.
@@ -97,16 +98,17 @@ public class Item {
         if ( !hasPending() ) return;
 
         Tools.println("cyan", "finding pending '"+cause+"' in "+toString());
+        Iterator<Pending> iterator = pendingList.iterator();
 
-        for (int i=0; i<pendingList.size(); i++) {
+        while(iterator.hasNext()) {
 
-            Pending pending = pendingList.get(i);
+            Pending pending = iterator.next();
 
-            Tools.println("", "\t '"+pending.getCause()+"' ...");
+            Tools.println("", "\t '"+pending.getCause()+"' ... ["+pending.typeAsString()+"]");
 
             if (pending.match(cause)) {
 
-                Tools.println("yellow", "pending '"+cause+"' found in "+toString());
+                Tools.println("yellow", "pending '"+cause+"' found in  ~~~>  "+toString());
 
                 String tmp = pending.replaceLabel(cause, ""+value);
 
@@ -115,7 +117,7 @@ public class Item {
                     double d = Tools.eval(tmp);
                     //value = (int)d;
                     int pos = pending.getPosition();
-                    Tools.println("cyan", "pos=" + pos + ",cause=" + cause + "  ||  " + toString());
+                    Tools.println("purple", "pos=" + pos + ",cause=" + cause + "  ||  " + toString());
                     switch (pending.getType()) {
                         case Pending.OFFSET_8_BITS_C2:
                             opCode[pos] = calcOffset(address, value);
@@ -140,7 +142,7 @@ public class Item {
                     // can't remove pending
                 }
 
-                pendingList.remove(i);
+                iterator.remove();
 
             }
         }
