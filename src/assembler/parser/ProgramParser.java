@@ -61,7 +61,7 @@ public class ProgramParser {
             result += current;
             next();
         }
-        if (!isSpace) result += current;
+        if (!isSpace && !isSemicolon) result += current;
 
         return result;
     }
@@ -136,6 +136,7 @@ public class ProgramParser {
         next();
         discardSpaces();
         String word = getWord();
+        if (word.isEmpty()) return null;
         if (ReservedWords.is(ReservedWords.WITHOUT_OPERANDS, word)) {
             dontExpectMore();
             return new Token(word, "", "", address, buffer);
@@ -166,7 +167,7 @@ public class ProgramParser {
             dontExpectMore();
             return new Token(word, operand1, operand2, address, buffer);
         }
-        if (current == ':') {
+        if ((word.length()>0) && (word.charAt(word.length()-1) == ':')) {
             dontExpectMore();
             word = word.substring(0, word.length()-1);
             return new Label(word, address, buffer);

@@ -16,7 +16,7 @@ public class TestAssembler {
      */
     public static void main(String[] args) throws Exception {
 
-        String file = "simple1";
+        String file = "test-mult";
 
         Program program = new Program(Samples.getFile(file+".asm"), _.DEBUG);
 

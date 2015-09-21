@@ -226,12 +226,15 @@ public class Token extends Item {
                 break;
 
             case "add":   // add a,?
-                if (operand1.equals("a")){
-                    try {
-                        return new int[]{0x80 | code8bitsRegister(_operand2)};
-                    }catch (Unrecognized8bitsRegister e){
-                        return new int[]{0xC6, Tools.figureOut(operand2)};
-                    }
+                switch (_operand1) {
+                    case "a":
+                        try {
+                            return new int[]{0x80 | code8bitsRegister(_operand2)};
+                        } catch (Unrecognized8bitsRegister e) {
+                            return new int[]{0xC6, Tools.figureOut(operand2)};
+                        }
+                    case "hl":
+                        return new int[]{0x09 | (ssRegister(_operand1) << 4)};
                 }
                 break;
 
@@ -490,6 +493,16 @@ public class Token extends Item {
             case "(hl)": return 0x06;
         }
         throw new Unrecognized8bitsRegister(reg);
+    }
+
+    protected int ssRegister(String reg) throws Exception {
+        switch(reg) {
+            case "bc": return 0;
+            case "de": return 1;
+            case "hl": return 2;
+            case "sp": return 3;
+        }
+        throw new Exception("Unknow register '"+reg+"'");
     }
 
     /**
