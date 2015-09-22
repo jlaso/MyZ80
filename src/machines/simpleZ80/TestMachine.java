@@ -1,14 +1,11 @@
 package machines.simpleZ80;
 
-import assembler.Program;
 import assembler.Tools;
 import fileFormat.Z80FileFormat;
 import hardware.cpu.z80.Z80;
 import samples.Samples;
 import common._;
 
-import java.io.FileNotFoundException;
-import java.net.URL;
 
 /**
  * Created by joseluislaso on 08/09/15.
@@ -26,9 +23,11 @@ public class TestMachine {
         Z80FileFormat z80file = new Z80FileFormat(Memory.ROM_SIZE);
         z80file.readFromFile(romFile);
 
+        IOSpace ioSpace = new IOSpace();
         Memory systemMemory = new Memory(z80file);
         Z80 cpu = new Z80(_.DEBUG);
         cpu.attachSystemMemory(systemMemory);
+        cpu.attachIOSpace(ioSpace);
 
         cpu.reset();
         Tools.println("red", "PC="+z80file.getPC());

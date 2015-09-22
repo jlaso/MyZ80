@@ -1,6 +1,7 @@
 package hardware.cpu.z80;
 
 import assembler.Tools;
+import hardware.devices.peripheral.MapIO;
 import hardware.system.MemorySystemInterface;
 
 /**
@@ -11,6 +12,7 @@ public class Z80 {
     final public static long STD_CLK = 4000000;
     protected long clock;
     protected MemorySystemInterface memory = null;
+    protected MapIO mapIO = null;
     protected boolean halted = true;
     protected long mcycles = 0;
     protected long tstates = 0;
@@ -43,6 +45,10 @@ public class Z80 {
 
     public void attachSystemMemory(MemorySystemInterface memory){
         this.memory = memory;
+    }
+
+    public void attachIOSpace(MapIO mapIO) {
+        this.mapIO = mapIO;
     }
 
     public void run (int PC) {
