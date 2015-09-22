@@ -60,6 +60,10 @@ public class Z80FileFormat implements BinaryFileInterface{
 
     }
 
+    public void readDirect(byte[] content) {
+        body = content;
+    }
+
     public void readFromFile(String fileName) throws Exception {
         DataInputStream reader = new DataInputStream(new FileInputStream(fileName));
 

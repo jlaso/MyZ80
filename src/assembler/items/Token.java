@@ -121,7 +121,13 @@ public class Token extends Item {
 
             case "out":
                 if (_operand2.equals("a")){
-                    // @TODO
+                    Pattern p = Pattern.compile("\\(\\s*(?<r>[^\\)]+)\\s*\\)");
+                    Matcher m = p.matcher(operand1);
+                    if (m.find()) {
+                        operand1 = m.group("r");
+                    }
+                    int n = getLiteralLo(operand1, 1);
+                    return new int[] {0xD3, n};
                 }
                 break;
 

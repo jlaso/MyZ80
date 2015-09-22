@@ -3,6 +3,8 @@ package hardware.cpu.z80;
 import assembler.Tools;
 import hardware.devices.peripheral.MapIO;
 import hardware.system.MemorySystemInterface;
+import machines.simpleZ80.IOSpace;
+import myz80.StatusBarPanel;
 
 /**
  * Created by joseluislaso on 05/09/15.
@@ -28,6 +30,7 @@ public class Z80 {
     public int IM = 0;    // interrupt mode
 
     protected boolean debug = false;
+    protected StatusBarPanel statusPanel = null;
 
     public Z80() {
         this(STD_CLK, false);
@@ -51,6 +54,10 @@ public class Z80 {
         this.mapIO = mapIO;
     }
 
+    public void attachStatusPanel(StatusBarPanel statusPanel) {
+        this.statusPanel = statusPanel;
+    }
+
     public void run (int PC) {
         halted = false;
         this.PC = PC;
@@ -62,9 +69,13 @@ public class Z80 {
 
             step();
 
-            if (debug) {
-                System.out.println(" "+currentInstruction);
-                currentInstruction = "";
+            if (statusPanel != null) {
+                statusPanel.setText(currentInstruction);
+            }else {
+                if (debug) {
+                    System.out.println(" " + currentInstruction);
+                    currentInstruction = "";
+                }
             }
         }
     }
@@ -621,6 +632,15 @@ public class Z80 {
                 IFF0 = IFF1 = true;
                 if (debug) currentInstruction = "EI";
                 break;
+
+            // IO operations
+            case 0xD3:
+                t(3,11);
+                int n = readMem(PC++);
+                if (debug) currentInstruction = "OUT ("+Tools.byteToHex(n)+"),A";
+                mapIO.write(n, A);
+                break;
+
 
             // arithmetic operations
 

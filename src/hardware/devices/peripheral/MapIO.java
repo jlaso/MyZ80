@@ -4,6 +4,9 @@ import hardware.devices.*;
 
 /**
  * Created by joseluislaso on 22/09/15.
+ *
+ * In the declaration of the real machine extend this class to generate the IO map
+ *
  */
 public class MapIO {
 
