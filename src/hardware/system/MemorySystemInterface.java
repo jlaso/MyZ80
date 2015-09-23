@@ -11,4 +11,8 @@ public interface MemorySystemInterface {
 
     public void reset();
 
+    public int firstRAMpos();
+
+    public int lastRAMpos();
+
 }

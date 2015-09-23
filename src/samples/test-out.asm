@@ -10,16 +10,15 @@ jp start
 
 start:
 
-   ld hl,$f000
+   ld sp,$ff00
+   ld a,0
 
 loop:
 
-   ld a,h
    ;out (ledport),A
    out ($03),A
-
    call delay1
-   inc h
+   inc a
 
    jp loop
 

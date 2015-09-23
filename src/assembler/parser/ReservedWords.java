@@ -15,7 +15,7 @@ public class ReservedWords {
             // WITHOUT_OPERANDS
         "|nop|rrca|rra|cpl|ccf|ccf|rlca|rla|daa|scf|di|ei|halt|",
             // WITH_ONE_OPERANDS
-        "|djnz|cp|im|sub|or|and|xor|rst|inc|dec|",
+        "|djnz|cp|im|sub|or|and|xor|rst|inc|dec|push|pop|",
             // WITH_TWO_OPERANDS
         "|ld|add|out|",
             // WITH_ONE_OR_NONE_OPERANDS

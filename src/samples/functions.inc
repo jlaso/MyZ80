@@ -8,15 +8,15 @@
 ;=======================
 delay1:
 
-    ;push a
+    push af
     ;push bc
     ;push de
 
-    ld bc, $0001
+    ld bc, $1000
 
 delay1_outer:
 
-    ld de, $0010
+    ld de, $1000
 
 delay1_inner:
 
@@ -33,7 +33,7 @@ delay1_inner:
 
     ;pop de
     ;pop bc
-    ;por a
+    pop af
 
     ret
 ;=======================

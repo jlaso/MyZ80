@@ -33,21 +33,18 @@ public class Memory implements MemorySystemInterface {
         this.bank = bank;
     }
 
+    @Override
+    public int firstRAMpos() {
+        return ROM_SIZE;
+    }
+
+    @Override
+    public int lastRAMpos() {
+        return 0xffff;
+    }
+
     private int getBlock(int address) {
-        int block = 0;
-
-        switch (address) {
-
-            case 0-16383:
-                block = 0;
-                break;
-
-            case 16384-65535:
-                block = 1;
-                break;
-        }
-
-        return block;
+        return  address < ROM_SIZE ? 0 : 1;
     }
 
     public void reset() {

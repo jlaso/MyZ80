@@ -1,6 +1,7 @@
 package hardware.cpu.z80;
 
 import assembler.Tools;
+import common._;
 import hardware.devices.peripheral.MapIO;
 import hardware.system.MemorySystemInterface;
 import machines.simpleZ80.IOSpace;
@@ -13,12 +14,25 @@ public class Z80 {
 
     final public static long STD_CLK = 4000000;
     protected long clock;
+    protected long factor;
     protected MemorySystemInterface memory = null;
     protected MapIO mapIO = null;
     protected boolean halted = true;
     protected long mcycles = 0;
     protected long tstates = 0;
     protected String currentInstruction = "";
+
+    protected String[] ssName = { /* 00 */ "BC", /* 01 */ "DE", /* 10 */ "HL", /* 11 */ "SP" };
+    protected String[] rName = {
+        "B",    // 000
+        "C",    // 001
+        "D",    // 010
+        "E",    // 011
+        "H",    // 100
+        "L",    // 101
+        "(HL)", // 110
+        "A"     // 111
+    };
 
     // registers
     public int A, F, B, C, D, E, H, L, I, R;
@@ -47,11 +61,13 @@ public class Z80 {
     public Z80 (long clock, boolean debug){
         this.debug = debug;
         this.clock = clock;
+        factor = 1000000000/clock; // to deal with nanoseconds
         reset();
     }
 
     public void attachSystemMemory(MemorySystemInterface memory){
         this.memory = memory;
+        if (SP==0) SP = memory.lastRAMpos();
     }
 
     public void attachIOSpace(MapIO mapIO) {
@@ -62,34 +78,41 @@ public class Z80 {
         this.statusPanel = statusPanel;
     }
 
-    public void run (int PC) {
+    public void run (int PC) throws InterruptedException {
         halted = false;
         this.PC = PC;
+        long startTime = System.nanoTime(), prevEndTime, realEndTime;
 
         while (!halted) {
 
-            if (debug)
-                dumpRegisters();
+            if (debug) dumpRegisters();
 
             step();
 
-            if (statusPanel != null) {
-                statusPanel.setText(currentInstruction);
-            }else {
-                if (debug) {
-                    System.out.println(" " + currentInstruction);
-                    currentInstruction = "";
-                }
+            if (statusPanel != null) statusPanel.setText("> "+currentInstruction);
+            if (debug) System.out.println(" " + currentInstruction);
+
+            currentInstruction = "";
+
+            prevEndTime = startTime + factor*tstates;  // 7/4000000 = 0,00000175 seconds  1.75 microseconds
+            realEndTime = System.nanoTime();
+
+            int delay = (int)((prevEndTime - realEndTime)/1000000);
+            if (delay  > 0){
+                Thread.sleep(delay);
             }
+            statusPanel.setText2(""+(prevEndTime - realEndTime)+" <");
         }
     }
 
     public void reset() {
         PC = 0;
-        SP = 0x1000;
+        SP = 0;
         H = L = 0;
         D = E = 0;
         B = C = 0;
+        A = F = 0;
+        IX = IY = 0;
 
         if(memory != null) {
             memory.reset();
@@ -271,6 +294,7 @@ public class Z80 {
     protected boolean isSignPositive(){ return (F & 0b10000000) == 0;}
     protected boolean isSignNegative(){ return (F & 0b10000000) > 0;}
     protected boolean isZero(){ return (F & 0b01000000) > 0;}
+    protected void setZero(){ F |= 0b01000000; }
     protected boolean isNonZero(){ return (F & 0b01000000) == 0;}
     protected boolean isCarry(){ return (F & 0b00000001) > 0;}
     protected boolean isNoCarry(){ return (F & 0b00000001) == 0;}
@@ -288,6 +312,14 @@ public class Z80 {
     protected void t(int m, int t){
         mcycles+=m;
         tstates+=t;
+    }
+
+    protected void dumpStack() {
+        String s = "*";
+        for (int i = SP; i < SP+12; i++) {
+            s += "["+Tools.addressToHex(i)+"] "+Tools.byteToHex(memory.peek(i))+" | ";
+        }
+        Tools.println("red", _.CR + s);
     }
 
     /**
@@ -357,19 +389,19 @@ public class Z80 {
     {
         switch (ss){
 
-            case 0x00: // BC
+            case 0b00: // BC
                 BC(hi,lo);
                 return "BC";
 
-            case 0x01: // DE
+            case 0b01: // DE
                 DE(hi,lo);
                 return "DE";
 
-            case 0x10: // HL
+            case 0b10: // HL
                 HL(hi,lo);
                 return "HL";
 
-            case 0x11: // SP
+            case 0b11: // SP
                 SP = (hi << 8) | lo;
                 return "SP";
 
@@ -398,6 +430,16 @@ public class Z80 {
         }
 
         return "?";
+    }
+
+    protected void decSSregister(int ss) {
+        // @TODO: flags ?
+        switch (ss) {
+            case 0b00: BC(BC()-1); break;
+            case 0b01: DE(DE() - 1); break;
+            case 0b10: HL(HL() - 1); break;
+            case 0b11: SP--; break;
+        }
     }
 
     /**
@@ -431,6 +473,7 @@ public class Z80 {
      */
     protected String setAfrom8bRegister(int r)
     {
+        // @TODO: flags ?
         switch (r){
             case 0: A=B; return "B";
             case 1: A=C; return "C";
@@ -565,8 +608,9 @@ public class Z80 {
      * @param value int
      */
     protected void push (int value) {
-        memory.poke(--SP, value >>> 8);
-        memory.poke(--SP, value & 0xff);
+        memory.poke(--SP, (int)(value >>> 8));
+        memory.poke(--SP, (int)(value & 0x00ff));
+        if (debug) dumpStack();
     }
 
     /**
@@ -574,7 +618,8 @@ public class Z80 {
      * @return int
      */
     protected int pop() {
-        return memory.peek(SP++) | (memory.peek(SP++) << 8);
+        if (debug) dumpStack();
+        return (int) (memory.peek(SP++) | (memory.peek(SP++) << 8));
     }
 
     /**
@@ -619,6 +664,25 @@ public class Z80 {
         return "";
     }
 
+    protected int r(int r) {
+        switch (r){
+            case 0: return B;
+            case 1: return C;
+            case 2: return D;
+            case 3: return E;
+            case 4: return H;
+            case 5: return L;
+            case 6: return readMem(HL());
+            case 7: return A;
+        }
+        return 0;
+    }
+
+    protected void A(int value) {
+        A = value;
+        if (A == 0) setZero();
+    }
+
 //    protected int c2byte(int value)
 //    {
 //        return 256 - (byte)value;
@@ -642,7 +706,7 @@ public class Z80 {
 
             case 0x00: // NOP
                 t(1, 4);
-                if (debug) currentInstruction = "NOP";
+                currentInstruction = "NOP";
                 break;
 
             case 0x10:  // DJNZ
@@ -655,18 +719,18 @@ public class Z80 {
                     t(3,13);
                     PC = address;
                 }
-                if (debug) currentInstruction = "DJNZ "+Tools.addressToHex(address)+" ("+offset+")";
+                currentInstruction = "DJNZ "+Tools.addressToHex(address)+" ("+offset+")";
                 break;
 
             case 0x01:  // LD ss,nn
             case 0x11:
-            case 0x21:
+            case 0x21:    // 0010 0001
             case 0x31:
                 t(3,10);
                 int lo = readMem(PC++);
                 int hi = readMem(PC++);
                 reg = set16bRegister((opcode >>> 4) & 0x03, hi, lo);
-                if (debug) currentInstruction = "LD "+reg+","+Tools.byteToHex(hi)+Tools.byteToHex(lo)+"h";
+                currentInstruction = "LD "+reg+","+Tools.byteToHex(hi)+Tools.byteToHex(lo)+"h";
                 break;
 
             case 0x04:  // INC
@@ -679,7 +743,7 @@ public class Z80 {
             case 0x3C:
                 t(1, 4);
                 reg = inc8bRegister((opcode >>> 3) & 0x07);
-                if (debug) currentInstruction = "INC "+reg;
+                currentInstruction = "INC "+reg;
                 break;
 
             case 0x78:   // LD A,r
@@ -692,7 +756,7 @@ public class Z80 {
             case 0x7F:
                 t(1,4);
                 reg = setAfrom8bRegister(opcode & 0x07);
-                if (debug) currentInstruction = "LD A,"+reg;
+                currentInstruction = "LD A,"+reg;
                 break;
 
             case 0x06:  // LD r,r
@@ -706,13 +770,13 @@ public class Z80 {
                 t(2,7);
                 int operand = readMem(PC++);
                 reg = set8bRegister((opcode >>> 3) & 0x07, operand);
-                if (debug) currentInstruction = "LD "+reg+","+Tools.byteToHex(operand)+"h";
+                currentInstruction = "LD "+reg+","+Tools.byteToHex(operand)+"h";
                 break;
 
             case 0x76: // HALT
                 t(1,4);
                 halted = true;
-                if (debug) currentInstruction = "HALT";
+                currentInstruction = "HALT";
                 break;
 
             case 0x80:  // ADD A,r
@@ -725,7 +789,7 @@ public class Z80 {
             case 0x87:
                 t(1,4);
                 reg = add8bRegisterToA(opcode & 0x07);
-                if (debug) currentInstruction = "ADD A,"+reg;
+                currentInstruction = "ADD A,"+reg;
                 break;
 
             case 0x88:  // ADC A,r
@@ -738,7 +802,7 @@ public class Z80 {
             case 0x8F:
                 t(1,4);
                 reg = adc8bRegisterToA(opcode & 0x07);
-                if (debug) currentInstruction = "ADC A,"+reg;
+                currentInstruction = "ADC A,"+reg;
                 break;
 
             case 0x90:  // SUB r   A <- A - r
@@ -751,7 +815,31 @@ public class Z80 {
             case 0x97:
                 t(1,4);
                 reg = sub8bRegisterToA(opcode & 0x07);
-                if (debug) currentInstruction = "SUB "+reg;
+                currentInstruction = "SUB "+reg;
+                break;
+
+            case 0x0B:   // DEC ss
+            case 0x1B:
+            case 0x2B:
+            case 0x3B:
+                t(1, 6);
+                int ss = (opcode & 0b00110000) >>> 4;
+                decSSregister(ss);
+                currentInstruction = "DEC "+ssName[ss];
+                break;
+
+            case 0xB0:   // OR r
+            case 0xB1:
+            case 0xB2:
+            case 0xB3:
+            case 0xB4:
+            case 0xB5:
+            case 0xB6:
+            case 0xB7:
+                int r = opcode & 0x7;
+                if (r == 0b110) t(2,7); else t(1,4);
+                currentInstruction = "OR "+rName[r];
+                A( A | r(r) );
                 break;
 
             case 0xC1:  // POP ss
@@ -760,7 +848,7 @@ public class Z80 {
             case 0xF1:
                 t(3,10);
                 reg = popSS((opcode >>> 4) & 0x03);
-                if (debug) currentInstruction = "POP "+reg;
+                currentInstruction = "POP "+reg;
                 return;
 
             case 0xC5:  // PUSH ss
@@ -769,15 +857,15 @@ public class Z80 {
             case 0xF5:
                 t(3,11);
                 reg = pushSS((opcode >>> 4) & 0x03);
-                if (debug) currentInstruction = "PUSH "+reg;
+                currentInstruction = "PUSH "+reg;
                 return;
 
             case 0xCD:  // CALL nn
                 t(5, 17);
-                push(PC);
                 address = readWord(PC); PC+=2;
+                push(PC);
                 PC = address;
-                if (debug) currentInstruction = "CALL "+Tools.addressToHex(address);
+                currentInstruction = "CALL "+Tools.addressToHex(address);
                 return;
 
             case 0xC4:   // CALL cc,nn
@@ -795,12 +883,13 @@ public class Z80 {
                 }else{
                     t(3,10);
                 }
-                if (debug) currentInstruction = "CALL "+result.data+", "+Tools.addressToHex(address);
+                currentInstruction = "CALL "+result.data+", "+Tools.addressToHex(address);
                 break;
 
             case 0xC9:   // RET
                 PC = pop();
                 t(3,10);
+                currentInstruction = "RET";
                 break;
 
             case 0xC0:   // RET cc
@@ -817,7 +906,7 @@ public class Z80 {
                 }else{
                     t(1,5);
                 }
-                if (debug) currentInstruction="RET "+result.data;
+                currentInstruction="RET "+result.data;
                 break;
 
             case 0xED:  // extended ED instructions
@@ -835,20 +924,20 @@ public class Z80 {
             case 0xF3:  // DI
                 t(1,4);
                 IFF0 = IFF1 = false;
-                if (debug) currentInstruction = "di";
+                currentInstruction = "di";
                 break;
 
             case 0xFB:  // EI
                 t(1,4);
                 IFF0 = IFF1 = true;
-                if (debug) currentInstruction = "EI";
+                currentInstruction = "EI";
                 break;
 
             // IO operations
             case 0xD3:
                 t(3,11);
                 int n = readMem(PC++);
-                if (debug) currentInstruction = "OUT ("+Tools.byteToHex(n)+"),A";
+                currentInstruction = "OUT ("+Tools.byteToHex(n)+"),A";
                 mapIO.write(n, A);
                 break;
 
@@ -861,7 +950,7 @@ public class Z80 {
             case 0x39:
                 t(3,11);
                 reg = addSSToHL((opcode & 0b00110000) >>> 4);
-                if (debug) currentInstruction = "ADD HL,"+reg;
+                currentInstruction = "ADD HL,"+reg;
                 break;
 
 
@@ -870,7 +959,7 @@ public class Z80 {
             case 0xC3:  // JP address
                 address = readWord(PC); PC+=2;
                 PC = address;
-                if (debug) currentInstruction = "JP "+Tools.addressToHex(address);
+                currentInstruction = "JP "+Tools.addressToHex(address);
                 break;
 
             case 0xC2:  // JP cond,address
@@ -883,12 +972,12 @@ public class Z80 {
             case 0xFA:
                 address = readWord(PC); PC+=2;
                 result = jump((opcode & 0b00111000) >>> 3, address);
-                if (result.success) {
+                if (result.success) {  // @TODO: books says that is the same time in any case
                     t(5,17);   // in the book isn't this (page 165)
                 }else{
                     t(3,10);
                 }
-                if (debug) currentInstruction = "JP "+result.data+" "+Tools.addressToHex(address);
+                currentInstruction = "JP "+result.data+" "+Tools.addressToHex(address);
                 break;
         }
 
@@ -911,19 +1000,19 @@ public class Z80 {
             case 0x46: // set IM to 0
                 t(2,8);
                 IM = 0;
-                if (debug) currentInstruction = "IM 0";
+                currentInstruction = "IM 0";
                 break;
 
             case 0x56: // set IM to 1
                 t(2,8);
                 IM = 1;
-                if (debug) currentInstruction = "IM 1";
+                currentInstruction = "IM 1";
                 break;
 
             case 0x5E: // set IM to 2
                 t(2,8);
                 IM = 2;
-                if (debug) currentInstruction = "IM 2";
+                currentInstruction = "IM 2";
                 break;
 
             // HL <- HL + ss + C
@@ -933,7 +1022,7 @@ public class Z80 {
             case 0x7a:
                 t(4,15);
                 reg = adcSSToHL((opcode & 0b00110000) >>> 4);
-                if (debug) currentInstruction = "ADC HL,"+reg;
+                currentInstruction = "ADC HL,"+reg;
                 break;
 
         }

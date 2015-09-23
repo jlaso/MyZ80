@@ -21,12 +21,14 @@ public class Board extends JFrame {
     private LedArray ledArray;
 
     public Board() throws Exception {
-        super();
+        this("Z80 Board");
+    }
+
+    public Board(String title) throws Exception {
+        super(title);
 
         setLayout(new BorderLayout());
         setExtendedState(Frame.MAXIMIZED_BOTH);
-        
-        setTitle("Z80 Board");
 
         statusBarPanel = new StatusBarPanel();
         add(statusBarPanel, BorderLayout.SOUTH);

@@ -1,19 +1,18 @@
 package machines.simpleZ80.tests;
 
 import assembler.Tools;
+import common._;
 import fileFormat.Z80FileFormat;
 import hardware.board.Board;
 import hardware.cpu.z80.Z80;
 import machines.simpleZ80.IOSpace;
 import machines.simpleZ80.Memory;
 import samples.Samples;
-import common._;
-
 
 /**
- * Created by joseluislaso on 08/09/15.
+ * Created by joseluislaso on 23/09/15.
  */
-public class TestMachine {
+public class TestMemory {
 
     /**
      * @param args the command line arguments
@@ -26,20 +25,19 @@ public class TestMachine {
         Z80FileFormat z80file = new Z80FileFormat(Memory.ROM_SIZE);
         z80file.readFromFile(romFile);
 
-        long clock = 4000000; // 4MHz
+        Memory memory = new Memory(z80file);
 
-        Board board = new Board("Z80 "+romFile+" @ "+(clock/1000000)+"MHz");
+        // test the RAM
 
-        IOSpace ioSpace = new IOSpace(board);
-        Memory systemMemory = new Memory(z80file);
-        Z80 cpu = new Z80(clock,_.NO_DEBUG);
-        cpu.attachSystemMemory(systemMemory);
-        cpu.attachIOSpace(ioSpace);
-        cpu.attachStatusPanel(board.getStatusBarPanel());
+        for (int i = memory.firstRAMpos(); i < memory.lastRAMpos(); i++) {
+            int v = (int)(Math.random() * 100);
 
-        cpu.reset();
-        Tools.println("red", "PC="+z80file.getPC());
-        cpu.run(z80file.getPC());
+            memory.poke(i, v);
+            if (v != memory.peek(i)) {
+                System.out.println("Position "+i+" has not been poked as expected!");
+            }
+        }
+
 
     }
 }
