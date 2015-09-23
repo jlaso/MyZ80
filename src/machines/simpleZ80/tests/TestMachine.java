@@ -38,7 +38,7 @@ public class TestMachine {
         cpu.attachStatusPanel(board.getStatusBarPanel());
 
         cpu.reset();
-        Tools.println("red", "PC="+z80file.getPC());
+        Tools.println("red", "starting on PC "+Tools.addressToHex(z80file.getPC()));
         cpu.run(z80file.getPC());
 
     }
