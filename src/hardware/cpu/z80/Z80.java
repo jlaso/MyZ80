@@ -24,10 +24,14 @@ public class Z80 {
     public int A, F, B, C, D, E, H, L, I, R;
     protected int PC;
     protected int SP;
+    protected int IX;
+    protected int IY;
     // interrupt
     public boolean IFF1 = false; // NMI interrupt flip-flop
     public boolean IFF0 = false; // IRQ interrupt flip-flop
     public int IM = 0;    // interrupt mode
+
+    protected boolean isED, isDD, isFD;
 
     protected boolean debug = false;
     protected StatusBarPanel statusPanel = null;
@@ -163,6 +167,18 @@ public class Z80 {
     protected void DE(int d, int e){
         D = d;
         E = e;
+    }
+
+    protected int AF() {
+        return (A << 8) | F;
+    }
+    protected void AF(int AF){
+        A = AF >>> 8;
+        F = AF & 0xFF;
+    }
+    protected void AF(int a, int f){
+        A = a;
+        F = f;
     }
 
     protected int carryFlag(){
@@ -304,8 +320,8 @@ public class Z80 {
     /**
      * read a byte from memory
      *
-     * @param address
-     * @return
+     * @param address int
+     * @return int
      */
     protected int readMem(int address)
     {
@@ -317,8 +333,8 @@ public class Z80 {
     /**
      * Read a word from memory
      *
-     * @param address
-     * @return
+     * @param address int
+     * @return int
      */
     protected int readWord(int address)
     {
@@ -332,10 +348,10 @@ public class Z80 {
     /**
      * set a register of 16 bits identified by "ss" and returns its mnemonic
      *
-     * @param ss
-     * @param hi
-     * @param lo
-     * @return
+     * @param ss int
+     * @param hi int
+     * @param lo int
+     * @return String
      */
     protected String set16bRegister(int ss, int hi, int lo)
     {
@@ -365,8 +381,8 @@ public class Z80 {
     /**
      * increments the register of 8 bits identified by "r" and returns its mnemonic
      *
-     * @param r
-     * @return
+     * @param r int
+     * @return String
      */
     protected String inc8bRegister(int r)
     {
@@ -387,9 +403,9 @@ public class Z80 {
     /**
      * sets the register of 8 bits identified by "r" and returns its mnemonic
      *
-     * @param r
-     * @param value
-     * @return
+     * @param r int
+     * @param value int
+     * @return String
      */
     protected String set8bRegister(int r, int value)
     {
@@ -408,22 +424,22 @@ public class Z80 {
     }
 
     /**
-     * add the content of the register of 8 bits identified by "r" to Accumulator and returns its mnemonic
+     * sets A register from register of 8 bits identified by "r" and returns its mnemonic
      *
-     * @param r
-     * @return
+     * @param r int
+     * @return String
      */
-    protected String sub8bRegisterToA(int r)
+    protected String setAfrom8bRegister(int r)
     {
         switch (r){
-            case 0: A=subByte(A,B); return "B";
-            case 1: A=subByte(A,C); return "C";
-            case 2: A=subByte(A,D); return "D";
-            case 3: A=subByte(A,E); return "E";
-            case 4: A=subByte(A,H); return "H";
-            case 5: A=subByte(A,L); return "L";
-            case 6: A=subByte(A,readMem(HL())); return "(HL)";
-            case 7: A=subByte(A,A); return "A";
+            case 0: A=B; return "B";
+            case 1: A=C; return "C";
+            case 2: A=D; return "D";
+            case 3: A=E; return "E";
+            case 4: A=H; return "H";
+            case 5: A=L; return "L";
+            case 6: A=readMem(HL()); return "(HL)";
+            case 7: A=A; return "A";
         }
 
         return "?";
@@ -432,20 +448,42 @@ public class Z80 {
     /**
      * add the content of the register of 8 bits identified by "r" to Accumulator and returns its mnemonic
      *
-     * @param r
-     * @return
+     * @param r int
+     * @return String
+     */
+    protected String sub8bRegisterToA(int r)
+    {
+        switch (r){
+            case 0: A=subByte(A, B); return "B";
+            case 1: A=subByte(A, C); return "C";
+            case 2: A=subByte(A, D); return "D";
+            case 3: A=subByte(A, E); return "E";
+            case 4: A=subByte(A, H); return "H";
+            case 5: A=subByte(A, L); return "L";
+            case 6: A=subByte(A, readMem(HL())); return "(HL)";
+            case 7: A=subByte(A, A); return "A";
+        }
+
+        return "?";
+    }
+
+    /**
+     * add the content of the register of 8 bits identified by "r" to Accumulator and returns its mnemonic
+     *
+     * @param r int
+     * @return String
      */
     protected String add8bRegisterToA(int r)
     {
         switch (r){
-            case 0: A=addByte(A,B); return "B";
-            case 1: A=addByte(A,C); return "C";
-            case 2: A=addByte(A,D); return "D";
-            case 3: A=addByte(A,E); return "E";
-            case 4: A=addByte(A,H); return "H";
-            case 5: A=addByte(A,L); return "L";
-            case 6: A=addByte(A,readMem(HL())); return "(HL)";
-            case 7: A=addByte(A,A); return "A";
+            case 0: A=addByte(A, B); return "B";
+            case 1: A=addByte(A, C); return "C";
+            case 2: A=addByte(A, D); return "D";
+            case 3: A=addByte(A, E); return "E";
+            case 4: A=addByte(A, H); return "H";
+            case 5: A=addByte(A, L); return "L";
+            case 6: A=addByte(A, readMem(HL())); return "(HL)";
+            case 7: A=addByte(A, A); return "A";
         }
 
         return "?";
@@ -454,8 +492,8 @@ public class Z80 {
     /**
      * add the carry and the content of the register of 8 bits identified by "r" to Accumulator and returns its mnemonic
      *
-     * @param r
-     * @return
+     * @param r int
+     * @return String
      */
     protected String adc8bRegisterToA(int r)
     {
@@ -477,25 +515,108 @@ public class Z80 {
 
     /**
      *
-     * @param cond
-     * @param address
-     * @return
+     * @param cond int
+     * @param address int
+     * @return Result
      */
-    protected String jump(int cond, int address)
+    protected Result jump(int cond, int address)
     {
+        Result result = checkCondition(cond);
+        if (result.success) PC=address;
+        return result;
+    }
+
+    /**
+     * checks the condition indicated by cond
+     * @param cond int
+     * @return Result
+     */
+    protected Result checkCondition(int cond) {
         String reg = "";
+        boolean ret = false;
         switch (cond){
-            case 0b000: reg="NZ"; if(isNonZero()) PC=address; break;
-            case 0b001: reg="Z"; if(isZero()) PC=address; break;
-            case 0b010: reg="NC"; if(isNoCarry()) PC=address; break;
-            case 0b011: reg="C"; if(isCarry()) PC=address; break;
-            case 0b100: reg="PO"; if(isParityOdd()) PC=address; break;
-            case 0b101: reg="PE"; if(isParityEven()) PC=address; break;
-            case 0b110: reg="P"; if(isSignPositive()) PC=address; break;
-            case 0b111: reg="M"; if(isSignNegative()) PC=address; break;
+            case 0b000: reg="NZ"; ret=isNonZero(); break;
+            case 0b001: reg="Z"; ret=isZero(); break;
+            case 0b010: reg="NC"; ret=isNoCarry(); break;
+            case 0b011: reg="C"; ret=isCarry(); break;
+            case 0b100: reg="PO"; ret=isParityOdd(); break;
+            case 0b101: reg="PE"; ret=isParityEven(); break;
+            case 0b110: reg="P"; ret=isSignPositive(); break;
+            case 0b111: reg="M"; ret=isSignNegative(); break;
         }
 
-        return reg;
+        return new Result(ret, reg);
+    }
+
+    /**
+     *
+     * @param cond int
+     * @return Result
+     */
+    protected Result ret(int cond)
+    {
+        Result result = checkCondition(cond);
+        if (result.success) PC=pop();
+        return result;
+    }
+
+    /**
+     * pushes the content of the value in the stack
+     * @param value int
+     */
+    protected void push (int value) {
+        memory.poke(--SP, value >>> 8);
+        memory.poke(--SP, value & 0xff);
+    }
+
+    /**
+     * fetches the value of 16 bits from the stack
+     * @return int
+     */
+    protected int pop() {
+        return memory.peek(SP++) | (memory.peek(SP++) << 8);
+    }
+
+    /**
+     * pushes the content of the register indicated by ss into the stack
+     * @param ss int
+     * @return String
+     */
+    protected String pushSS(int ss) {
+        switch (ss) {
+            case 0x00: push(BC()); return "BC";
+            case 0x01: push(DE()); return "DE";
+            case 0x02:
+                if (isDD) {
+                    push(IX); return "IX";
+                } else if (isFD) {
+                    push(IY); return "IY";
+                }
+                push(HL()); return "HL";
+            case 0x03: push(AF()); return "AF";
+        }
+        return "";
+    }
+
+    /**
+     * fetches from the stack the content of the register indicated by ss
+     * @param ss int
+     * @return String
+     */
+    protected String popSS(int ss) {
+        switch (ss) {
+            case 0x00: BC(pop()); return "BC";
+            case 0x01: DE(pop()); return "DE";
+            case 0x02:
+                if (isDD) {
+                    IX=pop(); return "IX";
+                } else if (isFD) {
+                    IY=pop(); return "IY";
+                }
+                HL(pop()); return "HL";
+            case 0x03: AF(pop()); return "AF";
+        }
+        return "";
     }
 
 //    protected int c2byte(int value)
@@ -508,9 +629,12 @@ public class Z80 {
      */
     protected void step() {
 
+        isED = isDD = false;
+
         String reg;   // temp variable
         int address;  // temp variable
         if (debug) System.out.print(Tools.addressToHex(PC)+": ");    // prints the current address (PC)
+        Result result;
 
         int opcode = readMem(PC++);
 
@@ -556,6 +680,19 @@ public class Z80 {
                 t(1, 4);
                 reg = inc8bRegister((opcode >>> 3) & 0x07);
                 if (debug) currentInstruction = "INC "+reg;
+                break;
+
+            case 0x78:   // LD A,r
+            case 0x79:
+            case 0x7A:
+            case 0x7B:
+            case 0x7C:
+            case 0x7D:
+            case 0x7E:
+            case 0x7F:
+                t(1,4);
+                reg = setAfrom8bRegister(opcode & 0x07);
+                if (debug) currentInstruction = "LD A,"+reg;
                 break;
 
             case 0x06:  // LD r,r
@@ -617,8 +754,82 @@ public class Z80 {
                 if (debug) currentInstruction = "SUB "+reg;
                 break;
 
+            case 0xC1:  // POP ss
+            case 0xD1:
+            case 0xE1:
+            case 0xF1:
+                t(3,10);
+                reg = popSS((opcode >>> 4) & 0x03);
+                if (debug) currentInstruction = "POP "+reg;
+                return;
+
+            case 0xC5:  // PUSH ss
+            case 0xD5:
+            case 0xE5:
+            case 0xF5:
+                t(3,11);
+                reg = pushSS((opcode >>> 4) & 0x03);
+                if (debug) currentInstruction = "PUSH "+reg;
+                return;
+
+            case 0xCD:  // CALL nn
+                t(5, 17);
+                push(PC);
+                address = readWord(PC); PC+=2;
+                PC = address;
+                if (debug) currentInstruction = "CALL "+Tools.addressToHex(address);
+                return;
+
+            case 0xC4:   // CALL cc,nn
+            case 0xD4:
+            case 0xE4:
+            case 0xF4:
+            case 0xCC:
+            case 0xDC:
+            case 0xEC:
+            case 0xFC:
+                address = readWord(PC); PC+=2;
+                result = jump((opcode & 0b00111000) >>> 3, address);
+                if (result.success) {
+                    t(5,17);
+                }else{
+                    t(3,10);
+                }
+                if (debug) currentInstruction = "CALL "+result.data+", "+Tools.addressToHex(address);
+                break;
+
+            case 0xC9:   // RET
+                PC = pop();
+                t(3,10);
+                break;
+
+            case 0xC0:   // RET cc
+            case 0xD0:
+            case 0xE0:
+            case 0xF0:
+            case 0xC8:
+            case 0xD8:
+            case 0xE8:
+            case 0xF8:
+                result = ret((opcode & 0b00111000) >>> 3);
+                if (result.success) {
+                    t(3,11);
+                }else{
+                    t(1,5);
+                }
+                if (debug) currentInstruction="RET "+result.data;
+                break;
+
             case 0xED:  // extended ED instructions
                 run_ED_opcode();
+                break;
+
+            case 0xDD:  // extended DD instructions
+                run_DD_opcode();
+                break;
+
+            case 0xFD:  // extended FD instructions
+                run_FD_opcode();
                 break;
 
             case 0xF3:  // DI
@@ -671,8 +882,13 @@ public class Z80 {
             case 0xF2:
             case 0xFA:
                 address = readWord(PC); PC+=2;
-                reg = jump((opcode & 0b00111000) >>> 3, address);
-                if (debug) currentInstruction = "JP "+reg+" "+Tools.addressToHex(address);
+                result = jump((opcode & 0b00111000) >>> 3, address);
+                if (result.success) {
+                    t(5,17);   // in the book isn't this (page 165)
+                }else{
+                    t(3,10);
+                }
+                if (debug) currentInstruction = "JP "+result.data+" "+Tools.addressToHex(address);
                 break;
         }
 
@@ -686,6 +902,7 @@ public class Z80 {
 
     protected void run_ED_opcode() {
 
+        isED = true;
         String reg; // temp variable
         int opcode = readMem(PC++);
 
@@ -719,6 +936,48 @@ public class Z80 {
                 if (debug) currentInstruction = "ADC HL,"+reg;
                 break;
 
+        }
+    }
+
+    /**
+     * EXECUTE INSTRUCTIONS WITH DD PREFIX
+     */
+
+    protected void run_DD_opcode() {
+
+        isDD = true;
+        String reg; // temp variable
+        int opcode = readMem(PC++);
+
+        switch (opcode) {
+
+        }
+
+    }
+
+    /**
+     * EXECUTE INSTRUCTIONS WITH FD PREFIX
+     */
+
+    protected void run_FD_opcode() {
+
+        isFD = true;
+        String reg; // temp variable
+        int opcode = readMem(PC++);
+
+        switch (opcode) {
+
+        }
+
+    }
+
+    class Result {
+        public String data;
+        public boolean success;
+
+        public Result(boolean success, String data) {
+            this.data = data;
+            this.success = success;
         }
     }
 

@@ -6,15 +6,35 @@
 ; isn't a millisecond,
 ; just for testing purposes
 ;=======================
-retard1ms:
+delay1:
 
-ld b, $ff
+    ;push a
+    ;push bc
+    ;push de
 
-_retard1ms:
-    nop
-    nop
-    nop
-    djnz _retard1ms
+    ld bc, $0001
+
+delay1_outer:
+
+    ld de, $0010
+
+delay1_inner:
+
+    dec de
+    ld a,d
+    or e
+    jp nz delay1_inner
+
+    dec bc
+    ld a,b
+    or c
+
+    jp nz delay1_outer
+
+    ;pop de
+    ;pop bc
+    ;por a
+
     ret
 ;=======================
 ; end of retard function
