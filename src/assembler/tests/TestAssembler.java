@@ -16,7 +16,7 @@ public class TestAssembler {
      */
     public static void main(String[] args) throws Exception {
 
-        String file = "test-out";
+        String file = "test";
 
         Program program = new Program(Samples.getFile(file+".asm"), _.DEBUG);
 
