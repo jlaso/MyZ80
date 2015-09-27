@@ -15,10 +15,10 @@ int main()
 
     cpu.attachMemory(memory);
 
-//    printf("\n\n");
-//
-    for (int addr = 0; addr < 6; addr++) {
-    //    printf("0x%02X > 0x%02X .\n", addr, memory.read(addr));
+    printf("\n\n");
+
+    for (int addr = 0; addr < 10; addr++) {
+        printf("0x%02X > 0x%02X .\n", addr, memory.read(addr));
     }
 
     cpu.run(0);

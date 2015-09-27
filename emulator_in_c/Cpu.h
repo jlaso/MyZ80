@@ -10,6 +10,12 @@ using namespace std;
 class Cpu
 {
 private:
+
+    /**
+     * REGISTERS
+     */
+
+    // MAIN REGISTERS
     record16 _AF;
     word* AF = &_AF.rr;
     byte* A  = &_AF.r.hi;
@@ -26,6 +32,29 @@ private:
     word* HL = &_HL.rr;
     byte* H  = &_HL.r.hi;
     byte* L  = &_HL.r.lo;
+
+    // ALTERNATE REGISTERS
+    record16 _AF_;
+    word* AF_ = &_AF_.rr;
+    byte* A_  = &_AF_.r.hi;
+    byte* F_  = &_AF_.r.lo;
+    record16 _BC_;
+    word* BC_ = &_BC_.rr;
+    byte* B_  = &_BC_.r.hi;
+    byte* C_  = &_BC_.r.lo;
+    record16 _DE_;
+    word* DE_ = &_DE_.rr;
+    byte* D_  = &_DE_.r.hi;
+    byte* E_  = &_DE_.r.lo;
+    record16 _HL_;
+    word* HL_ = &_HL_.rr;
+    byte* H_  = &_HL_.r.hi;
+    byte* L_  = &_HL_.r.lo;
+
+    // Program Counter and Stack Pointer
+    word PC, SP;
+
+    // Index Registers
     record16 _IX;
     word* IX = &_IX.rr;
     byte* Ix = &_IX.r.hi;
@@ -35,48 +64,76 @@ private:
     byte* Iy = &_IY.r.hi;
     byte* Y  = &_IY.r.lo;
 
-    byte* r[8] = { &_BC.r.hi,&_BC.r.lo,&_DE.r.hi,&_DE.r.lo,&_HL.r.hi, 0, &_HL.r.lo, &_AF.r.hi };
-    char * rName[8] = { "B", "C", "D", "E", "H", "L", "(HL)", "A" };
+    // Special registers
+    byte I,R;
+    bool IFF1,IFF2;
+    byte IM;
 
-    word PC, SP;
+    /**
+     * auxiliary variables
+     */
+
     char currentInstruction[250] = "\0";
+    static const int align = 25;     // to align the PC + opcodes to the left in the currentInstruction string
+    long cycles;   // cycles consumed by the currentInstruction in order to adjust the real time consumed
+    byte opcode; // current opcode that is been decoded and executed
+    byte registersBank;
+    byte bPrev, bAfter;
+    word wPrev, wAfter;
 
-    long cycles;
+    /**
+     * Memory
+     */
     Memory memory;
-    byte opcode;
+    byte readByte(word addr);
+    word readWord(word addr);
 
+    /**
+     * methods that executes every instruction
+     */
     virtual int unknown();
     virtual int nop();
-    virtual int inc_r();
     virtual int ld_bc_nn();
-    virtual int halt();
     virtual int ld_b_b();
     virtual int jp_nn();
 
-    typedef int(Cpu::*PtrFunction)(void);
-    Cpu::PtrFunction mfs[0xFF];
-    byte readByte(word addr);
-    word readWord(word addr);
+    /**
+     * FLAG's stuff
+     */
     void setFlags(byte result, int sign, int zero, int half_carry, int par_over, int add_sub, int carry);
 
-    static const int align = 25;
     static const byte SIGN_FLAG     = 0b10000000;
     static const byte ZERO_FLAG     = 0b01000000;
     static const byte ADD_SUB_FLAG  = 0b00010000;
     static const byte PAR_OV_FLAG   = 0b00000100;
     static const byte CARRY_FLAG    = 0b00000001;
-    static const word H_CARRY_FLAG = 0b100000000;
+    static const word H_CARRY_FLAG = 0b100000000;   // fake flag to control other behaviour of H
+
+    /** ? **/
+    //byte* r[8] = { &_BC.r.hi,&_BC.r.lo,&_DE.r.hi,&_DE.r.lo,&_HL.r.hi, 0, &_HL.r.lo, &_AF.r.hi };
+    //char * rName[8] = { "B", "C", "D", "E", "H", "L", "(HL)", "A" };
+
+    char* rName(byte rCode);
+    char* rrName(byte rCode);
+    byte r(byte rCode);
 
 public:
 
     Cpu();
     void attachMemory(Memory memory);
     void run(word startAddress);
-    void execute(int opcode);
+    int step();
+    void reset();
     long getCycles();
 
+    /**
+     * INSTRUCTIONS OP_CODES
+     */
     static const byte NOP            = 0x00;
     static const byte LD_BC_NN       = 0x01;
+    static const byte LD_DE_NN       = 0x11;
+    static const byte LD_HL_NN       = 0x21;
+    static const byte LD_SP_NN       = 0x31;
 
     static const byte INC_B          = 0x04;
     static const byte INC_C          = 0x0C;
