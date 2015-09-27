@@ -1,9 +1,9 @@
-#include "Cpu.h"
 #include <iostream>
+#include <cstdio>
 #include <string>
+#include "Cpu.h"
 
 using namespace std;
-
 
 Cpu::Cpu()
 {
@@ -21,7 +21,16 @@ Cpu::Cpu()
     mfs[LD_BC_NN]   = &Cpu::ld_bc_nn;
     mfs[LD_B_B]     = &Cpu::ld_b_b;
     mfs[HALT]       = &Cpu::halt;
-    mfs[INC_A]      = &Cpu::inc_a;
+
+    mfs[INC_B]      = &Cpu::inc_r;
+    mfs[INC_C]      = &Cpu::inc_r;
+    mfs[INC_D]      = &Cpu::inc_r;
+    mfs[INC_E]      = &Cpu::inc_r;
+    mfs[INC_H]      = &Cpu::inc_r;
+    mfs[INC_H]      = &Cpu::inc_r;
+    mfs[INC_HL_CONTENT]= &Cpu::unknown;
+    mfs[INC_A]      = &Cpu::inc_r;
+
     mfs[JP_NN]      = &Cpu::jp_nn;
 }
 
@@ -35,31 +44,35 @@ long Cpu::getCycles()
     return cycles;
 }
 
+byte Cpu::readByte(word addr)
+{
+    byte read = memory.read(addr);
+    sprintf(currentInstruction, "%s%02X:", currentInstruction, read);
+    return read;
+}
+
+word Cpu::readWord(word addr)
+{
+    return readByte(addr) | (readByte(++addr) << 8);
+}
+
 void Cpu::run(word startAddress)
 {
     PC = startAddress;
 
     do {
-        printf("0x%02X: ", PC);
+        sprintf(currentInstruction, "0x%04X: ", PC);
 
-        opcode = memory.read(PC++);
-
-        printf("[0x%02X] ", opcode);
+        opcode = readByte(PC++);
 
         cycles += (this->*mfs[opcode])();
+
+        printf("%s\n", currentInstruction);
 
     } while (opcode != HALT);
 
 }
 
-void Cpu::pp(char* msg, word data)
-{
-    printf("%s 0x%04X\n", msg, data);
-}
-void Cpu::pp(char* msg)
-{
-    printf("%s\n", msg);
-}
 
 int Cpu::unknown()
 {
@@ -86,36 +99,37 @@ int Cpu::nop()
     return 4;
 }
 
-int Cpu::inc_a()
+int Cpu::inc_r()
 {
-    bool hc = (*A & 0b0001111) > 0;
-    *A++;
-    setFlags(*A, 1, 1, (hc ? 1 : 0), 0x7F, 0, -1);
-    pp("INC A");
+    int  rCode = (opcode >> 3 & 0x07);
+    bool halfCarry = (*r[rCode] & 0b0001111) > 0;
+    *r[rCode]++;
+    setFlags(*r[rCode], 1, 1, (halfCarry ? 1 : 0), 0x7F, 0, -1);
+    sprintf(currentInstruction, "%-*s INC %s", align, currentInstruction, rName[rCode]);
     return 10;
 }
 
 int Cpu::ld_bc_nn()
 {
-    *BC = memory.readWord(PC);
+    *BC = readWord(PC);
     PC += 2;
-    pp("LD BC,",*BC);
+    sprintf(currentInstruction, "%-*s LD BC, 0x%04X", align, currentInstruction, *BC);
     return 10;
 }
 int Cpu::jp_nn()
 {
-    PC = memory.readWord(PC);
-    pp("JP ",PC);
+    PC = readWord(PC);
+    sprintf(currentInstruction, "%-*s JP 0x%04X", align, currentInstruction, PC);
     return 10;
 }
 int Cpu::ld_b_b()
 {
-    cout << "LD B,B" << endl;
+    sprintf(currentInstruction,"%-*s LD B,B", align, currentInstruction);
     return 4;
 }
 int Cpu::halt()
 {
-    cout << "HALT" << endl;
+    sprintf(currentInstruction, "%-*s HALT", align, currentInstruction);
     return 4;
 }
 

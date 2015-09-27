@@ -35,7 +35,11 @@ private:
     byte* Iy = &_IY.r.hi;
     byte* Y  = &_IY.r.lo;
 
+    byte* r[8] = { &_BC.r.hi,&_BC.r.lo,&_DE.r.hi,&_DE.r.lo,&_HL.r.hi, 0, &_HL.r.lo, &_AF.r.hi };
+    char * rName[8] = { "B", "C", "D", "E", "H", "L", "(HL)", "A" };
+
     word PC, SP;
+    char currentInstruction[250] = "\0";
 
     long cycles;
     Memory memory;
@@ -43,7 +47,7 @@ private:
 
     virtual int unknown();
     virtual int nop();
-    virtual int inc_a();
+    virtual int inc_r();
     virtual int ld_bc_nn();
     virtual int halt();
     virtual int ld_b_b();
@@ -51,16 +55,17 @@ private:
 
     typedef int(Cpu::*PtrFunction)(void);
     Cpu::PtrFunction mfs[0xFF];
-    void pp(char* msg, word data);
-    void pp(char* msg);
+    byte readByte(word addr);
+    word readWord(word addr);
     void setFlags(byte result, int sign, int zero, int half_carry, int par_over, int add_sub, int carry);
 
+    static const int align = 25;
     static const byte SIGN_FLAG     = 0b10000000;
     static const byte ZERO_FLAG     = 0b01000000;
     static const byte ADD_SUB_FLAG  = 0b00010000;
     static const byte PAR_OV_FLAG   = 0b00000100;
     static const byte CARRY_FLAG    = 0b00000001;
-    static const byte H_CARRY_FLAG = 0b100000000;
+    static const word H_CARRY_FLAG = 0b100000000;
 
 public:
 
@@ -72,7 +77,16 @@ public:
 
     static const byte NOP            = 0x00;
     static const byte LD_BC_NN       = 0x01;
+
+    static const byte INC_B          = 0x04;
+    static const byte INC_C          = 0x0C;
+    static const byte INC_D          = 0x14;
+    static const byte INC_E          = 0x1C;
+    static const byte INC_H          = 0x24;
+    static const byte INC_L          = 0x2C;
+    static const byte INC_HL_CONTENT = 0x34;
     static const byte INC_A          = 0x3C;
+
     static const byte LD_B_B         = 0x40;
     static const byte HALT           = 0x76;
     static const byte JP_NN          = 0xC3;
