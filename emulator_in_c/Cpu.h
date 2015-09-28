@@ -1,5 +1,5 @@
-#ifndef INSTRUCTION_H
-#define INSTRUCTION_H
+#ifndef CPU_H
+#define CPU_H
 
 #include "general.h"
 #include "Memory.h"
@@ -91,11 +91,8 @@ private:
     /**
      * methods that executes every instruction
      */
-    virtual int unknown();
-    virtual int nop();
-    virtual int ld_bc_nn();
-    virtual int ld_b_b();
-    virtual int jp_nn();
+    int jp_nn();
+    void add_a_r(byte r);
 
     /**
      * FLAG's stuff
@@ -124,16 +121,25 @@ public:
     void run(word startAddress);
     int step();
     void reset();
-    long getCycles();
 
     /**
      * INSTRUCTIONS OP_CODES
      */
     static const byte NOP            = 0x00;
+
     static const byte LD_BC_NN       = 0x01;
     static const byte LD_DE_NN       = 0x11;
     static const byte LD_HL_NN       = 0x21;
     static const byte LD_SP_NN       = 0x31;
+
+    static const byte LD_B_N         = 0x06;
+    static const byte LD_C_N         = 0x0E;
+    static const byte LD_D_N         = 0x16;
+    static const byte LD_E_N         = 0x1E;
+    static const byte LD_H_N         = 0x26;
+    static const byte LD_L_N         = 0x2E;
+    static const byte LD_HL_CONTENT  = 0x36;
+    static const byte LD_A_N         = 0x3E;
 
     static const byte INC_B          = 0x04;
     static const byte INC_C          = 0x0C;
@@ -144,10 +150,19 @@ public:
     static const byte INC_HL_CONTENT = 0x34;
     static const byte INC_A          = 0x3C;
 
+    static const byte ADD_A_B        = 0x80;
+    static const byte ADD_A_C        = 0x81;
+    static const byte ADD_A_D        = 0x82;
+    static const byte ADD_A_E        = 0x83;
+    static const byte ADD_A_H        = 0x84;
+    static const byte ADD_A_L        = 0x85;
+    static const byte ADD_A_HL_CONTENT= 0x86;
+    static const byte ADD_A_A        = 0x87;
+
     static const byte LD_B_B         = 0x40;
     static const byte HALT           = 0x76;
     static const byte JP_NN          = 0xC3;
 
 };
 
-#endif // INSTRUCTION_H
+#endif // CPU_H

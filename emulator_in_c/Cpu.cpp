@@ -12,6 +12,9 @@ Cpu::Cpu()
     reset();
 }
 
+/**
+ * executes the reset of the chip
+ */
 void Cpu::reset()
 {
     cycles=0;
@@ -24,28 +27,37 @@ void Cpu::reset()
     registersBank = 0;
 }
 
+/**
+ * connects the memory to the chip
+ */
 void Cpu::attachMemory(Memory memory)
 {
     this->memory = memory;
 }
 
-long Cpu::getCycles()
-{
-    return cycles;
-}
-
+/**
+ * reads a byte from the memory attached
+ */
 byte Cpu::readByte(word addr)
 {
     byte read = memory.read(addr);
+#ifdef DEBUG
     sprintf(currentInstruction, "%s%02X:", currentInstruction, read);
+#endif
     return read;
 }
 
+/**
+ * reads a word from the memory attached
+ */
 word Cpu::readWord(word addr)
 {
     return readByte(addr++) | (readByte(addr) << 8);
 }
 
+/**
+ * starts the execution of instructions from the address especified
+ */
 void Cpu::run(word startAddress)
 {
     PC = startAddress;
@@ -63,6 +75,9 @@ void Cpu::run(word startAddress)
     goto loop;
 }
 
+/**
+ * decodes the current opcode
+ */
 int Cpu::step()
 {
     switch (opcode) {
@@ -107,11 +122,59 @@ int Cpu::step()
             #endif
             return 10;
 
-        default: return unknown();
+        case LD_B_N: bPrev = *B; bAfter = *B = readByte(PC++); goto ld_r_n;
+        case LD_C_N: bPrev = *C; bAfter = *C = readByte(PC++); goto ld_r_n;
+        case LD_D_N: bPrev = *D; bAfter = *D = readByte(PC++); goto ld_r_n;
+        case LD_E_N: bPrev = *E; bAfter = *E = readByte(PC++); goto ld_r_n;
+        case LD_H_N: bPrev = *H; bAfter = *H = readByte(PC++); goto ld_r_n;
+        case LD_L_N: bPrev = *L; bAfter = *L = readByte(PC++); goto ld_r_n;
+        case LD_A_N: bPrev = *A; bAfter = *A = readByte(PC++); goto ld_r_n;
+        ld_r_n:
+#ifdef DEBUG
+            sprintf(currentInstruction, "%-*s LD %s,0x%02X", align, currentInstruction, rName((opcode >> 3) & 0x07), bAfter);
+#endif
+            return 7;
+
+        case LD_HL_CONTENT:
+            bPrev = readByte(*HL); bAfter = readByte(PC++); memory.write(*HL, bAfter);
+#ifdef DEBUG
+            sprintf(currentInstruction, "%-*s LD (HL),0x%02X", align, currentInstruction, bAfter);
+#endif
+            return 10;
+
+        case ADD_A_B: add_a_r(*B); goto add_a_r;
+        case ADD_A_C: add_a_r(*C); goto add_a_r;
+        case ADD_A_D: add_a_r(*D); goto add_a_r;
+        case ADD_A_E: add_a_r(*E); goto add_a_r;
+        case ADD_A_H: add_a_r(*H); goto add_a_r;
+        case ADD_A_L: add_a_r(*L); goto add_a_r;
+        case ADD_A_A: add_a_r(*A); goto add_a_r;
+        add_a_r:
+#ifdef DEBUG
+            sprintf(currentInstruction, "%-*s ADD A,%s", align, currentInstruction, rName(opcode & 0x07));
+#endif
+            return 4;
+
+
+        default:
+            printf("Unknow opcode 0x%02X\n", opcode);
+            exit(1);
     }
 }
 
+/**
+ * adds the register r to A
+ */
+void Cpu::add_a_r(byte r)
+{
+    bPrev = *A;
+    // @TODO: flags
+    bAfter = ((*A + r) & 0xFF);
+}
 
+/**
+ * gets the content of the register r
+ */
 byte Cpu::r(byte rCode)
 {
     switch (rCode) {
@@ -127,7 +190,9 @@ byte Cpu::r(byte rCode)
     }
 }
 
-
+/**
+ * gets the name of the register of 8 bits r
+ */
 char* Cpu::rName(byte rCode) {
     switch (rCode) {
         case 0b000: return "B";
@@ -142,6 +207,9 @@ char* Cpu::rName(byte rCode) {
     }
 }
 
+/**
+ * gets the name of the register of 16 bits rr
+ */
 char* Cpu::rrName(byte rCode) {
     switch (rCode) {
         case 0b000: return "BC";
@@ -152,13 +220,9 @@ char* Cpu::rrName(byte rCode) {
     }
 }
 
-int Cpu::unknown()
-{
-    printf("Unknow opcode 0x%02X\n", opcode);
-    exit(-1);
-    return 0;
-}
-
+/**
+ * set flags F according to the status of some flags passed
+ */
 void Cpu::setFlags(byte result, int sign, int zero, int half_carry, int par_over, int add_sub, int carry)
 {
     if (result == 0 && zero == 1) *F |= ZERO_FLAG;
@@ -171,31 +235,7 @@ void Cpu::setFlags(byte result, int sign, int zero, int half_carry, int par_over
     if (carry == 0) *F &= ~CARRY_FLAG;
 }
 
-int Cpu::nop()
-{
-    cout << "NOP" << endl;
-    return 4;
-}
-//
-//int Cpu::inc_r()
-//{
-//    int  rCode = (opcode >> 3 & 0x07);
-//    bool halfCarry = (*r[rCode] & 0b0001111) > 0;
-//    *r[rCode]++;
-//    setFlags(*r[rCode], 1, 1, (halfCarry ? 1 : 0), 0x7F, 0, -1);
-//    sprintf(currentInstruction, "%-*s INC %s", align, currentInstruction, rName[rCode]);
-//    return 10;
-//}
 
-int Cpu::ld_bc_nn()
-{
-    *BC = readWord(PC);
-    PC += 2;
-#ifdef DEBUG
-    sprintf(currentInstruction, "%-*s LD BC, 0x%04X", align, currentInstruction, *BC);
-#endif
-    return 10;
-}
 int Cpu::jp_nn()
 {
     PC = readWord(PC);
@@ -204,9 +244,5 @@ int Cpu::jp_nn()
 #endif
     return 10;
 }
-int Cpu::ld_b_b()
-{
-    sprintf(currentInstruction,"%-*s LD B,B", align, currentInstruction);
-    return 4;
-}
+
 
