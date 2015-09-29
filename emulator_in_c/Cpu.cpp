@@ -5,6 +5,8 @@
 
 #define DEBUG
 
+#define twosComplement(offset) ((((char)offset) << 16) >> 16)
+
 using namespace std;
 
 Cpu::Cpu()
@@ -84,7 +86,7 @@ int Cpu::step()
 
         case NOP:
 #ifdef DEBUG
-            printf(currentInstruction, "%-*s NP", align, currentInstruction);
+            sprintf(currentInstruction, "%-*s NOP", align, currentInstruction);
 #endif
             return 4;
 
@@ -94,8 +96,7 @@ int Cpu::step()
 #endif
             return 4;
 
-        case JP_NN:
-            return jp_nn();
+        case JP_NN:    return jp_nn();
 
         case LD_BC_NN: wPrev = *BC; wAfter = *BC = readWord(PC); goto ld_rr_nn;
         case LD_DE_NN: wPrev = *DE; wAfter = *DE = readWord(PC); goto ld_rr_nn;
@@ -142,6 +143,13 @@ int Cpu::step()
 #endif
             return 10;
 
+        case ADD_A_HL_CONTENT:
+            add_a_r(readByte(*HL));
+#ifdef DEBUG
+            sprintf(currentInstruction, "%-*s ADD A,(HL)", align, currentInstruction);
+#endif
+            return 7;
+
         case ADD_A_B: add_a_r(*B); goto add_a_r;
         case ADD_A_C: add_a_r(*C); goto add_a_r;
         case ADD_A_D: add_a_r(*D); goto add_a_r;
@@ -155,6 +163,56 @@ int Cpu::step()
 #endif
             return 4;
 
+        case ADC_A_HL_CONTENT:
+            adc_a_r(readByte(*HL));
+#ifdef DEBUG
+            sprintf(currentInstruction, "%-*s ADC A,(HL)", align, currentInstruction);
+#endif
+            return 7;
+
+        case ADC_A_B: add_a_r(*B); goto adc_a_r;
+        case ADC_A_C: add_a_r(*C); goto adc_a_r;
+        case ADC_A_D: add_a_r(*D); goto adc_a_r;
+        case ADC_A_E: add_a_r(*E); goto adc_a_r;
+        case ADC_A_H: add_a_r(*H); goto adc_a_r;
+        case ADC_A_L: add_a_r(*L); goto adc_a_r;
+        case ADC_A_A: add_a_r(*A); goto adc_a_r;
+        adc_a_r:
+#ifdef DEBUG
+            sprintf(currentInstruction, "%-*s ADC A,%s", align, currentInstruction, rName(opcode & 0x07));
+#endif
+            return 4;
+
+        case SUB_HL_CONTENT:
+            sub_a(readByte(*HL));
+#ifdef DEBUG
+            sprintf(currentInstruction, "%-*s SUB (HL)", align, currentInstruction);
+#endif
+            return 7;
+
+        case SUB_B: sub_a(*B); goto sub_a;
+        case SUB_C: sub_a(*C); goto sub_a;
+        case SUB_D: sub_a(*D); goto sub_a;
+        case SUB_E: sub_a(*E); goto sub_a;
+        case SUB_H: sub_a(*H); goto sub_a;
+        case SUB_L: sub_a(*L); goto sub_a;
+        case SUB_A: sub_a(*A); goto sub_a;
+        sub_a:
+#ifdef DEBUG
+            sprintf(currentInstruction, "%-*s SUB %s", align, currentInstruction, rName(opcode & 0x07));
+#endif
+            return 4;
+
+        case DJNZ:
+            offset = twosComplement(readByte(PC++));
+#ifdef DEBUG
+            sprintf(currentInstruction, "%-*s DJNZ %d", align, currentInstruction, offset);
+#endif
+            if ((--*B & 0xFF) != 0) {
+                PC = (PC + offset) & 0xffff;
+                return 13;
+            }
+            return 8;
 
         default:
             printf("Unknow opcode 0x%02X\n", opcode);
@@ -170,6 +228,23 @@ void Cpu::add_a_r(byte r)
     bPrev = *A;
     // @TODO: flags
     bAfter = ((*A + r) & 0xFF);
+}
+
+/**
+ * adds the register r to A and Carry Flag
+ */
+void Cpu::adc_a_r(byte r)
+{
+    bPrev = *A;
+    // @TODO: flags
+    bAfter = ((*A + r + ((*F | CARRY_FLAG) != 0) ? 1 : 0) & 0xFF);
+}
+
+void Cpu::sub_a(byte r)
+{
+    bPrev = *A;
+    // @TODO: flags
+    bAfter = ((*A - r) & 0xFF);
 }
 
 /**

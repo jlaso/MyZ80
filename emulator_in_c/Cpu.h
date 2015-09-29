@@ -80,6 +80,7 @@ private:
     byte registersBank;
     byte bPrev, bAfter;
     word wPrev, wAfter;
+    int offset;
 
     /**
      * Memory
@@ -93,6 +94,8 @@ private:
      */
     int jp_nn();
     void add_a_r(byte r);
+    void adc_a_r(byte r);
+    void sub_a(byte r);
 
     /**
      * FLAG's stuff
@@ -159,9 +162,28 @@ public:
     static const byte ADD_A_HL_CONTENT= 0x86;
     static const byte ADD_A_A        = 0x87;
 
+    static const byte ADC_A_B        = 0x88;
+    static const byte ADC_A_C        = 0x89;
+    static const byte ADC_A_D        = 0x8A;
+    static const byte ADC_A_E        = 0x8B;
+    static const byte ADC_A_H        = 0x8C;
+    static const byte ADC_A_L        = 0x8D;
+    static const byte ADC_A_HL_CONTENT= 0x8E;
+    static const byte ADC_A_A        = 0x8F;
+
+    static const byte SUB_B          = 0x90;
+    static const byte SUB_C          = 0x91;
+    static const byte SUB_D          = 0x92;
+    static const byte SUB_E          = 0x93;
+    static const byte SUB_H          = 0x94;
+    static const byte SUB_L          = 0x95;
+    static const byte SUB_HL_CONTENT = 0x96;
+    static const byte SUB_A          = 0x97;
+
     static const byte LD_B_B         = 0x40;
     static const byte HALT           = 0x76;
     static const byte JP_NN          = 0xC3;
+    static const byte DJNZ           = 0x10;
 
 };
 
