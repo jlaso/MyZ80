@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>13F41BCE-5D6B-447E-9B79-6A0686921D52</string>
+	<key>IDESourceControlProjectName</key>
+	<string>z80-emulator-in-c</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>7F682003-57C3-4381-AFB5-7790587CA800</key>
+		<string>ssh://github.com/jlaso/MyZ80.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>z80-emulator-in-c/z80-emulator-in-c.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>7F682003-57C3-4381-AFB5-7790587CA800</key>
+		<string>../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>ssh://github.com/jlaso/MyZ80.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>7F682003-57C3-4381-AFB5-7790587CA800</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>7F682003-57C3-4381-AFB5-7790587CA800</string>
+			<key>IDESourceControlWCCName</key>
+			<string>MyZ80</string>
+		</dict>
+	</array>
+</dict>
+</plist>
