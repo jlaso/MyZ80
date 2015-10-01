@@ -1,16 +1,19 @@
 #include <iostream>
 #include <cstdio>
 #include <string>
+#include <unistd.h>
 #include "Cpu.h"
 
-#define DEBUG
+// # define DEBUG
 
 #define twosComplement(offset) ((((char)offset) << 16) >> 16)
 
 using namespace std;
 
-Cpu::Cpu()
+Cpu::Cpu(unsigned long clock_freq)
 {
+    clock_herzs = clock_freq;
+    clock_cycle = 1.0/(double) clock_freq;
     reset();
 }
 
@@ -62,6 +65,8 @@ word Cpu::readWord(word addr)
  */
 void Cpu::run(word startAddress)
 {
+    double elapsed;
+    start_clock = clock();
     PC = startAddress;
     loop:
 #ifdef DEBUG
@@ -72,8 +77,14 @@ void Cpu::run(word startAddress)
 #ifdef DEBUG
     printf("%s\n", currentInstruction);
 #endif
-    if (opcode == HALT) exit(0);
+    if (opcode == HALT) return;
 
+    current_clock = double(clock() - start_clock) / (double)CLOCKS_PER_SEC;
+    elapsed = double(cycles) * clock_cycle;
+    printf ("%d %1.8f: clock elapsed %1.8f, cycles elapsed %1.8f\n", clock_herzs, clock_cycle, current_clock, elapsed);   // cycles/clock_herzs   10/4000000 => 0,0000025
+    if (elapsed > current_clock) {
+        //usleep(1000*(elapsed - current_clock));
+    }
     goto loop;
 }
 
@@ -97,6 +108,22 @@ int Cpu::step()
             return 4;
 
         case JP_NN:    return jp_nn();
+
+        case JP_Z_NN:  cc = (*F & ZERO_FLAG) != 0 ; goto jp_cc_nn;
+        case JP_NZ_NN: cc = (*F & ZERO_FLAG) == 0 ; goto jp_cc_nn;
+        case JP_C_NN:  cc = (*F & CARRY_FLAG) != 0 ; goto jp_cc_nn;
+        case JP_NC_NN: cc = (*F & CARRY_FLAG) == 0 ; goto jp_cc_nn;
+        case JP_PO_NN: cc = (*F & PAR_OV_FLAG) != 0 ; goto jp_cc_nn;
+        case JP_PE_NN: cc = (*F & PAR_OV_FLAG) == 0 ; goto jp_cc_nn;
+        case JP_P_NN:  cc = (*F & SIGN_FLAG) == 0 ; goto jp_cc_nn;
+        case JP_M_NN:  cc = (*F & SIGN_FLAG) != 0 ; goto jp_cc_nn;
+        jp_cc_nn:
+            wAfter = readWord(PC);
+            if (cc) PC = wAfter; else PC += 2;
+#ifdef DEBUG
+            sprintf(currentInstruction, "%-*s JP %s,0x%04X", align, currentInstruction, ccName((opcode>>3)&0x07), wAfter);
+#endif
+            return 10;
 
         case LD_BC_NN: wPrev = *BC; wAfter = *BC = readWord(PC); goto ld_rr_nn;
         case LD_DE_NN: wPrev = *DE; wAfter = *DE = readWord(PC); goto ld_rr_nn;
@@ -278,6 +305,23 @@ char* Cpu::rName(byte rCode) {
         case 0b101: return "L";
         case 0b110: return "(HL)";
         case 0b111: return "A";
+        default: return "?";
+    }
+}
+
+/**
+ * gets the name of the condition
+ */
+char* Cpu::ccName(byte cc) {
+    switch (cc) {
+        case 0b000: return "NZ";
+        case 0b001: return "Z";
+        case 0b010: return "NC";
+        case 0b011: return "C";
+        case 0b100: return "PO";
+        case 0b101: return "PE";
+        case 0b110: return "P";
+        case 0b111: return "M";
         default: return "?";
     }
 }

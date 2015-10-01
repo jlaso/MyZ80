@@ -81,6 +81,15 @@ private:
     byte bPrev, bAfter;
     word wPrev, wAfter;
     int offset;
+    bool cc;
+
+    /**
+     * FREQUENCY
+     */
+    unsigned long clock_herzs;
+    double clock_cycle;
+    long start_clock;
+    double current_clock;
 
     /**
      * Memory
@@ -109,17 +118,17 @@ private:
     static const byte CARRY_FLAG    = 0b00000001;
     static const word H_CARRY_FLAG = 0b100000000;   // fake flag to control other behaviour of H
 
-    /** ? **/
     //byte* r[8] = { &_BC.r.hi,&_BC.r.lo,&_DE.r.hi,&_DE.r.lo,&_HL.r.hi, 0, &_HL.r.lo, &_AF.r.hi };
     //char * rName[8] = { "B", "C", "D", "E", "H", "L", "(HL)", "A" };
 
     char* rName(byte rCode);
     char* rrName(byte rCode);
     byte r(byte rCode);
+    char* ccName(byte rCode);
 
 public:
 
-    Cpu();
+    Cpu(unsigned long clock_freq);
     void attachMemory(Memory memory);
     void run(word startAddress);
     int step();
@@ -183,6 +192,15 @@ public:
     static const byte LD_B_B         = 0x40;
     static const byte HALT           = 0x76;
     static const byte JP_NN          = 0xC3;
+    static const byte JP_Z_NN        = 0xCA;
+    static const byte JP_NZ_NN       = 0xC2;
+    static const byte JP_C_NN        = 0xDA;
+    static const byte JP_NC_NN       = 0xD2;
+    static const byte JP_P_NN        = 0xF2;
+    static const byte JP_PO_NN       = 0xE2;
+    static const byte JP_PE_NN       = 0xEA;
+    static const byte JP_M_NN        = 0xFA;
+
     static const byte DJNZ           = 0x10;
 
 };
