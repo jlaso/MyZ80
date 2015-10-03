@@ -21,6 +21,7 @@ public class Z80 {
     protected long mcycles = 0;
     protected long tstates = 0;
     protected String currentInstruction = "";
+    protected int opcode;
 
     protected String[] ssName = { /* 00 */ "BC", /* 01 */ "DE", /* 10 */ "HL", /* 11 */ "SP" };
     protected String[] rName = {
@@ -102,7 +103,15 @@ public class Z80 {
                 Thread.sleep(delay);
             }
             statusPanel.setText2(""+(prevEndTime - realEndTime)+" <");
+
+            if ((opcode != 0xF3) && (opcode != 0xFB)) {   // DI & EI don't handle interrupts immediatelly
+                handleInterrutps();
+            }
         }
+    }
+
+    public void handleInterrutps() {
+
     }
 
     public void reset() {
@@ -700,7 +709,7 @@ public class Z80 {
         if (debug) System.out.print(Tools.addressToHex(PC)+": ");    // prints the current address (PC)
         Result result;
 
-        int opcode = readMem(PC++);
+        opcode = readMem(PC++);
 
         switch (opcode) {
 

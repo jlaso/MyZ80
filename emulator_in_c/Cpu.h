@@ -99,12 +99,17 @@ private:
     word readWord(word addr);
 
     /**
-     * methods that executes every instruction
+     * methods that executes instructions
      */
     int jp_nn();
     void add_a_r(byte r);
     void adc_a_r(byte r);
     void sub_a(byte r);
+
+    /**
+     * internal methods
+     */
+    void handleInterrupts();
 
     /**
      * FLAG's stuff
@@ -202,6 +207,9 @@ public:
     static const byte JP_M_NN        = 0xFA;
 
     static const byte DJNZ           = 0x10;
+
+    static const byte EI             = 0xFB;
+    static const byte DI             = 0xF3;
 
 };
 

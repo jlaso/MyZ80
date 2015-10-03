@@ -10,31 +10,31 @@
 	<string>z80-emulator-in-c</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
-		<key>7F682003-57C3-4381-AFB5-7790587CA800</key>
-		<string>ssh://github.com/jlaso/MyZ80.git</string>
+		<key>D8A8970CF731E75B5AE8925A8FE29E969E8F98A9</key>
+		<string>github.com:jlaso/MyZ80.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>z80-emulator-in-c/z80-emulator-in-c.xcodeproj/project.xcworkspace</string>
+	<string>z80-emulator-in-c/z80-emulator-in-c.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
-		<key>7F682003-57C3-4381-AFB5-7790587CA800</key>
+		<key>D8A8970CF731E75B5AE8925A8FE29E969E8F98A9</key>
 		<string>../../..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
-	<string>ssh://github.com/jlaso/MyZ80.git</string>
+	<string>github.com:jlaso/MyZ80.git</string>
 	<key>IDESourceControlProjectVersion</key>
-	<integer>110</integer>
+	<integer>111</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>7F682003-57C3-4381-AFB5-7790587CA800</string>
+	<string>D8A8970CF731E75B5AE8925A8FE29E969E8F98A9</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>7F682003-57C3-4381-AFB5-7790587CA800</string>
+			<string>D8A8970CF731E75B5AE8925A8FE29E969E8F98A9</string>
 			<key>IDESourceControlWCCName</key>
-			<string>MyZ80</string>
+			<string>myZ80</string>
 		</dict>
 	</array>
 </dict>

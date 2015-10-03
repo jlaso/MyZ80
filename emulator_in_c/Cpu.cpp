@@ -17,6 +17,11 @@ Cpu::Cpu(unsigned long clock_freq)
     reset();
 }
 
+void Cpu::handleInterrupts()
+{
+
+}
+
 /**
  * executes the reset of the chip
  */
@@ -84,6 +89,9 @@ void Cpu::run(word startAddress)
     printf ("%d %1.8f: clock elapsed %1.8f, cycles elapsed %1.8f\n", clock_herzs, clock_cycle, current_clock, elapsed);   // cycles/clock_herzs   10/4000000 => 0,0000025
     if (elapsed > current_clock) {
         //usleep(1000*(elapsed - current_clock));
+    }
+    if ((opcode != DI)  &&  (opcode != EI)) {
+        handleInterrupts();
     }
     goto loop;
 }
