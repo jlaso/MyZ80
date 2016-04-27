@@ -41,7 +41,7 @@ public class TestOutLeds {
 
     }
 
-    protected static byte[] getTestProgram() {
+    private static byte[] getTestProgram() {
         return new byte[] {
                 0x00,       // NOP
                 0x3E, 0x0F, // LD A,0x0F
