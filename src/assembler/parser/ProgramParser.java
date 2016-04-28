@@ -10,14 +10,15 @@ import di.Container;
 
 /**
  * Created by joseluislaso on 17/09/15.
+ *
  */
 public class ProgramParser {
 
-    String buffer;
-    char current;
-    int index, lineNum;
-    boolean eof, eofc, isSpace, isDoubleQuotes, isComma, isSemicolon;
-    Container container;
+    private String buffer;
+    private char current;
+    private int index, lineNum;
+    private boolean eof, eofc, isSpace, isDoubleQuotes, isComma, isSemicolon;
+    private Container container;
 
     public ProgramParser() {
         container = Container.getContainer();
@@ -45,7 +46,7 @@ public class ProgramParser {
     /**
      * advances the pointer until a char that is not a space
      */
-    protected void discardSpaces() {
+    private void discardSpaces() {
         while (!eof && isSpace) next();
     }
 
@@ -71,7 +72,7 @@ public class ProgramParser {
      *
      * @throws UnexpectedCharException
      */
-    protected void dontExpectMore() throws UnexpectedCharException {
+    private void dontExpectMore() throws UnexpectedCharException {
         discardSpaces();
         if (!eofc) throw new UnexpectedCharException(current, index, buffer, lineNum);
     }
@@ -81,7 +82,7 @@ public class ProgramParser {
      *
      * @return String
      */
-    protected String getOperand() throws OperandNotFoundException {
+    private String getOperand() throws OperandNotFoundException {
         String result = "";
         discardSpaces();
         while (!isSpace && !isComma && !eofc) {

@@ -4,6 +4,7 @@ import assembler.Tools;
 
 /**
  * Created by joseluislaso on 06/09/15.
+ *
  */
 public class Constant extends Item implements Valuable {
 
@@ -28,7 +29,7 @@ public class Constant extends Item implements Valuable {
 
     @Override
     public boolean match(String name) {
-        return name.equals(name);
+        return this.name.equals(name);
     }
 
     @Override
