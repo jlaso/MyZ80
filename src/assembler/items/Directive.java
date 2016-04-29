@@ -1,7 +1,6 @@
 package assembler.items;
 
 import assembler.Tools;
-import assembler.parser.ExpressionParser;
 import assembler.parser.exceptions.UnrecognizedLiteralException;
 import di.Container;
 
@@ -10,7 +9,7 @@ import java.util.Arrays;
 
 /**
  * Created by joseluislaso on 06/09/15.
- * 
+ *
  */
 public class Directive extends Item {
 
@@ -23,7 +22,7 @@ public class Directive extends Item {
     protected String value;
     protected Container container;
 
-    protected final static String directives = "|.db|.dw|.org|";
+    private final static String directives = "|.db|.dw|.org|";
 
 //    public Directive(String name) throws Exception {
 //        this(name, "");
@@ -63,15 +62,15 @@ public class Directive extends Item {
         return value;
     }
 
-    protected String parse(String expression) throws UnrecognizedLiteralException {
+    private String parse(String expression) throws UnrecognizedLiteralException {
         return container.expressionParser.preParse(expression);
     }
 
-    protected boolean isDB() {
+    boolean isDB() {
         return name.toLowerCase().equals(_DB);
     }
 
-    protected boolean isDW() {
+    boolean isDW() {
         return name.toLowerCase().equals(_DW);
     }
 
@@ -79,7 +78,7 @@ public class Directive extends Item {
         return name.toLowerCase().equals(_ORG);
     }
 
-    protected int[] tokenizeOperands(String operands) throws Exception {
+    private int[] tokenizeOperands(String operands) throws Exception {
 
         int[] tmp = new int[MAXDATA];
         int index = 0;
@@ -142,9 +141,9 @@ public class Directive extends Item {
         return index > 0 ? Arrays.copyOfRange(tmp, 0, index) : null;
     }
 
-    protected void addPending(ArrayList<String> pendings, int type, int pos) {
-        for (int i = 0; i < pendings.size(); i++) {
-            addPending(pendings.get(i), type, pos);
+    private void addPending(ArrayList<String> pendings, int type, int pos) {
+        for (String pending : pendings) {
+            addPending(pending, type, pos);
         }
     }
 
@@ -154,7 +153,7 @@ public class Directive extends Item {
      * @return int[]
      * @throws Exception
      */
-    protected int[] process() throws Exception {
+    int[] process() throws Exception {
 
         switch (name.toLowerCase()) {
 
