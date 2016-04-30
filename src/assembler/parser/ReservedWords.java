@@ -2,6 +2,7 @@ package assembler.parser;
 
 /**
  * Created by joseluislaso on 17/09/15.
+ *
  */
 public class ReservedWords {
 
@@ -26,7 +27,7 @@ public class ReservedWords {
 
     static boolean is(int type, String word) {
 
-        return reservedWords[type].contains('|'+word+'|');
+        return reservedWords[type].contains('|'+word.toLowerCase()+'|');
 
     }
 

@@ -1,7 +1,7 @@
 package assembler;
 
 import assembler.parser.ProgramParser;
-import common._;
+import common.$;
 import di.Container;
 import assembler.items.*;
 import fileFormat.Z80FileFormat;
@@ -75,7 +75,7 @@ public class Program {
                             }
                             org = address = Integer.parseInt(((Directive) item).getValue());
                             orgDefined = true;
-                            debug(_.TAB + _.TAB + _.TAB + "~~~~==** org address " + address + " **==~~~~", _.YELLOW);
+                            debug($.TAB + $.TAB + $.TAB + "~~~~==** org address " + address + " **==~~~~", $.YELLOW);
                         }
                         address += item.getSize();
                         program.add(item);
@@ -114,14 +114,14 @@ public class Program {
         dumpPendings();
 
         // pass 3  -  solve labels
-        debug(_.CR + _.CR + "~~~~~~~~~~ propagating labels ~~~~~~~~~" + _.CR, _.RED);
+        debug($.CR + $.CR + "~~~~~~~~~~ propagating labels ~~~~~~~~~" + $.CR, $.RED);
         for (Item item : program) {
             if (item instanceof Label) propagateLabel((Label)item);
         }
 
         dumpPendings();
 
-        debug(_.CR + _.CR, null);
+        debug($.CR + $.CR, null);
 
     }
 
@@ -139,7 +139,7 @@ public class Program {
 
     protected void dumpLabels() {
         if (!debug) return;
-        Tools.println("red", _.CR + _.CR + "~~~~~~~~~~ labels ~~~~~~~~~~");
+        Tools.println("red", $.CR + $.CR + "~~~~~~~~~~ labels ~~~~~~~~~~");
         for (Item item : program) {
             if (item instanceof Label) Tools.println("", item.toString());
         }
@@ -147,7 +147,7 @@ public class Program {
 
     protected void dumpPendings() {
         if (!debug) return;
-        Tools.println("red", _.CR + _.CR + "~~~~~~~~~~ pendings ~~~~~~~~~~");
+        Tools.println("red", $.CR + $.CR + "~~~~~~~~~~ pendings ~~~~~~~~~~");
         for (Item item : program) {
             for (Pending pending : item.getPendingList()) {
                 Tools.println("", pending.toString() + " " + item.toString());
@@ -168,7 +168,7 @@ public class Program {
     }
 
     public void dumpProgram() {
-        Tools.println(_.RED, _.CR+_.TAB+"~~~~~~  dumping assembled program ~~~~~~"+_.CR);
+        Tools.println($.RED, $.CR+ $.TAB+"~~~~~~  dumping assembled program ~~~~~~"+ $.CR);
         String hex = "";
         for (Item item : program) {
             System.out.println(item.toString());
@@ -182,7 +182,7 @@ public class Program {
      */
     public void saveBin(String outputFile, int maxFileSize) {
 
-        Tools.println_if(debug, "red", _.CR + _.CR + "~~~~~~~~~~~~ dump ~~~~~~~~~~~");
+        Tools.println_if(debug, "red", $.CR + $.CR + "~~~~~~~~~~~~ dump ~~~~~~~~~~~");
 
         Z80FileFormat z80file = new Z80FileFormat(maxFileSize);
         z80file.setPC(org);
@@ -204,11 +204,11 @@ public class Program {
             dumpLabels();
             dumpPendings();
 
-            Tools.println("red", _.CR + _.CR + _.TAB + "O~~=> generated " + outputFile + " with " + maxFileSize + " bytes. <=~~O");
+            Tools.println("red", $.CR + $.CR + $.TAB + "O~~=> generated " + outputFile + " with " + maxFileSize + " bytes. <=~~O");
 
         } catch (IOException e) {
 
-            System.out.println ("Some error happened saving binary file." + _.CR + e.getMessage());
+            System.out.println ("Some error happened saving binary file." + $.CR + e.getMessage());
             System.exit(-1);
         }
 

@@ -1,13 +1,12 @@
 package machines.simpleZ80.tests;
 
 import assembler.Tools;
-import common._;
+import common.$;
 import fileFormat.Z80FileFormat;
 import hardware.board.Board;
 import hardware.cpu.z80.Z80;
 import machines.simpleZ80.IOSpace;
 import machines.simpleZ80.Memory;
-import samples.Samples;
 
 
 /**
@@ -30,7 +29,7 @@ public class TestOutLeds {
 
         IOSpace ioSpace = new IOSpace(board);
         Memory systemMemory = new Memory(z80file);
-        Z80 cpu = new Z80(_.DEBUG);
+        Z80 cpu = new Z80($.DEBUG);
         cpu.attachSystemMemory(systemMemory);
         cpu.attachIOSpace(ioSpace);
 

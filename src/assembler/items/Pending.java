@@ -31,25 +31,34 @@ public class Pending {
         return type;
     }
 
-    public String getCause() { return cause; }
+    public String getCause() {
+        return cause;
+    }
 
-    public void setCause(String cause) { this.cause = cause; }
+    public void setCause(String cause) {
+        this.cause = " " + cause.trim() + " ";
+    }
 
     public boolean match(String cause) {
-        return this.cause.contains(" " + cause + " ");
+        return this.cause.contains(" " + cause.trim() + " ");
     }
 
     public String replaceLabel(String label, String value) {
-        return cause = cause.replace(" "+label+" ", value);
+        return cause = cause.replace(" " + label.trim() + " ", " " + value.trim() + " ");
     }
 
     protected String typeAsString() {
         switch (type) {
-            case OFFSET_8_BITS_C2: return "OFFSET_8_BITS_C2";
-            case BYTE_LO: return "BYTE_LO";
-            case BYTE_HI: return "BYTE_HI";
-            case ADDRESS: return "ADDRESS";
-            default: return ""+type;
+            case OFFSET_8_BITS_C2:
+                return "OFFSET_8_BITS_C2";
+            case BYTE_LO:
+                return "BYTE_LO";
+            case BYTE_HI:
+                return "BYTE_HI";
+            case ADDRESS:
+                return "ADDRESS";
+            default:
+                return "" + type;
         }
     }
 

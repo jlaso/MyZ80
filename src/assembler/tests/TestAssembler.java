@@ -3,7 +3,7 @@ package assembler.tests;
 import assembler.Program;
 import machines.simpleZ80.Memory;
 import samples.Samples;
-import common._;
+import common.$;
 
 /**
  * Created by joseluislaso on 06/09/15.
@@ -18,7 +18,7 @@ public class TestAssembler {
 
         String file = "test";
 
-        Program program = new Program(Samples.getFile(file+".asm"), _.DEBUG);
+        Program program = new Program(Samples.getFile(file+".asm"), $.DEBUG);
 
         program.assemble();
 

@@ -6,9 +6,7 @@ import assembler.items.Item;
 import assembler.items.Label;
 import assembler.items.Pending;
 import assembler.parser.ProgramParser;
-import common._;
-import machines.simpleZ80.Memory;
-import samples.Samples;
+import common.$;
 
 import java.util.ArrayList;
 
@@ -75,7 +73,7 @@ public class TestProgramParser {
     }
 
     protected static void dumpPendings(ArrayList<Item> program) {
-        Tools.println("red", _.CR + _.CR + "~~~~~~~~~~ pendings ~~~~~~~~~~");
+        Tools.println("red", $.CR + $.CR + "~~~~~~~~~~ pendings ~~~~~~~~~~");
         for (Item item : program) {
             for (Pending pending : item.getPendingList()) {
                 Tools.println("", pending.toString() + " " + item.toString());

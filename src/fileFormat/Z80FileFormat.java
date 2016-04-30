@@ -10,8 +10,8 @@ import java.io.*;
 public class Z80FileFormat implements BinaryFileInterface{
 
     protected int size;
-    protected int PC;
-    protected byte[] body;
+    private int PC;
+    private byte[] body;
 
     public Z80FileFormat(int size) {
         this.size = size;

@@ -16,8 +16,8 @@ import java.util.regex.Pattern;
  */
 public class Token extends Item {
 
-    protected String instruction, op1, op2;
-    protected boolean isOffset = false;  // indicates that there is one operand in offset terms
+    private String instruction, op1, op2;
+    private boolean isOffset = false;  // indicates that there is one operand in offset terms
     protected Container container;
 
     public Token(String instruction, String op1, String op2, int address, String src) throws Exception {
@@ -30,7 +30,7 @@ public class Token extends Item {
         opCode = process();
     }
 
-    protected int[] process() throws Exception {
+    int[] process() throws Exception {
 
         String operation = instruction.toLowerCase().trim();
         String operand1 = op1.trim(), _operand1 = op1.toLowerCase();

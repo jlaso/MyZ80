@@ -7,7 +7,7 @@ import hardware.cpu.z80.Z80;
 import machines.simpleZ80.IOSpace;
 import machines.simpleZ80.Memory;
 import samples.Samples;
-import common._;
+import common.$;
 
 
 /**
@@ -32,7 +32,7 @@ public class TestMachine {
 
         IOSpace ioSpace = new IOSpace(board);
         Memory systemMemory = new Memory(z80file);
-        Z80 cpu = new Z80(clock,_.NO_DEBUG);
+        Z80 cpu = new Z80(clock, $.NO_DEBUG);
         cpu.attachSystemMemory(systemMemory);
         cpu.attachIOSpace(ioSpace);
         cpu.attachStatusPanel(board.getStatusBarPanel());

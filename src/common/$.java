@@ -2,8 +2,9 @@ package common;
 
 /**
  * Created by joseluislaso on 18/09/15.
+ *
  */
-public class _ {
+public class $ {
 
     public static boolean DEBUG = true;
     public static boolean NO_DEBUG = false;

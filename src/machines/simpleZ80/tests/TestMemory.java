@@ -1,11 +1,6 @@
 package machines.simpleZ80.tests;
 
-import assembler.Tools;
-import common._;
 import fileFormat.Z80FileFormat;
-import hardware.board.Board;
-import hardware.cpu.z80.Z80;
-import machines.simpleZ80.IOSpace;
 import machines.simpleZ80.Memory;
 import samples.Samples;
 

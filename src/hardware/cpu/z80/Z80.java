@@ -1,10 +1,9 @@
 package hardware.cpu.z80;
 
 import assembler.Tools;
-import common._;
+import common.$;
 import hardware.devices.peripheral.MapIO;
 import hardware.system.MemorySystemInterface;
-import machines.simpleZ80.IOSpace;
 import myz80.StatusBarPanel;
 
 /**
@@ -328,7 +327,7 @@ public class Z80 {
         for (int i = SP; i < SP+12; i++) {
             s += "["+Tools.addressToHex(i)+"] "+Tools.byteToHex(memory.peek(i))+" | ";
         }
-        Tools.println("red", _.CR + s);
+        Tools.println("red", $.CR + s);
     }
 
     /**
