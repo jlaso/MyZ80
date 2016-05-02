@@ -2,6 +2,7 @@ package assembler;
 
 /**
  * Created by joseluislaso on 08/09/15.
+ *
  */
 public class Tools {
 
@@ -15,7 +16,7 @@ public class Tools {
     public static final String ANSI_CYAN = "\u001B[36m";
     public static final String ANSI_WHITE = "\u001B[37m";
 
-    final protected static String hexChars = "0123456789ABCDEF";
+    private final static String hexChars = "0123456789ABCDEF";
 
     public static String byteToHex(int b)
     {
