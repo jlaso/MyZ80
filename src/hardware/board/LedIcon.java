@@ -7,12 +7,13 @@ import java.awt.*;
 
 /**
  * Created by joseluislaso on 22/09/15.
+ *
  */
 public class LedIcon extends JLabel {
 
     protected String color;
 
-    public LedIcon(int bit, String color) {
+    LedIcon(int bit, String color) {
         super(""+bit);
         this.color = color;
         setPreferredSize(new Dimension(40, 32));

@@ -13,11 +13,11 @@ import java.io.IOException;
 
 /**
  * Created by joseluislaso on 22/09/15.
+ *
  */
 public class Board extends JFrame {
 
     private StatusBarPanel statusBarPanel;
-    private JPanel mainPanel;
     private LedArray ledArray;
 
     public Board() throws Exception {
@@ -33,7 +33,7 @@ public class Board extends JFrame {
         statusBarPanel = new StatusBarPanel();
         add(statusBarPanel, BorderLayout.SOUTH);
 
-        mainPanel = new JPanel();
+        JPanel mainPanel = new JPanel();
         mainPanel.setSize(200, getHeight());
         //mainPanel.setLayout(new BorderLayout());
 
