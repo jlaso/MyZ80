@@ -1,9 +1,9 @@
 package momo;
 
-import myz80.StatusBarPanel;
-
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 
 import org.apache.http.*;
 import org.apache.http.client.methods.HttpGet;
@@ -20,37 +20,71 @@ public class MainWindow {
 
     private TextArea textArea;
     private static String theName = "MoMo";
+    private StatusBarPanel statusBarPanel;
+    private MainPanel mainPanel;
+    private SidebarPanel sidebarPanel;
+    private int currentWidth, currentHeight;
+    private final JProgressBar progressBar = new JProgressBar();
 
     private MainWindow() throws Exception {
 
         JFrame frame = new JFrame(theName + " Main Window");
-
-        frame.setName(theName);
-        ///setIconImage();
         frame.setLayout(new BorderLayout());
         frame.setExtendedState(Frame.MAXIMIZED_BOTH);
+        frame.setVisible(true);
+        frame.validate();
 
-        StatusBarPanel statusBarPanel = new StatusBarPanel();
+        progressBar.setPreferredSize(new Dimension(150, 18));
+        progressBar.setStringPainted(true);
+
+        frame.addComponentListener(new ComponentListener() {
+
+            public void componentResized(ComponentEvent e) {
+                Dimension d = e.getComponent().getSize();
+                if(d.getHeight() >= 640) {
+                    currentHeight = (int) d.getHeight();
+                }
+                if(d.getWidth() >= 800) {
+                    currentWidth = (int) d.getWidth();
+                }
+                frame.setSize(new Dimension(currentWidth, currentHeight));
+                statusBarPanel.setText(""+d);
+                mainPanel.setPreferredSize(new Dimension(currentWidth*4/5, currentHeight));
+                sidebarPanel.setPreferredSize(new Dimension(currentWidth/5, currentHeight));
+            }
+
+            public void componentHidden(ComponentEvent e) {}
+
+            public void componentMoved(ComponentEvent e) {}
+
+            public void componentShown(ComponentEvent e) {}
+        });
+
+        statusBarPanel = new StatusBarPanel();
         frame.add(statusBarPanel, BorderLayout.SOUTH);
 
-        JPanel mainPanel = new JPanel();
-        mainPanel.setSize(200, frame.getHeight());
-        mainPanel.setName(theName);
-        //mainPanel.setLayout(new BorderLayout());
+        statusBarPanel.setText(null, ""+frame.getWidth()+""+frame.getHeight());
 
-        textArea = new TextArea(5,20);
+        mainPanel = new MainPanel((int)currentWidth*2/3, frame.getHeight());
+        frame.add(mainPanel, BorderLayout.LINE_START);
+
+        textArea = new TextArea(25,20);
         textArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(textArea);
-        frame.add(scrollPane);
+        //mainPanel.add(scrollPane);
+
+        sidebarPanel = new SidebarPanel((int)frame.getWidth()/3, frame.getHeight(), 50);
+        frame.add(sidebarPanel, BorderLayout.EAST);
 
         JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
         menuBar.add(fileMenu);
 
         frame.setJMenuBar(menuBar);
-        frame.setVisible(true);
 
-        readData();
+        frame.getContentPane().doLayout();
+
+        //readData();
     }
 
     private void output(String text)

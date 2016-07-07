@@ -1,5 +1,13 @@
 nbproject
+
 build
 build.xml
+
+#IntelliJ folder
 .idea
+
+# output folder for z80 compilation
 out
+
+# the properties used by MyZ80 IDE
+resources/appconfig.properties
