@@ -21,8 +21,7 @@ Go to File->Project Structure->Project
 
 Go to File->Project Structure->Modules->Sources and with the right click select the type of each folder in the project
 
-
-![](establish-source-folders-of-the-project.png)
+![](establishing-source-folders-of-the-project.png)
 
 ## Set libraries' path 
 
@@ -39,7 +38,7 @@ so, if you are going to use mine, just create the folder in terminal with ```mkd
 
 Go to File->Project Structure->Modules->Path
 
-![](establish-output-paths.png)
+![](establishing-output-paths.png)
 
 
 # Dependencies (libraries)
