@@ -3,8 +3,13 @@ nbproject
 build
 build.xml
 
-#IntelliJ folder
-.idea
+#IntelliJ open files on workspace
+.idea/workspace.xml
+
+# IntelliJ JDK
+.idea/misc.xml
+
+
 
 # output folder for z80 compilation
 out

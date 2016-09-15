@@ -6,6 +6,8 @@ include more CPU's (Arduino?, STM?)
 
 .The project was created using ItelliJ IDEA community version
 
+[Installation instructions](doc/install.md)
+
 ### You have several test's points along the code (you can just execute them).
 
 #### /src/assembler/tests
@@ -54,8 +56,6 @@ this is a concrete hardware for the examples, here you can see declaration of me
 #### /src/momo
 
 my proof of concept for the IDE
-
-
 
 #### /Tests
 
