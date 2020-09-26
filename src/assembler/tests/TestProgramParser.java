@@ -1,12 +1,12 @@
-package assembler.tests;
+package MyZ80.assembler.tests;
 
-import assembler.Tools;
-import assembler.items.Directive;
-import assembler.items.Item;
-import assembler.items.Label;
-import assembler.items.Pending;
-import assembler.parser.ProgramParser;
-import common.$;
+import MyZ80.assembler.Tools;
+import MyZ80.assembler.items.Directive;
+import MyZ80.assembler.items.Item;
+import MyZ80.assembler.items.Label;
+import MyZ80.assembler.items.Pending;
+import MyZ80.assembler.parser.ProgramParser;
+import MyZ80.common.$;
 
 import java.util.ArrayList;
 

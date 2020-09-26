@@ -1,11 +1,11 @@
-package assembler;
+package MyZ80.assembler;
 
-import assembler.parser.ProgramParser;
-import common.$;
-import di.Container;
-import assembler.items.*;
-import fileFormat.Z80FileFormat;
-import samples.Samples;
+import MyZ80.assembler.parser.ProgramParser;
+import MyZ80.common.$;
+import MyZ80.DI.Container;
+import MyZ80.assembler.items.*;
+import MyZ80.fileFormat.Z80FileFormat;
+import MyZ80.samples.Samples;
 
 import java.io.*;
 import java.util.ArrayList;

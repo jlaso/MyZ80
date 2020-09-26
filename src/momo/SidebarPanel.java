@@ -3,21 +3,23 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package momo;
+package MyZ80.momo;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 
 /**
  * @author joseluislaso
  */
 class SidebarPanel extends JScrollPane {
 
-    private JButton[] buttons;
-    private int numButtons;
+    private final JButton[] buttons;
+    private final int numButtons;
 
-    SidebarPanel(int width, int height, int numButtons) {
+    SidebarPanel(int width, int height, int numButtons, MainWindow win) {
         super(null, VERTICAL_SCROLLBAR_ALWAYS, HORIZONTAL_SCROLLBAR_NEVER);
+        Config config = new Config();
         setSize(width, height);
         setPreferredSize(new Dimension(width, height));
         JPanel panel = new JPanel();
@@ -30,14 +32,15 @@ class SidebarPanel extends JScrollPane {
 
         panel.setBackground(new Color(0xddeeee));
 
-        Font font = new Font("Courier New", Font.BOLD, 18);
+        ActionListener al = new ButtonListener(win);
 
         buttons = new JButton[numButtons];
         for(int i=0; i<numButtons; i++){
             JButton button = new JButton("Button #"+i);
-            button.setFont(font);
+            button.setFont(config.font);
             button.setPreferredSize(new Dimension(175,20));
             button.setSize(new Dimension(175,20));
+            button.addActionListener(al);
             buttons[i] = button;
             panel.add(button);
         }

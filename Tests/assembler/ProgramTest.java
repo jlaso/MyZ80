@@ -1,4 +1,4 @@
-package assembler;
+package MyZ80.assembler;
 
 import org.junit.After;
 import org.junit.Before;

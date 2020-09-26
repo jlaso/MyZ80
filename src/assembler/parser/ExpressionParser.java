@@ -1,8 +1,8 @@
-package assembler.parser;
+package MyZ80.assembler.parser;
 
-import di.Container;
-import assembler.items.Valuable;
-import assembler.parser.exceptions.*;
+import MyZ80.DI.Container;
+import MyZ80.assembler.items.Valuable;
+import MyZ80.assembler.parser.exceptions.*;
 
 import java.util.ArrayList;
 

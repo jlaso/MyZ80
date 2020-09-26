@@ -2,14 +2,14 @@
  * InputHandler.java - Manages key bindings and executes actions
  * Copyright (C) 1999 Slava Pestov
  *
- * You may use and modify this package for any purpose. Redistribution is
+ * You may use and modify this package MyZ80.for any purpose. Redistribution is
  * permitted, in both source and binary form, provided that this notice
  * remains intact in all source distributions of this package.
  */
-package jEditSyntax.inputHandler;
+package MyZ80.jEditSyntax.inputHandler;
 
-import jEditSyntax.JEditTextArea;
-import jEditSyntax.TextUtilities;
+import MyZ80.jEditSyntax.JEditTextArea;
+import MyZ80.jEditSyntax.TextUtilities;
 import javax.swing.text.*;
 import javax.swing.JPopupMenu;
 import java.awt.event.*;

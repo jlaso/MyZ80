@@ -1,13 +1,13 @@
-package machines.simpleZ80.tests;
+package MyZ80.machines.simpleZ80.tests;
 
-import assembler.Tools;
-import fileFormat.Z80FileFormat;
-import hardware.board.Board;
-import hardware.cpu.z80.Z80;
-import machines.simpleZ80.IOSpace;
-import machines.simpleZ80.Memory;
-import samples.Samples;
-import common.$;
+import MyZ80.assembler.Tools;
+import MyZ80.fileFormat.Z80FileFormat;
+import MyZ80.hardware.board.Board;
+import MyZ80.hardware.cpu.z80.Z80;
+import MyZ80.machines.simpleZ80.IOSpace;
+import MyZ80.machines.simpleZ80.Memory;
+import MyZ80.samples.Samples;
+import MyZ80.common.$;
 
 
 /**

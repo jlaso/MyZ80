@@ -1,4 +1,4 @@
-package fileFormat;
+package MyZ80.fileFormat;
 
 import java.io.*;
 
@@ -7,7 +7,7 @@ import java.io.*;
  *
  * need more ideas ?  take a look http://www.worldofspectrum.org/faq/reference/z80format.htm
  */
-public class Z80FileFormat implements BinaryFileInterface{
+public class Z80FileFormat implements BinaryFileInterface {
 
     protected int size;
     private int PC;

@@ -1,4 +1,4 @@
-package assembler.items;
+package MyZ80.assembler.items;
 
 import junit.framework.TestCase;
 

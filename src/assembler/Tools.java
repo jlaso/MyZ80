@@ -1,4 +1,4 @@
-package assembler;
+package MyZ80.assembler;
 
 /**
  * Created by joseluislaso on 08/09/15.

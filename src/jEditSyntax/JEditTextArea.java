@@ -2,15 +2,16 @@
  * JEditTextArea.java - jEdit's text component
  * Copyright (C) 1999 Slava Pestov
  *
- * You may use and modify this package for any purpose. Redistribution is
+ * You may use and modify this package MyZ80.for any purpose. Redistribution is
  * permitted, in both source and binary form, provided that this notice
  * remains intact in all source distributions of this package.
  */
 
-package jEditSyntax;
+package MyZ80.jEditSyntax;
 
-import jEditSyntax.inputHandler.InputHandler;
-import jEditSyntax.marker.TokenMarker;
+import MyZ80.jEditSyntax.marker.ASMZ80TokenMarker;
+import MyZ80.jEditSyntax.inputHandler.InputHandler;
+import MyZ80.jEditSyntax.marker.TokenMarker;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -774,7 +775,7 @@ public class JEditTextArea extends JTextArea //JTextComponent
      * <code>getDocument().setTokenMarker()</code>.
      * @param tokenMarker The token marker
      */
-    public final void setTokenMarker(TokenMarker tokenMarker)
+    public final void setTokenMarker(ASMZ80TokenMarker tokenMarker)
     {
         document.setTokenMarker(tokenMarker);
     }

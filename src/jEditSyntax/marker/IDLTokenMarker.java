@@ -3,15 +3,15 @@
  * Copyright (C) 1999 Slava Pestov
  * Copyright (C) 1999 Juha Lindfors
  *
- * You may use and modify this package for any purpose. Redistribution is
+ * You may use and modify this package MyZ80.for any purpose. Redistribution is
  * permitted, in both source and binary form, provided that this notice
  * remains intact in all source distributions of this package.
  */
-package jEditSyntax.marker;
+package MyZ80.jEditSyntax.marker;
 
-import jEditSyntax.KeywordMap;
-import jEditSyntax.Token;
-import jEditSyntax.marker.CTokenMarker;
+import MyZ80.jEditSyntax.KeywordMap;
+import MyZ80.jEditSyntax.Token;
+import MyZ80.jEditSyntax.marker.CTokenMarker;
 import javax.swing.text.Segment;
 
 /**

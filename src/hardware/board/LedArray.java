@@ -1,7 +1,7 @@
-package hardware.board;
+package MyZ80.hardware.board;
 
-import assembler.Tools;
-import resources.Resources;
+import MyZ80.assembler.Tools;
+import MyZ80.resources.Resources;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

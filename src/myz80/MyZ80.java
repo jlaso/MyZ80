@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package myz80;
+package MyZ80.myz80;
 
 import javax.swing.UIManager;
 
@@ -19,7 +19,7 @@ public class MyZ80 {
     public static void main(String[] args) {
 
         // inject my own UI
-        UIManager.put("EditTextAreaUI", "jEditSyntax.EditTextAreaUI");
+        UIManager.put("EditTextAreaUI", "MyZ80.jEditSyntax.EditTextAreaUI");
 
         // launch main window
         new TextEditor();

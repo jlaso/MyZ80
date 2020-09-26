@@ -1,7 +1,7 @@
-package di;
+package MyZ80.DI;
 
-import assembler.items.Valuable;
-import assembler.parser.ExpressionParser;
+import MyZ80.assembler.items.Valuable;
+import MyZ80.assembler.parser.ExpressionParser;
 
 import java.util.ArrayList;
 

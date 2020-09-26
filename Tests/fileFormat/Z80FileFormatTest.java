@@ -1,4 +1,4 @@
-package fileFormat;
+package MyZ80.fileFormat;
 
 import org.junit.After;
 import org.junit.Before;

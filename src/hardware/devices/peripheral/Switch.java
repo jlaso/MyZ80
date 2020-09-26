@@ -1,7 +1,7 @@
-package hardware.devices.peripheral;
+package MyZ80.hardware.devices.peripheral;
 
-import hardware.board.LedIcon;
-import hardware.devices.BitDevice;
+import MyZ80.hardware.board.LedIcon;
+import MyZ80.hardware.devices.BitDevice;
 
 /**
  * Created by joseluislaso on 22/09/15.

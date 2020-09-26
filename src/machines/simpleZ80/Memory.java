@@ -1,10 +1,10 @@
-package machines.simpleZ80;
+package MyZ80.machines.simpleZ80;
 
-import fileFormat.BinaryFileInterface;
-import hardware.devices.RAM;
-import hardware.devices.ROM;
-import hardware.devices.RW;
-import hardware.system.MemorySystemInterface;
+import MyZ80.fileFormat.BinaryFileInterface;
+import MyZ80.hardware.devices.RAM;
+import MyZ80.hardware.devices.ROM;
+import MyZ80.hardware.devices.RW;
+import MyZ80.hardware.system.MemorySystemInterface;
 
 /**
  * Created by joseluislaso on 05/09/15.

@@ -1,8 +1,8 @@
-package machines.simpleZ80.tests;
+package MyZ80.machines.simpleZ80.tests;
 
-import fileFormat.Z80FileFormat;
-import machines.simpleZ80.Memory;
-import samples.Samples;
+import MyZ80.fileFormat.Z80FileFormat;
+import MyZ80.machines.simpleZ80.Memory;
+import MyZ80.samples.Samples;
 
 /**
  * Created by joseluislaso on 23/09/15.

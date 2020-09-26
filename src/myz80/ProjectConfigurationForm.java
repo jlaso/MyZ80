@@ -1,4 +1,4 @@
-package myz80;
+package MyZ80.myz80;
 
 import javax.swing.*;
 import java.awt.*;
@@ -78,15 +78,13 @@ public class ProjectConfigurationForm implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
+        System.out.println(e.getSource());
         if(e.getSource()==acceptBtn){
-
             projectConfig.setName(nameFld.getText());
             projectConfig.save();
             hideDialog();
             if (callback != null)
                 callback.run();
-
             return;
         }
         if(e.getSource()==cancelBtn){

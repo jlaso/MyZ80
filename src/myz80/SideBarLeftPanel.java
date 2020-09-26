@@ -1,5 +1,5 @@
 
-package myz80;
+package MyZ80.myz80;
 
 import sun.jvm.hotspot.debugger.cdbg.Sym;
 

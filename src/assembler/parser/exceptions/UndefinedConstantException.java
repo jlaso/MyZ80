@@ -1,4 +1,4 @@
-package assembler.parser.exceptions;
+package MyZ80.assembler.parser.exceptions;
 
 /**
  * Created by joseluislaso on 14/09/15.

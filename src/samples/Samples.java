@@ -1,4 +1,4 @@
-package samples;
+package MyZ80.samples;
 
 /**
  * Created by joseluislaso on 12/09/15.

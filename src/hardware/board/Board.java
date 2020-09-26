@@ -1,8 +1,8 @@
-package hardware.board;
+package MyZ80.hardware.board;
 
-import hardware.devices.peripheral.Led8;
-import myz80.StatusBarPanel;
-import resources.Resources;
+import MyZ80.hardware.devices.peripheral.Led8;
+import MyZ80.myz80.StatusBarPanel;
+import MyZ80.resources.Resources;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

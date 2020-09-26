@@ -1,4 +1,4 @@
-package myz80;
+package MyZ80.myz80;
 
 /*
  * Copyright (c) 1995, 2008, Oracle and/or its affiliates. All rights reserved.

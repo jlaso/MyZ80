@@ -2,14 +2,14 @@
  * TeXTokenMarker.java - TeX/LaTeX/AMS-TeX token marker
  * Copyright (C) 1998 Slava Pestov
  *
- * You may use and modify this package for any purpose. Redistribution is
+ * You may use and modify this package MyZ80.for any purpose. Redistribution is
  * permitted, in both source and binary form, provided that this notice
  * remains intact in all source distributions of this package.
  */
-package jEditSyntax.marker;
+package MyZ80.jEditSyntax.marker;
 
-import jEditSyntax.Token;
-import jEditSyntax.marker.TokenMarker;
+import MyZ80.jEditSyntax.Token;
+import MyZ80.jEditSyntax.marker.TokenMarker;
 import javax.swing.text.Segment;
 
 /**

@@ -1,6 +1,6 @@
-package myz80;
+package MyZ80.myz80;
 
-import jEditSyntax.JEditTextArea;
+import MyZ80.jEditSyntax.JEditTextArea;
 
 /**
  * Created by joseluislaso on 02/09/15.

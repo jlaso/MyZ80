@@ -1,9 +1,10 @@
-package momo;
+package MyZ80.momo;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.util.Iterator;
 
 import org.apache.http.*;
 import org.apache.http.client.methods.HttpGet;
@@ -18,22 +19,25 @@ import org.json.*;
  */
 public class MainWindow {
 
-    private TextArea textArea;
-    private static String theName = "MoMo";
-    private StatusBarPanel statusBarPanel;
-    private MainPanel mainPanel;
-    private SidebarPanel sidebarPanel;
+    private final TextArea textArea;
+    private static final String theName = "MoMo";
+    private final StatusBarPanel statusBarPanel;
+    private final MainPanel mainPanel;
+    private final SidebarPanel sidebarPanel;
     private int currentWidth, currentHeight;
-    private final JProgressBar progressBar = new JProgressBar();
 
     private MainWindow() throws Exception {
+
+        Config config = new Config();
 
         JFrame frame = new JFrame(theName + " Main Window");
         frame.setLayout(new BorderLayout());
         frame.setExtendedState(Frame.MAXIMIZED_BOTH);
         frame.setVisible(true);
         frame.validate();
+        frame.setFont(config.font);
 
+        JProgressBar progressBar = new JProgressBar();
         progressBar.setPreferredSize(new Dimension(150, 18));
         progressBar.setStringPainted(true);
 
@@ -68,13 +72,14 @@ public class MainWindow {
         mainPanel = new MainPanel((int)currentWidth*2/3, frame.getHeight());
         frame.add(mainPanel, BorderLayout.LINE_START);
 
+        sidebarPanel = new SidebarPanel((int)frame.getWidth()/3, frame.getHeight(), 50, this);
+        frame.add(sidebarPanel, BorderLayout.EAST);
+
         textArea = new TextArea(25,20);
         textArea.setEditable(false);
+        textArea.setFont(config.font);
         JScrollPane scrollPane = new JScrollPane(textArea);
-        //mainPanel.add(scrollPane);
-
-        sidebarPanel = new SidebarPanel((int)frame.getWidth()/3, frame.getHeight(), 50);
-        frame.add(sidebarPanel, BorderLayout.EAST);
+        mainPanel.add(scrollPane);
 
         JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
@@ -90,9 +95,11 @@ public class MainWindow {
     private void output(String text)
     {
         textArea.append(text+"\n");
+        textArea.revalidate();
     }
 
-    private void readData(){
+    public void readData(){
+        output("Hey");
         DefaultHttpClient httpclient = new DefaultHttpClient();
         try {
             // specify the host, protocol, and port
@@ -115,8 +122,18 @@ public class MainWindow {
             output("----------------------------------------");
 
             if (entity != null) {
-                output(EntityUtils.toString(entity));
-                JSONObject jarray = new JSONObject(EntityUtils.toString(entity));
+                String body = EntityUtils.toString(entity);
+//                output(entity.toString());
+                output(body);
+                JSONObject jarray = new JSONObject(body);
+//                System.out.println(jarray);
+                Iterator<String> keys = jarray.keys();
+                while(keys.hasNext()){
+                    String key = keys.next();
+                    if (jarray.get(key) instanceof String) {
+                        System.out.println(jarray.get(key));
+                    }
+                }
             }
 
         } catch (Exception e) {
@@ -143,7 +160,8 @@ public class MainWindow {
 
         // set the look and feel
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        new MainWindow();
+        MainWindow w = new MainWindow();
+        w.output("Hola");
     }
 
 

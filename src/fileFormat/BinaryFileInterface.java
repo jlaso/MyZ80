@@ -1,4 +1,4 @@
-package fileFormat;
+package MyZ80.fileFormat;
 
 /**
  * Created by joseluislaso on 12/09/15.
