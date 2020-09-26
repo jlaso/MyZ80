@@ -775,7 +775,7 @@ public class JEditTextArea extends JTextArea //JTextComponent
      * <code>getDocument().setTokenMarker()</code>.
      * @param tokenMarker The token marker
      */
-    public final void setTokenMarker(ASMZ80TokenMarker tokenMarker)
+    public final void setTokenMarker(TokenMarker tokenMarker)
     {
         document.setTokenMarker(tokenMarker);
     }
