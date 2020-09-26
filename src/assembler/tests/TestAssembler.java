@@ -1,9 +1,9 @@
-package assembler.tests;
+package MyZ80.assembler.tests;
 
-import assembler.Program;
-import machines.simpleZ80.Memory;
-import samples.Samples;
-import common.$;
+import MyZ80.assembler.Program;
+import MyZ80.machines.simpleZ80.Memory;
+import MyZ80.samples.Samples;
+import MyZ80.common.$;
 
 /**
  * Created by joseluislaso on 06/09/15.

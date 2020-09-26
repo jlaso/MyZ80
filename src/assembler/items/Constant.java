@@ -1,6 +1,6 @@
-package assembler.items;
+package MyZ80.assembler.items;
 
-import assembler.Tools;
+import MyZ80.assembler.Tools;
 
 /**
  * Created by joseluislaso on 06/09/15.

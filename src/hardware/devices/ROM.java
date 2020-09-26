@@ -1,7 +1,7 @@
-package hardware.devices;
+package MyZ80.hardware.devices;
 
-import fileFormat.BinaryFileInterface;
-import fileFormat.Z80FileFormat;
+import MyZ80.fileFormat.BinaryFileInterface;
+import MyZ80.fileFormat.Z80FileFormat;
 
 import java.io.DataInputStream;
 import java.io.File;

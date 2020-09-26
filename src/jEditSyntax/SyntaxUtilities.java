@@ -6,7 +6,7 @@
  * permitted, in both source and binary form, provided that this notice
  * remains intact in all source distributions of this package.
  */
-package jEditSyntax;
+package MyZ80.jEditSyntax;
 
 import javax.swing.text.*;
 import java.awt.*;

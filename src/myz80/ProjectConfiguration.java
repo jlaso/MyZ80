@@ -1,4 +1,4 @@
-package myz80;
+package MyZ80.myz80;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 public class ProjectConfiguration {
 
     protected String configFile = ".project.myz80";
-    private Properties prop;
+    private final Properties prop;
     protected String path;
 
     protected String name;
@@ -30,11 +30,7 @@ public class ProjectConfiguration {
 
             name = prop.getProperty("name", path);
 
-        } catch (NullPointerException ex) {
-
-            //save();
-
-        } catch (IOException ex) {
+        } catch (NullPointerException | IOException ex) {
 
             //save();
 
@@ -54,10 +50,8 @@ public class ProjectConfiguration {
 
             prop.store(stream, null);
             stream.close();
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(AppConfiguration.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(AppConfiguration.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(AppConfiguration.class.getName()).log(Level.SEVERE, "Error saving file " + configFile, ex);
         }
 
     }

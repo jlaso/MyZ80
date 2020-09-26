@@ -1,9 +1,9 @@
-package hardware.devices.peripheral;
+package MyZ80.hardware.devices.peripheral;
 
-import hardware.board.LedIcon;
-import hardware.devices.AbstractIODevice;
-import hardware.devices.BitDevice;
-import hardware.devices.GroupByteDevice;
+import MyZ80.hardware.board.LedIcon;
+import MyZ80.hardware.devices.AbstractIODevice;
+import MyZ80.hardware.devices.BitDevice;
+import MyZ80.hardware.devices.GroupByteDevice;
 
 import java.awt.*;
 

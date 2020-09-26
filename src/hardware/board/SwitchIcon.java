@@ -1,7 +1,7 @@
-package hardware.board;
+package MyZ80.hardware.board;
 
-import hardware.devices.Interruptable;
-import resources.Resources;
+import MyZ80.hardware.devices.Interruptable;
+import MyZ80.resources.Resources;
 
 import javax.swing.*;
 import java.awt.*;

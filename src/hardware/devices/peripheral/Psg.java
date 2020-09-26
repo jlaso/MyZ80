@@ -1,4 +1,4 @@
-package hardware.devices.peripheral;
+package MyZ80.hardware.devices.peripheral;
 
 /**
  * Created by joseluislaso on 22/09/15.

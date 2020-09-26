@@ -1,4 +1,4 @@
-package assembler.parser;
+package MyZ80.assembler.parser;
 
 /**
  * Created by joseluislaso on 17/09/15.

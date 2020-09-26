@@ -1,6 +1,6 @@
-package hardware.board;
+package MyZ80.hardware.board;
 
-import resources.Resources;
+import MyZ80.resources.Resources;
 
 import javax.swing.*;
 import java.awt.*;

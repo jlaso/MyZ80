@@ -7,10 +7,11 @@
  * remains intact in all source distributions of this package.
  */
 
-package jEditSyntax.marker;
+package MyZ80.jEditSyntax.marker;
 
-import jEditSyntax.KeywordMap;
-import jEditSyntax.Token;
+import MyZ80.jEditSyntax.KeywordMap;
+import MyZ80.jEditSyntax.KeywordMap;
+import MyZ80.jEditSyntax.Token;
 import javax.swing.text.Segment;
 
 /**

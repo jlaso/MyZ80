@@ -1,10 +1,10 @@
-package hardware.cpu.z80;
+package MyZ80.hardware.cpu.z80;
 
-import assembler.Tools;
-import common.$;
-import hardware.devices.peripheral.MapIO;
-import hardware.system.MemorySystemInterface;
-import myz80.StatusBarPanel;
+import MyZ80.assembler.Tools;
+import MyZ80.common.$;
+import MyZ80.hardware.devices.peripheral.MapIO;
+import MyZ80.hardware.system.MemorySystemInterface;
+import MyZ80.myz80.StatusBarPanel;
 
 /**
  * Created by joseluislaso on 05/09/15.

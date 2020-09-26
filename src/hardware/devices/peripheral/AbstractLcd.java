@@ -1,7 +1,7 @@
-package hardware.devices.peripheral;
+package MyZ80.hardware.devices.peripheral;
 
-import hardware.devices.AbstractDevice;
-import hardware.devices.Peripheral;
+import MyZ80.hardware.devices.AbstractDevice;
+import MyZ80.hardware.devices.Peripheral;
 
 /**
  * Created by joseluislaso on 22/09/15.

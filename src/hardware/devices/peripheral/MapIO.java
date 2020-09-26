@@ -1,6 +1,6 @@
-package hardware.devices.peripheral;
+package MyZ80.hardware.devices.peripheral;
 
-import hardware.devices.*;
+import MyZ80.hardware.devices.*;
 
 /**
  * Created by joseluislaso on 22/09/15.

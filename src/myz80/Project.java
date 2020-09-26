@@ -1,4 +1,4 @@
-package myz80;
+package MyZ80.myz80;
 
 /**
  * Created by joseluislaso on 02/09/15.

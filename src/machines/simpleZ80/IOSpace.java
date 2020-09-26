@@ -1,9 +1,9 @@
-package machines.simpleZ80;
+package MyZ80.machines.simpleZ80;
 
-import hardware.board.Board;
-import hardware.devices.peripheral.Latch;
-import hardware.devices.peripheral.Led8;
-import hardware.devices.peripheral.MapIO;
+import MyZ80.hardware.board.Board;
+import MyZ80.hardware.devices.peripheral.Latch;
+import MyZ80.hardware.devices.peripheral.Led8;
+import MyZ80.hardware.devices.peripheral.MapIO;
 
 /**
  * Created by joseluislaso on 22/09/15.

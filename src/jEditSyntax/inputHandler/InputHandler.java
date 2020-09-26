@@ -6,10 +6,10 @@
  * permitted, in both source and binary form, provided that this notice
  * remains intact in all source distributions of this package.
  */
-package jEditSyntax.inputHandler;
+package MyZ80.jEditSyntax.inputHandler;
 
-import jEditSyntax.JEditTextArea;
-import jEditSyntax.TextUtilities;
+import MyZ80.jEditSyntax.JEditTextArea;
+import MyZ80.jEditSyntax.TextUtilities;
 import javax.swing.text.*;
 import javax.swing.JPopupMenu;
 import java.awt.event.*;

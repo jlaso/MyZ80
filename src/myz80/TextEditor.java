@@ -2,11 +2,11 @@
  * This simple editor is based on the idea of Turk4n
  * see original post here: http://forum.codecall.net/topic/49721-simple-text-editor/
  */
-package myz80;
+package MyZ80.myz80;
 
-import jEditSyntax.JEditTextArea;
-import jEditSyntax.TextAreaDefaults;
-import jEditSyntax.marker.ASMZ80TokenMarker;
+import MyZ80.jEditSyntax.JEditTextArea;
+import MyZ80.jEditSyntax.TextAreaDefaults;
+import MyZ80.jEditSyntax.marker.ASMZ80TokenMarker;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -122,7 +122,9 @@ public class TextEditor extends JFrame {
         });
 
         if (appConfig.getLastProject() != "") {
-            openProject(appConfig.getLastProject());
+            String file = appConfig.getLastProject().replaceFirst("^~", System.getProperty("user.home"));
+            System.out.println("Opening " + file + "...");
+            openProject(file);
         }
 
         configForm = new ProjectConfigurationForm(this);

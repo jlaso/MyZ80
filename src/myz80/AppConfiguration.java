@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package myz80;
+package MyZ80.myz80;
 
 import java.io.*;
 import java.util.Properties;
@@ -53,7 +53,9 @@ public class AppConfiguration {
     }
     
     public void save() {
-        
+
+        lastProject = lastProject.replaceFirst("^" + System.getProperty("user.home"), "~");
+
         FileOutputStream stream;
         try {
             stream = new FileOutputStream(configFile);

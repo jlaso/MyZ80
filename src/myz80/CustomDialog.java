@@ -29,14 +29,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package myz80;
+package MyZ80.myz80;
 
-import javax.swing.JOptionPane;
-import javax.swing.JDialog;
-import javax.swing.JTextField;
-import java.beans.*; //property change stuff
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 /* 1.4 example used by DialogDemo.java. */
 class CustomDialog extends JDialog

@@ -1,6 +1,6 @@
-package di;
+package MyZ80.DI;
 
-import assembler.items.Constant;
+import MyZ80.assembler.items.Constant;
 import junit.framework.TestCase;
 
 /**

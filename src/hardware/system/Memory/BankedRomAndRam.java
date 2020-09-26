@@ -1,4 +1,4 @@
-package hardware.system.Memory;
+package MyZ80.hardware.system.Memory;
 
 /**
  * Created by joseluislaso on 05/09/15.

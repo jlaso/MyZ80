@@ -1,5 +1,5 @@
 
-package myz80;
+package MyZ80.myz80;
 
 import java.awt.BorderLayout;
 import java.awt.Button;

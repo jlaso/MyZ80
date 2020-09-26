@@ -7,10 +7,11 @@
  * remains intact in all source distributions of this package.
  */
 
-package jEditSyntax;
+package MyZ80.jEditSyntax;
 
-import jEditSyntax.inputHandler.InputHandler;
-import jEditSyntax.marker.TokenMarker;
+import MyZ80.jEditSyntax.marker.ASMZ80TokenMarker;
+import MyZ80.jEditSyntax.inputHandler.InputHandler;
+import MyZ80.jEditSyntax.marker.TokenMarker;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;

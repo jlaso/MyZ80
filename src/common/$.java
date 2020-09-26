@@ -1,4 +1,4 @@
-package common;
+package MyZ80.common;
 
 /**
  * Created by joseluislaso on 18/09/15.

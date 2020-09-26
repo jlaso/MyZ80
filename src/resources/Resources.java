@@ -1,4 +1,4 @@
-package resources;
+package MyZ80.resources;
 
 import java.io.File;
 

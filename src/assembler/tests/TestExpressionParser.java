@@ -1,9 +1,9 @@
-package assembler.tests;
+package MyZ80.assembler.tests;
 
-import assembler.parser.ExpressionParser;
-import di.Container;
-import assembler.items.Constant;
-import assembler.items.Valuable;
+import MyZ80.assembler.parser.ExpressionParser;
+import MyZ80.DI.Container;
+import MyZ80.assembler.items.Constant;
+import MyZ80.assembler.items.Valuable;
 
 import java.util.ArrayList;
 

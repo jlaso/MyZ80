@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package myz80;
+package MyZ80.myz80;
 
 import java.awt.*;
 import javax.swing.*;

@@ -1,12 +1,12 @@
-package assembler.parser;
+package MyZ80.assembler.parser;
 
-import assembler.Tools;
-import assembler.items.*;
-import assembler.parser.exceptions.OperandNotFoundException;
-import assembler.parser.exceptions.UnexpectedCharException;
-import assembler.parser.exceptions.UnexpectedWordException;
-import assembler.parser.exceptions.UnrecognizedLiteralException;
-import di.Container;
+import MyZ80.assembler.Tools;
+import MyZ80.assembler.items.*;
+import MyZ80.assembler.parser.exceptions.OperandNotFoundException;
+import MyZ80.assembler.parser.exceptions.UnexpectedCharException;
+import MyZ80.assembler.parser.exceptions.UnexpectedWordException;
+import MyZ80.assembler.parser.exceptions.UnrecognizedLiteralException;
+import MyZ80.DI.Container;
 
 /**
  * Created by joseluislaso on 17/09/15.
