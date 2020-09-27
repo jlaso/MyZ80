@@ -8,14 +8,17 @@ import MyZ80.jEditSyntax.JEditTextArea;
 import MyZ80.jEditSyntax.TextAreaDefaults;
 import MyZ80.jEditSyntax.marker.ASMZ80TokenMarker;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.text.DefaultEditorKit;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 /**
  *
@@ -122,7 +125,7 @@ public class TextEditor extends JFrame {
         });
 
         if (appConfig.getLastProject() != "") {
-            String file = appConfig.getLastProject().replaceFirst("^~", System.getProperty("user.home"));
+            String file = appConfig.getLastProject();
             System.out.println("Opening " + file + "...");
             openProject(file);
         }
@@ -131,6 +134,7 @@ public class TextEditor extends JFrame {
     };
 
     private void openProject(String projectName) {
+        projectName = projectName.replaceFirst("^~", System.getProperty("user.home"));
         project = new Project(projectName);
         sideBarLeftPanel.loadProject(project);
         ConfigAction.setEnabled(true);

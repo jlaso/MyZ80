@@ -29,37 +29,37 @@ include more CPU's (Arduino?, STM?)
 
 #### /src
 
-#### /src/di
+##### /src/DI
 
-Dependenciy Injection
+    Dependenciy Injection
 
-#### /src/assembler
+##### /src/assembler
 
-assembler related stuff
+    assembler related stuff
 
-#### /src/fileFormat
+##### /src/fileFormat
 
-about the file format the IDE will be able to recognize
+    about the file format the IDE will be able to recognize
 
-#### /src/samples
+##### /src/samples
 
-all the z80 that can be used on the tests
+    all the z80 that can be used on the tests
 
-#### /src/hardware
+##### /src/hardware
 
-that wants to be an abstraction layer for the hardwere
+    that wants to be an abstraction layer for the hardwere
 
-#### /src/achines.simpleZ80
+##### /src/achines.simpleZ80
 
-this is a concrete hardware for the examples, here you can see declaration of memory and IO mapping 
+    this is a concrete hardware for the examples, here you can see declaration of memory and IO mapping 
 
-#### /src/momo
+##### /src/momo
 
-my proof of concept for the IDE
+    my proof of concept for the IDE
 
 #### /Tests
 
-I am right now obsesed about unit testing and I have been created several tests in /Tests folder
+    I am bit obsessed about unit testing and I have been created several tests in /Tests folder
 
 # Collaboration
 
@@ -70,5 +70,5 @@ Any kind of collaboration will be welcomed.
 Please, take a look over the doc folder, I've put there things that I found related with z80.
 
 I hope there won't be any problem to link that kind of files to the project. In any case all the files linked in 
-this doc area are property of their respectives authors, and are linked to this project in order to document it, NOT
+this doc area are property of their respective authors, and are linked to this project in order to document it, NOT
 with the intention of make my the owner. If you find some copyright documentation and you want that be removed please let me know.
