@@ -3,7 +3,7 @@ package MyZ80.hardware.devices;
 /**
  * Created by joseluislaso on 05/09/15.
  */
-public interface RW extends Peripheral{
+public interface RW extends Peripheral {
 
     public int read(int address);
 

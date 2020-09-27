@@ -11,7 +11,6 @@ import static org.junit.Assert.*;
 
 /**
  * Created by joseluislaso on 30/04/16.
- *
  */
 public class ToolsTest {
 
@@ -54,7 +53,7 @@ public class ToolsTest {
     @Test
     public void println() throws Exception {
         Tools.println("black", "hello");
-        assertEquals(Tools.ANSI_BLACK+"hello"+Tools.ANSI_RESET+"\n", outContent.toString());
+        assertEquals(Tools.ANSI_BLACK + "hello" + Tools.ANSI_RESET + "\n", outContent.toString());
     }
 
     @Test

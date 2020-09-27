@@ -22,14 +22,14 @@ public class Z80FileFormat implements BinaryFileInterface {
     }
 
     public void addData(int address, byte[] data) {
-        for (int i = 0; i < data.length; i++) {
-            body[address++] = data[i];
+        for (byte datum : data) {
+            body[address++] = datum;
         }
     }
 
     public void addData(int address, int[] data) {
-        for (int i = 0; i < data.length; i++) {
-            body[address++] = (byte) (data[i] & 0xff);
+        for (int datum : data) {
+            body[address++] = (byte) (datum & 0xff);
         }
     }
 
@@ -68,14 +68,16 @@ public class Z80FileFormat implements BinaryFileInterface {
         DataInputStream reader = new DataInputStream(new FileInputStream(fileName));
 
         // read header
-        int sizeReaded = reader.readByte() | (reader.readByte() << 8);
-        if (size != sizeReaded){
+        int sizeRead = reader.readByte() | (reader.readByte() << 8);
+        if (size != sizeRead){
             throw new Exception("Size mismatch!");
         }
         PC = (int) ((reader.readByte() & 0xff) | (reader.readByte() << 8));
         // read body
         body = new byte[size];
-        reader.read(body);
+        if (reader.read(body) != size) {
+            throw new Exception("Read size mismatch");
+        };
         // close reader
         reader.close();
     }

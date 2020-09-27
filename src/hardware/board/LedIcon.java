@@ -7,20 +7,19 @@ import java.awt.*;
 
 /**
  * Created by joseluislaso on 22/09/15.
- *
  */
 public class LedIcon extends JLabel {
 
     protected String color;
 
     LedIcon(int bit, String color) {
-        super(""+bit);
+        super("" + bit);
         this.color = color;
         setPreferredSize(new Dimension(40, 32));
         setIcon(new ImageIcon(Resources.getFileName("devices/led/led-" + color + "-off.png")));
     }
 
     public void change(boolean status) {
-        setIcon(new ImageIcon(Resources.getFileName("devices/led/led-"+color+"-"+(status ? "on" : "off")+".png")));
+        setIcon(new ImageIcon(Resources.getFileName("devices/led/led-" + color + "-" + (status ? "on" : "off") + ".png")));
     }
 }

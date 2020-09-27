@@ -6,7 +6,7 @@ import MyZ80.hardware.devices.Peripheral;
 /**
  * Created by joseluislaso on 22/09/15.
  */
-abstract class AbstractLcd extends AbstractDevice implements Peripheral{
+abstract class AbstractLcd extends AbstractDevice implements Peripheral {
 
     public static int MODE_PARALLEL_BYTE = 0;
     public static int MODE_PARALLEL_NIBBLE = 0;

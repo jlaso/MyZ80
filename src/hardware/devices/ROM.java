@@ -1,12 +1,6 @@
 package MyZ80.hardware.devices;
 
 import MyZ80.fileFormat.BinaryFileInterface;
-import MyZ80.fileFormat.Z80FileFormat;
-
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 
 /**
  * Created by joseluislaso on 05/09/15.
@@ -24,6 +18,7 @@ public class ROM extends RAM {
     @Override
     public void write(int address, int value) {
         // do nothing because ROM is read only
+        // @TODO: Maybe handle exception if some config flag is set, to avoid programs writing in here?
     }
 
     @Override

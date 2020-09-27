@@ -2,23 +2,17 @@ package MyZ80.hardware.board;
 
 import MyZ80.hardware.devices.peripheral.Led8;
 import MyZ80.myz80.StatusBarPanel;
-import MyZ80.resources.Resources;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 
 /**
  * Created by joseluislaso on 22/09/15.
- *
  */
 public class Board extends JFrame {
 
-    private StatusBarPanel statusBarPanel;
-    private LedArray ledArray;
+    private final StatusBarPanel statusBarPanel;
+    private final LedArray ledArray;
 
     public Board() throws Exception {
         this("Z80 Board");

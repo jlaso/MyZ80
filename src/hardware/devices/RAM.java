@@ -6,13 +6,13 @@ package MyZ80.hardware.devices;
 public class RAM implements Memory {
 
     protected static byte UNKNOWN = 0;
-    protected int baseAdress;
+    protected int baseAddress;
     protected int size;
     protected byte[] memory;
 
-    public RAM(int size, int baseAdress){
+    public RAM(int size, int baseAdress) {
         this.size = size;
-        this.baseAdress = baseAdress;
+        this.baseAddress = baseAdress;
 
         memory = new byte[size];
         reset();
@@ -21,11 +21,11 @@ public class RAM implements Memory {
     @Override
     public int read(int address) {
 
-        int pos = address - baseAdress;
+        int pos = address - baseAddress;
 
-        if (pos < size){
+        if (pos < size) {
             byte b = memory[pos];
-            return (b>=0) ? (int) b : (int)(256+b);
+            return (b >= 0) ? (int) b : (int) (256 + b);
         }
 
         return UNKNOWN;
@@ -33,9 +33,9 @@ public class RAM implements Memory {
 
     @Override
     public void write(int address, int value) {
-        int pos = address - baseAdress;
+        int pos = address - baseAddress;
 
-        if (pos < size){
+        if (pos < size) {
             memory[pos] = (byte) value;
         }
     }
@@ -53,7 +53,7 @@ public class RAM implements Memory {
     @Override
     public void reset() {
 
-        for (int i=0; i<size; i++){
+        for (int i = 0; i < size; i++) {
             memory[i] = 0;
         }
     }

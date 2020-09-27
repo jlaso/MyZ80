@@ -1,12 +1,8 @@
 package MyZ80.hardware.board;
 
 import MyZ80.assembler.Tools;
-import MyZ80.resources.Resources;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
-import java.awt.*;
-import java.awt.image.BufferedImage;
 
 /**
  * Created by joseluislaso on 22/09/15.
@@ -24,7 +20,7 @@ public class LedArray extends JPanel {
         super();
 
         this.color = color;
-        add(new JLabel("Port ["+Tools.byteToHex(port)+"] "));
+        add(new JLabel("Port [" + Tools.byteToHex(port) + "] "));
 
         for (int i = 7; i >= 0; i--) {
             leds[i] = new LedIcon(i, color);

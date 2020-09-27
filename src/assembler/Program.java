@@ -12,7 +12,6 @@ import java.util.ArrayList;
 
 /**
  * Created by joseluislaso on 06/09/15.
- *
  */
 public class Program {
 
@@ -24,7 +23,7 @@ public class Program {
     protected ProgramParser programParser;
 
     /**
-     * @param file String
+     * @param file  String
      * @param debug boolean
      */
     public Program(String file, boolean debug) {
@@ -39,7 +38,7 @@ public class Program {
      * prints the message if debug is active
      *
      * @param message String
-     * @param color String
+     * @param color   String
      */
     public void debug(String message, String color) {
         if (debug) {
@@ -82,11 +81,11 @@ public class Program {
                         program.add(item);
 
                         if (item instanceof Constant) {
-                            container.constants.add((Constant)item);
-                        }else if (item instanceof Label) {
-                            container.constants.add((Label)item);
-                        }else if (item instanceof Include) {
-                            processFile(Samples.getFile(((Include)item).getFile()));
+                            container.constants.add((Constant) item);
+                        } else if (item instanceof Label) {
+                            container.constants.add((Label) item);
+                        } else if (item instanceof Include) {
+                            processFile(Samples.getFile(((Include) item).getFile()));
                         }
                     }
                 }
@@ -117,7 +116,7 @@ public class Program {
         // pass 3  -  solve labels
         debug($.CR + $.CR + "~~~~~~~~~~ propagating labels ~~~~~~~~~" + $.CR, $.RED);
         for (Item item : program) {
-            if (item instanceof Label) propagateLabel((Label)item);
+            if (item instanceof Label) propagateLabel((Label) item);
         }
 
         dumpPendings();
@@ -133,7 +132,7 @@ public class Program {
      */
     protected void propagateLabel(Label label) {
         Tools.println_if(debug, "", "~^~ propagating label " + label.getLabel() + " " + label.getAddress() + " ~^~");
-        for (Item item: program) {
+        for (Item item : program) {
             item.solvePending(label.getLabel(), label.getAddress());
         }
     }
@@ -157,19 +156,17 @@ public class Program {
     }
 
     public void dumpHexProgram() {
-        String hex = "";
-        for (int i = 0; i < program.size(); i++) {
-            Item item = program.get(i);
-
+        StringBuilder hex = new StringBuilder();
+        for (Item item : program) {
             if (item.getSize() > 0) {
-                hex += item.getOpCodeAsHexString(' ');
+                hex.append(item.getOpCodeAsHexString(' '));
             }
         }
         System.out.println(hex);
     }
 
     public void dumpProgram() {
-        Tools.println($.RED, $.CR+ $.TAB+"~~~~~~  dumping assembled program ~~~~~~"+ $.CR);
+        Tools.println($.RED, $.CR + $.TAB + "~~~~~~  dumping assembled program ~~~~~~" + $.CR);
         String hex = "";
         for (Item item : program) {
             System.out.println(item.toString());
@@ -209,7 +206,7 @@ public class Program {
 
         } catch (IOException e) {
 
-            System.out.println ("Some error happened saving binary file." + $.CR + e.getMessage());
+            System.out.println("Some error happened saving binary file." + $.CR + e.getMessage());
             System.exit(-1);
         }
 

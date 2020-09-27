@@ -3,7 +3,7 @@ package MyZ80.hardware.devices;
 /**
  * Created by joseluislaso on 23/09/15.
  */
-public interface Interruptable {
+public interface Interruptible {
 
     static int HIGH_PRIORITY = 9;
     static int MEDIUM_PRIORITY = 5;

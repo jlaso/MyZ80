@@ -11,7 +11,6 @@ import static org.junit.Assert.*;
 
 /**
  * Created by joseluislaso on 02/05/16.
- *
  */
 public class ProgramTest {
 
@@ -32,6 +31,7 @@ public class ProgramTest {
         System.setErr(null);
         program = null;
     }
+
     @Test
     public void debug() throws Exception {
         program.debug("This is a test", "red");
