@@ -29,6 +29,7 @@ public class SideBarLeftPanel extends JPanel {
     AreaEditorHandler areaEditorHandler;
     Project project = null;
     JScrollPane scrollPane;
+    String currentOpenedFile;
 
     public SideBarLeftPanel(AreaEditorHandler areaEditorHdl){
      
@@ -61,7 +62,8 @@ public class SideBarLeftPanel extends JPanel {
                 /* React to the node selection. */
 
                 if (!nodeInfo.getIsDir()) {
-                    areaEditorHandler.loadFile(nodeInfo.getFullName());
+                    currentOpenedFile = nodeInfo.getFullName();
+                    areaEditorHandler.loadFile(currentOpenedFile);
                 }
             }
         });

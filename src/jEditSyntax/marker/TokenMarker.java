@@ -39,8 +39,7 @@ public abstract class TokenMarker
 	{
 		if(lineIndex >= length)
 		{
-			throw new IllegalArgumentException("Tokenizing invalid line: "
-				+ lineIndex);
+			throw new IllegalArgumentException("Tokenizing invalid line: " + lineIndex);
 		}
 
 		lastToken = null;
@@ -53,8 +52,7 @@ public abstract class TokenMarker
 			prev = lineInfo[lineIndex - 1];
 
 		byte oldToken = info.token;
-		byte token = markTokensImpl(prev == null ?
-			Token.NULL : prev.token,line,lineIndex);
+		byte token = markTokensImpl(prev == null ? Token.NULL : prev.token,line,lineIndex);
 
 		info.token = token;
 
@@ -123,8 +121,7 @@ public abstract class TokenMarker
 	 * starting at 0
 	 * @return The initial token type for the next line
 	 */
-	protected abstract byte markTokensImpl(byte token, Segment line,
-		int lineIndex);
+	protected abstract byte markTokensImpl(byte token, Segment line, int lineIndex);
 
 	/**
 	 * Returns if the token marker supports tokens that span multiple

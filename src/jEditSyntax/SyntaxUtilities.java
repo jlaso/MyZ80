@@ -117,8 +117,7 @@ public class SyntaxUtilities
 	 * @return The x co-ordinate, plus the width of the painted string
 	 */
 	public static int paintSyntaxLine(Segment line, Token tokens,
-		SyntaxStyle[] styles, TabExpander expander, Graphics gfx,
-		int x, int y)
+		SyntaxStyle[] styles, TabExpander expander, Graphics gfx, int x, int y)
 	{
 		Font defaultFont = gfx.getFont();
 		Color defaultColor = gfx.getColor();

@@ -4,6 +4,8 @@
  */
 package MyZ80.myz80;
 
+import MyZ80.assembler.Program;
+import MyZ80.assembler.parser.ProgramParser;
 import MyZ80.jEditSyntax.JEditTextArea;
 import MyZ80.jEditSyntax.TextAreaDefaults;
 import MyZ80.jEditSyntax.marker.ASMZ80TokenMarker;
@@ -43,6 +45,7 @@ public class TextEditor extends JFrame {
     ActionMap m;
     Action NewAction, OpenAction, ConfigAction, QuitAction;
     Action CutAction, CopyAction, PasteAction;
+    Action AssembleAction;
 
     public TextEditor()
     {
@@ -196,19 +199,33 @@ public class TextEditor extends JFrame {
         CopyAction = m.get(DefaultEditorKit.copyAction);
         PasteAction = m.get(DefaultEditorKit.pasteAction);
 
+        AssembleAction = new AbstractAction("Assemble") {
+            public void actionPerformed(ActionEvent e) {
+                // ProgramParser pparser = new ProgramParser();
+                Program program = new Program(sideBarLeftPanel.currentOpenedFile, true);
+                try {
+                    program.assemble();
+                }catch (Exception exception){
+                    statusBarPanel.setText(exception.getMessage());
+                }
+            }
+        };
+
         // Menu bar
         JMenuBar JMB = new JMenuBar();
         setJMenuBar(JMB);
         JMenu projectMenu = new JMenu("Project");
+        JMenu fileMenu = new JMenu("File");
         JMenu edit = new JMenu("Edit");
         JMB.add(projectMenu);
+        JMB.add(fileMenu);
         JMB.add(edit);
 
         projectMenu.add(NewAction);
-
         projectMenu.add(OpenAction);
-
         projectMenu.add(QuitAction);
+
+        fileMenu.add(AssembleAction);
 
         JMenuItem ConfigMenuItem = new JMenuItem();
         ConfigMenuItem.setAction(ConfigAction);
